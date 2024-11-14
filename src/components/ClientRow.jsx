@@ -1,4 +1,6 @@
-﻿function ClientRow({ client = {}, expanded, onClick }) {
+﻿import React from 'react';
+
+function ClientRow({ client = {}, expanded, onClick }) {
     const {
         name = "Nombre no disponible",
         status = "Estado no disponible",
@@ -6,55 +8,48 @@
         contact = "Contacto no disponible",
         rut = "RUT no disponible",
         paymentDate = "Fecha de pago no disponible",
-        debt = "0"
     } = client;
 
     const isExpanded = expanded;
 
     return (
         <div
-            className={`flex items-center gap-10 px-5 py-3 w-full min-h-[50px] bg-white border-b border-gray-200 ${isExpanded ? 'bg-indigo-500' : ''}`}
+            className={`flex items-center gap-10 px-5 py-3 w-full min-h-[50px] bg-white border border-gray-200 rounded-lg ${isExpanded ? 'bg-[#5D5FEF]' : ''}`} // Cambié el color de fondo aquí
             onClick={onClick}
         >
             {/* Nombre */}
-            <div className={`flex-1 ${isExpanded ? 'text-white' : 'text-green-600'}`}>
+            <div className={`w-[200px] ${isExpanded ? 'text-white' : 'text-green-600'} font-sans text-[14px]`} style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
                 {name}
             </div>
 
             {/* Estado */}
-            <div className={`flex-1 ${isExpanded ? 'text-white' : 'text-zinc-700'}`}>
+            <div className={`w-[120px] ${isExpanded ? 'text-white' : 'text-zinc-700'} font-sans text-[14px]`} style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
                 {status}
             </div>
 
             {/* Fecha Última Factura */}
-            <div className={`flex-1 ${isExpanded ? 'text-white' : ''}`}>
+            <div className={`w-[150px] ${isExpanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`} style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
                 {date}
             </div>
 
             {/* Número */}
-            <div className={`flex-1 ${isExpanded ? 'text-white' : ''}`}>
+            <div className={`w-[100px] ${isExpanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`} style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
                 {contact}
             </div>
 
             {/* RUT */}
-            <div className={`flex-1 ${isExpanded ? 'text-white' : ''}`}>
+            <div className={`w-[150px] ${isExpanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`} style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
                 {rut}
             </div>
 
             {/* Fecha de Pago */}
-            <div className={`flex-1 ${isExpanded ? 'text-white' : ''}`}>
+            <div className={`w-[180px] ${isExpanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`} style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
                 {paymentDate}
             </div>
 
-            {/* Deuda */}
-            <div className={`flex-1 ${isExpanded ? 'text-white' : ''}`}>
-                {debt}
-            </div>
-
             {/* Opciones */}
-            <div className="flex gap-4">
-                <div
-                    className={`p-2 rounded-lg shadow-sm ${isExpanded ? 'bg-gray-50 text-indigo-500' : 'bg-indigo-500 text-white'}`}>
+            <div className="w-[120px] flex justify-center gap-4">
+                <div className={`p-2 rounded-lg shadow-sm ${isExpanded ? 'bg-gray-50 text-indigo-500' : 'bg-indigo-500 text-white'}`}>
                     Detalle
                 </div>
                 <img loading="lazy"
@@ -65,7 +60,8 @@
                      alt="" className="object-contain shrink-0 w-[30px]"/>
                 <img loading="lazy"
                      src={isExpanded ? "https://cdn.builder.io/api/v1/image/assets/TEMP/e596324028b2a73c869ab3a30a2afd29348e42b614d1eaac9c2ef9fce603dfac?apiKey=c8e063ba4e294c0496fff8126c800e5e&" : "https://cdn.builder.io/api/v1/image/assets/TEMP/1bd453a1918970a54ffc2b34f36dd8210408728eb76742b3bef7083b42a1a351?apiKey=c8e063ba4e294c0496fff8126c800e5e&"}
-                     alt="" className="object-contain shrink-0 w-[5px]"/></div>
+                     alt="" className="object-contain shrink-0 w-[5px]"/>
+            </div>
         </div>
     );
 }

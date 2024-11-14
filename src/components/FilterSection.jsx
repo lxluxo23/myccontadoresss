@@ -1,6 +1,5 @@
 ﻿import React, { useState } from 'react';
 import DateRangePicker from './DateRangePicker';
-import SingleDatePicker from './SingleDatePicker';
 import StateSelector from './StateSelector';
 
 function FilterSection() {
@@ -27,7 +26,7 @@ function FilterSection() {
     };
 
     return (
-        <section className="flex flex-wrap justify-between gap-5 mt-10 w-full max-md:max-w-full text-sm">
+        <section className="flex flex-wrap justify-between gap-5 mt-10 w-full max-md:max-w-full text-sm" style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
             <div className="flex flex-wrap gap-4 items-center max-md:max-w-full">
 
                 {/* Filtro de Estado */}
@@ -35,9 +34,6 @@ function FilterSection() {
 
                 {/* Filtro de Rango de Fechas de Transacciones */}
                 <DateRangePicker dateRange={transactionDateRange} setDateRange={handleTransactionDateRangeChange} />
-
-                {/* Filtro de Fecha de Última Actualización */}
-                <SingleDatePicker selectedDate={lastUpdateDate} setSelectedDate={handleLastUpdateDateChange} />
 
                 {/* Filtro de Nombre Cliente */}
                 <div className="flex items-center bg-white rounded-lg border border-neutral-200 p-2.5 w-[222px]">
@@ -56,7 +52,7 @@ function FilterSection() {
                 </div>
             </div>
 
-            {/* Botón de Contacto */}
+            {/* Botón de AddClient */}
             <button className="flex items-center px-3 py-2 font-medium text-white bg-indigo-500 rounded-lg">
                 <img
                     src="https://cdn.builder.io/api/v1/image/assets%2Fc8e063ba4e294c0496fff8126c800e5e%2Fc05b811e45c841eebd0409533b748374"

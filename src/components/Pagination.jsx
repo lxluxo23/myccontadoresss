@@ -24,6 +24,7 @@ function Pagination() {
         <nav
             className="flex gap-4 items-center justify-center mt-12 ml-3 max-w-full text-sm tracking-tight whitespace-nowrap text-zinc-700 max-md:mt-10"
             aria-label="Pagination"
+            style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}
         >
             <div className="text-center font-medium">
                 Página
