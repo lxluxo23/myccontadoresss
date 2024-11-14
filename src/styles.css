@@ -1,0 +1,51 @@
+﻿@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+}
+
+.max-md\:max-w-full {
+    @media (max-width: 767px) {
+        max-width: 100%;
+    }
+}
+
+.max-md\:mr-0\.5 {
+    @media (max-width: 767px) {
+        margin-right: 0.125rem;
+    }
+}
+
+.max-md\:mt-10 {
+    @media (max-width: 767px) {
+        margin-top: 2.5rem;
+    }
+}
+
+.max-md\:mr-2\.5 {
+    @media (max-width: 767px) {
+        margin-right: 0.625rem;
+    }
+}
+
+.max-md\:ml-2 {
+    @media (max-width: 767px) {
+        margin-left: 0.5rem;
+    }
+}
+
+.max-md\:px-5 {
+    @media (max-width: 767px) {
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+}
+
+.max-md\:hidden {
+    @media (max-width: 767px) {
+        display: none;
+    }
+}
