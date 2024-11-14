@@ -1,10 +1,10 @@
 ﻿import React, { useState } from 'react';
-import Header from './Header';
-import FilterSection from './FilterSection';
-import TableHeader from './TableHeader';
-import ClientRow from './ClientRow';
-import Pagination from './Pagination';
-import ExpandedClientRow from './ExpandedClientRow';
+import Header from '../components/Header';
+import FilterSection from '../components/FilterSection';
+import TableHeader from '../components/TableHeader';
+import ClientRow from '../components/ClientRow';
+import Pagination from '../components/Pagination';
+import ExpandedClientRow from '../components/ExpandedClientRow';
 
 function MyContadores() {
     const clients = [

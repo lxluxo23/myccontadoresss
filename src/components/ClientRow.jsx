@@ -1,8 +1,10 @@
 ﻿import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ExpandedClientRow from './ExpandedClientRow'; // Asegúrate de importar el componente ExpandedClientRow
 
 function ClientRow({ client = {} }) {
-    const [expanded, setExpanded] = useState(false); // Estado para controlar la expansión
+    const [expanded, setExpanded] = useState(false);
+    const navigate = useNavigate();
 
     const {
         name = "Nombre no disponible",
@@ -18,8 +20,8 @@ function ClientRow({ client = {} }) {
     };
 
     const handleDetailClick = (event) => {
-        event.stopPropagation(); // Evita que el clic se propague a la fila
-        alert("Funcionalidad aún no implementada"); // Muestra un mensaje al hacer clic en "Detalle"
+        event.stopPropagation();
+        navigate('/spreadsheet'); // Aquí redirige a la página de la hoja de cálculo
     };
 
     const handleEditClick = (event) => {
