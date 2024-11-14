@@ -14,42 +14,49 @@ function ClientRow({ client = {}, expanded, onClick }) {
 
     return (
         <div
-            className={`flex items-center gap-10 px-5 py-3 w-full min-h-[50px] bg-white border border-gray-200 rounded-lg ${isExpanded ? 'bg-[#5D5FEF]' : ''}`} // Cambié el color de fondo aquí
+            className={`flex items-center gap-10 px-5 py-3 w-full min-h-[50px] border border-gray-200 rounded-lg cursor-pointer ${expanded ? 'bg-[#5D5FEF]' : 'bg-white'}`}
             onClick={onClick}
         >
             {/* Nombre */}
-            <div className={`w-[200px] ${isExpanded ? 'text-white' : 'text-green-600'} font-sans text-[14px]`} style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
+            <div className={`w-[200px] ${isExpanded ? 'text-white' : 'text-green-600'} font-sans text-[14px]`}
+                 style={{fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%'}}>
                 {name}
             </div>
 
             {/* Estado */}
-            <div className={`w-[120px] ${isExpanded ? 'text-white' : 'text-zinc-700'} font-sans text-[14px]`} style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
+            <div className={`w-[120px] ${isExpanded ? 'text-white' : 'text-zinc-700'} font-sans text-[14px]`}
+                 style={{fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%'}}>
                 {status}
             </div>
 
             {/* Fecha Última Factura */}
-            <div className={`w-[150px] ${isExpanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`} style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
+            <div className={`w-[150px] ${isExpanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}
+                 style={{fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%'}}>
                 {date}
             </div>
 
             {/* Número */}
-            <div className={`w-[100px] ${isExpanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`} style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
+            <div className={`w-[100px] ${isExpanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}
+                 style={{fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%'}}>
                 {contact}
             </div>
 
             {/* RUT */}
-            <div className={`w-[150px] ${isExpanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`} style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
+            <div className={`w-[150px] ${isExpanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}
+                 style={{fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%'}}>
                 {rut}
             </div>
 
             {/* Fecha de Pago */}
-            <div className={`w-[180px] ${isExpanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`} style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
+            <div className={`w-[180px] ${isExpanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}
+                 style={{fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%'}}>
                 {paymentDate}
             </div>
 
             {/* Opciones */}
             <div className="w-[120px] flex justify-center gap-4">
-                <div className={`p-2 rounded-lg shadow-sm ${isExpanded ? 'bg-gray-50 text-indigo-500' : 'bg-indigo-500 text-white'}`}>
+                <div
+                    className={`p-2 rounded-lg shadow-sm ${isExpanded ? 'bg-gray-50 text-indigo-500' : 'bg-indigo-500 text-white'}`}>
                     Detalle
                 </div>
                 <img loading="lazy"
