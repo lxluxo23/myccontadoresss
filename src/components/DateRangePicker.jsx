@@ -4,7 +4,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 function DateRangePicker({ dateRange, setDateRange }) {
     return (
-        <div className="flex items-center gap-3" style={{ fontFamily: 'Work Sans, sans-serif' }}>
+        <div className="flex items-center gap-3" style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
             {/* Texto sin caja */}
             <span className="mr-2 text-sm" style={{ letterSpacing: '-2%' }}>Rango Transacciones</span>
 
