@@ -1,42 +1,43 @@
 ﻿import React, { useState } from 'react';
 import DateRangePicker from './DateRangePicker';
 import StateSelector from './StateSelector';
+import AddClientForm from './AddClientForm';
+import ClientRow from './ClientRow';
 
 function FilterSection() {
-    // Estados para los filtros
     const [transactionDateRange, setTransactionDateRange] = useState({ startDate: null, endDate: null });
     const [lastUpdateDate, setLastUpdateDate] = useState(null);
     const [selectedState, setSelectedState] = useState('');
-    const [searchName, setSearchName] = useState(''); // Estado para el filtro de nombre
+    const [searchName, setSearchName] = useState('');
+    const [showAddClientForm, setShowAddClientForm] = useState(false);
+    const [clients, setClients] = useState([]);  // Aquí guardamos los clientes
 
-    // Lógica de exclusión mutua para los filtros de fecha
     const handleTransactionDateRangeChange = (range) => {
         setTransactionDateRange(range);
-        setLastUpdateDate(null); // Limpiar última actualización al activar rango de transacciones
+        setLastUpdateDate(null);
     };
 
     const handleLastUpdateDateChange = (date) => {
         setLastUpdateDate(date);
-        setTransactionDateRange({ startDate: null, endDate: null }); // Limpiar rango de transacciones al activar última actualización
+        setTransactionDateRange({ startDate: null, endDate: null });
     };
 
-    // Manejo del cambio en el input de búsqueda por nombre
     const handleNameSearchChange = (event) => {
         setSearchName(event.target.value);
     };
 
+    const handleAddClient = (clientData) => {
+        setClients([...clients, clientData]); // Agregar nuevo cliente
+        setShowAddClientForm(false); // Cerrar formulario
+    };
+
     return (
-        <section className="flex flex-wrap justify-between gap-5 mt-10 w-full max-md:max-w-full text-sm" style={{ fontFamily: 'Work Sans, sans-serif', letterSpacing: '-2%' }}>
+        <section className="flex flex-wrap justify-between gap-5 mt-10 w-full max-md:max-w-full text-sm">
             <div className="flex flex-wrap gap-4 items-center max-md:max-w-full">
-
-                {/* Filtro de Estado */}
-                <StateSelector selectedState={selectedState} setSelectedState={setSelectedState} />
-
-                {/* Filtro de Rango de Fechas de Transacciones */}
-                <DateRangePicker dateRange={transactionDateRange} setDateRange={handleTransactionDateRangeChange} />
-
-                {/* Filtro de Nombre Cliente */}
-                <div className="flex items-center bg-white rounded-lg border border-neutral-200 p-2.5 w-[222px]">
+                <StateSelector selectedState={selectedState} setSelectedState={setSelectedState}/>
+                <DateRangePicker dateRange={transactionDateRange} setDateRange={handleTransactionDateRangeChange}/>
+                <div
+                    className="flex items-center bg-white rounded-lg border border-neutral-200 p-2.5 w-[222px] h-[40px]">
                     <img
                         src="https://cdn.builder.io/api/v1/image/assets/TEMP/1ac34c89075cc9f5150c0d9188e344b5ab22d341ea722a0b4ce115573d2bf2e7?apiKey=c8e063ba4e294c0496fff8126c800e5e&"
                         alt=""
@@ -45,22 +46,35 @@ function FilterSection() {
                     <input
                         type="text"
                         value={searchName}
-                        onChange={handleNameSearchChange} // Cambiar el nombre a medida que el usuario escribe
+                        onChange={handleNameSearchChange}
                         placeholder="Buscar Cliente"
-                        className="bg-transparent focus:outline-none"
+                        className="bg-transparent focus:outline-none h-full w-full"
                     />
                 </div>
+
             </div>
 
-            {/* Botón de AddClient */}
-            <button className="flex items-center px-3 py-2 font-medium text-white bg-indigo-500 rounded-lg">
-                <img
-                    src="https://cdn.builder.io/api/v1/image/assets%2Fc8e063ba4e294c0496fff8126c800e5e%2Fc05b811e45c841eebd0409533b748374"
-                    alt=""
-                    className="w-[17px] h-[17px] mr-2"
-                />
+            <button
+                onClick={() => setShowAddClientForm(true)}
+                className="flex items-center px-3 py-2 font-medium text-white bg-indigo-500 rounded-lg transform transition-all duration-500 ease-in-out hover:bg-indigo-600 hover:scale-105 hover:opacity-90"
+            >
                 <span>Añadir Cliente</span>
             </button>
+
+            {showAddClientForm && (
+                <AddClientForm
+                    onClose={() => setShowAddClientForm(false)}
+                    onAddClient={handleAddClient}
+                />
+            )}
+
+            {clients.map((client, index) => (
+                <ClientRow
+                    key={index}
+                    client={client}
+                    showAddClientForm={showAddClientForm}
+                />
+            ))}
         </section>
     );
 }
