@@ -35,7 +35,6 @@ function SpreadsheetPage() {
             imposicionesPagadas: false,
             multasPagadas: false,
         },
-        // Agregar más datos de clientes aquí...
     ]);
 
     // Formulario de ingreso de nuevos pagos
@@ -56,7 +55,6 @@ function SpreadsheetPage() {
         multasPagadas: false,
     });
 
-    // Función para manejar el cambio en los inputs del formulario
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setNewPayment(prev => ({
@@ -65,7 +63,6 @@ function SpreadsheetPage() {
         }));
     };
 
-    // Función para agregar un nuevo pago
     const handleAddPayment = (e) => {
         e.preventDefault();
         if (!newPayment.date || !newPayment.month || !newPayment.formaPago) {

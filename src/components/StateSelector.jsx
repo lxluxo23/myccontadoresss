@@ -3,35 +3,31 @@
 const StateSelector = ({ selectedState, setSelectedState }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    // Refs para el contenedor y el botón
     const dropdownRef = useRef(null);
 
-    // Opciones de estado
     const states = ['Pagado', 'Pendiente', 'Atrasado'];
 
-    // Toggle de apertura y cierre del dropdown
     const toggleDropdown = () => {
         setIsOpen(!isOpen);
     };
 
-    // Cambio de estado seleccionado
     const handleStateChange = (state) => {
         setSelectedState(state);
-        setIsOpen(false); // Cerrar el dropdown después de seleccionar
+        setIsOpen(false);
     };
 
     // Efecto para manejar clics fuera del dropdown
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsOpen(false); // Cerrar el dropdown si se hace clic fuera
+                setIsOpen(false);
             }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
 
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside); // Limpiar el listener al desmontar el componente
+            document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
 

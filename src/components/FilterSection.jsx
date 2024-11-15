@@ -27,8 +27,8 @@ function FilterSection() {
     };
 
     const handleAddClient = (clientData) => {
-        setClients([...clients, clientData]); // Agregar nuevo cliente
-        setShowAddClientForm(false); // Cerrar formulario
+        setClients([...clients, clientData]);
+        setShowAddClientForm(false);
     };
 
     return (

@@ -19,8 +19,8 @@ function AddClientForm({ onClose, onAddClient }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onAddClient(clientData); // Llama a la función para agregar el cliente
-        onClose(); // Cierra el formulario
+        onAddClient(clientData);
+        onClose();
     };
 
     return (
