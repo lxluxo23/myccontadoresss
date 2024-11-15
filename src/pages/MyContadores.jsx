@@ -8,6 +8,86 @@ import ExpandedClientRow from '../components/ExpandedClientRow';
 
 function MyContadores() {
     const clients = [
+        {
+            name: 'Camilo Osorio',
+            status: 'Por pagar',
+            date: '23-10-2024',
+            contact: 'No disp',
+            rut: '20.792-999-9',
+            paymentDate: '21-03-2022'
+        },
+        {
+            name: 'Luis Céspedes',
+            status: 'Por pagar',
+            date: '02-11-2024',
+            contact: 'No disp',
+            rut: '20.792-999-9',
+            paymentDate: '21-03-2022',
+        },
+        {
+            name: 'Andrea Céspedes',
+            status: 'Por pagar',
+            date: '22-03-2024',
+            contact: 'No disp',
+            rut: '20.792-999-9',
+            paymentDate: '21-03-2022'
+        },
+        {
+            name: 'Constanza Sanhueza',
+            status: 'Al dia',
+            date: '22/02/2024',
+            contact: 'No disp',
+            rut: '20.792-999-9',
+            paymentDate: '21-03-2022'
+        },
+        {
+            name: 'Enzo Camerati',
+            status: 'Al dia',
+            date: '10-03-2022',
+            contact: 'No disp',
+            rut: '20.792-999-9',
+            paymentDate: '21-03-2022'
+        },
+        {
+            name: 'Camilo Osorio',
+            status: 'Por pagar',
+            date: '23-10-2024',
+            contact: 'No disp',
+            rut: '20.792-999-9',
+            paymentDate: '21-03-2022'
+        },
+        {
+            name: 'Luis Céspedes',
+            status: 'Por pagar',
+            date: '02-11-2024',
+            contact: 'No disp',
+            rut: '20.792-999-9',
+            paymentDate: '21-03-2022',
+        },
+        {
+            name: 'Andrea Céspedes',
+            status: 'Por pagar',
+            date: '22-03-2024',
+            contact: 'No disp',
+            rut: '20.792-999-9',
+            paymentDate: '21-03-2022'
+        },
+        {
+            name: 'Constanza Sanhueza',
+            status: 'Al dia',
+            date: '22/02/2024',
+            contact: 'No disp',
+            rut: '20.792-999-9',
+            paymentDate: '21-03-2022'
+        },
+        {
+            name: 'Enzo Camerati',
+            status: 'Al dia',
+            date: '10-03-2022',
+            contact: 'No disp',
+            rut: '20.792-999-9',
+            paymentDate: '21-03-2022'
+        }
     ];
 
     const [expandedClients, setExpandedClients] = useState({});
