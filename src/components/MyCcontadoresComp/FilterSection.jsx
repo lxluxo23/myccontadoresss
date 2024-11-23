@@ -10,7 +10,7 @@ function FilterSection() {
     const [selectedState, setSelectedState] = useState('');
     const [searchName, setSearchName] = useState('');
     const [showAddClientForm, setShowAddClientForm] = useState(false);
-    const [clients, setClients] = useState([]);  // Aquí guardamos los clientes
+    const [clients, setClients] = useState([]);
 
     const handleTransactionDateRangeChange = (range) => {
         setTransactionDateRange(range);
@@ -27,8 +27,8 @@ function FilterSection() {
     };
 
     const handleAddClient = (clientData) => {
-        setClients([...clients, clientData]); // Agregar nuevo cliente
-        setShowAddClientForm(false); // Cerrar formulario
+        setClients([...clients, clientData]);
+        setShowAddClientForm(false);
         setClients([...clients, clientData]);
         setShowAddClientForm(false);
     };

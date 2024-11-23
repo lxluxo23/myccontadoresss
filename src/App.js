@@ -1,7 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Usando React Router
-import MyContadores from './pages/MyContadores';  // Asegúrate de importar correctamente
-import SpreadsheetPage from './pages/SpreadsheetPage';  // Asegúrate de importar SpreadsheetPage
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import MyContadores from './pages/MyContadores';
+import SpreadsheetPage from './pages/SpreadsheetPage';
 
 function App() {
     return (

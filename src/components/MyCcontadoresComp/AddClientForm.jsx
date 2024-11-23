@@ -1,5 +1,4 @@
-﻿// src/components/AddClientForm.jsx
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 
 function AddClientForm({ onClose, onAddClient }) {
     const [clientData, setClientData] = useState({

@@ -7,8 +7,7 @@ function ExpandedClientRow() {
   // Alternar la funcionalidad del botón
   const handleXlsxClick = () => {
     setIsXlsxClicked(true);
-    // Aquí puedes agregar la lógica para descargar el archivo XLSX
-    // o cualquier acción adicional que desees
+    // agregar lógica para descargar el archivo XLSX
     alert("Descargar XLSX - Funcionalidad aún no implementada");
   };
 
