@@ -1,10 +1,10 @@
 ﻿import React, { useState } from 'react';
-import Header from '../components/Header';
-import FilterSection from '../components/FilterSection';
-import TableHeader from '../components/TableHeader';
-import ClientRow from '../components/ClientRow';
-import Pagination from '../components/Pagination';
-import ExpandedClientRow from '../components/ExpandedClientRow';
+import Header from '../components/MyCcontadoresComp/Header';
+import FilterSection from '../components/MyCcontadoresComp/FilterSection';
+import TableHeader from '../components/MyCcontadoresComp/TableHeader';
+import ClientRow from '../components/MyCcontadoresComp/ClientRow';
+import Pagination from '../components/MyCcontadoresComp/Pagination';
+import ExpandedClientRow from '../components/MyCcontadoresComp/ExpandedClientRow';
 
 function MyContadores() {
     const clients = [

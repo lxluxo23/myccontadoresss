@@ -1,7 +1,12 @@
-﻿import React, { useState } from 'react';
+﻿// SpreadsheetPage.js
+import React, { useState } from 'react';
+import 'tailwindcss/tailwind.css';
+import PaymentForm   from "../components/SpreedSheetComp/PaymentForm";
+import DebtForm from "../components/SpreedSheetComp/DebtForm";
+import PaymentsTable from "../components/SpreedSheetComp/PaymentsTable";
+import DebtsTable from "../components/SpreedSheetComp/DebtsTable";
 
 function SpreadsheetPage() {
-    // Datos de ejemplo para el cliente
     const [clientData, setClientData] = useState([
         {
             date: '2024-01-15',
@@ -14,10 +19,6 @@ function SpreadsheetPage() {
             formaPago: 'Transferencia',
             talonario: 'T-001',
             observaciones: 'Pago mensual, sin multas',
-            honorariosPagados: false,
-            ivaPagado: false,
-            imposicionesPagadas: false,
-            multasPagadas: false,
         },
         {
             date: '2024-02-18',
@@ -30,14 +31,20 @@ function SpreadsheetPage() {
             formaPago: 'Efectivo',
             talonario: 'T-002',
             observaciones: 'Pago mensual, sin multas',
-            honorariosPagados: false,
-            ivaPagado: false,
-            imposicionesPagadas: false,
-            multasPagadas: false,
         },
     ]);
 
-    // Formulario de ingreso de nuevos pagos
+    const [debtData, setDebtData] = useState([
+        {
+            id: 1,
+            date: '2024-03-10',
+            month: 'Marzo',
+            amount: 200000,
+            description: 'Pago pendiente de servicios',
+            status: 'Pendiente',
+        },
+    ]);
+
     const [newPayment, setNewPayment] = useState({
         date: '',
         month: '',
@@ -49,27 +56,91 @@ function SpreadsheetPage() {
         formaPago: '',
         talonario: '',
         observaciones: '',
-        honorariosPagados: false,
-        ivaPagado: false,
-        imposicionesPagadas: false,
-        multasPagadas: false,
     });
+
+    const [newDebt, setNewDebt] = useState({
+        date: '',
+        month: '',
+        amount: 0,
+        description: '',
+        status: 'Pendiente',
+    });
+
+    const [editingDebt, setEditingDebt] = useState(null);
+
+    const [isPaymentFormVisible, setIsPaymentFormVisible] = useState(false);
+    const [isDebtFormVisible, setIsDebtFormVisible] = useState(false);
+
+    // Función para obtener el nombre del mes a partir de una fecha
+    const getMonthName = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const monthNames = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+        ];
+        return monthNames[date.getMonth()];
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setNewPayment(prev => ({
-            ...prev,
-            [name]: value,
-        }));
+        setNewPayment((prev) => {
+            const updatedPayment = { ...prev, [name]: value };
+
+            if (name === 'date' && value) {
+                updatedPayment.month = getMonthName(value);
+            }
+
+            return updatedPayment;
+        });
+    };
+
+    const handleDebtInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewDebt((prev) => {
+            const updatedDebt = { ...prev, [name]: value };
+
+            if (name === 'date' && value) {
+                updatedDebt.month = getMonthName(value);
+            }
+
+            return updatedDebt;
+        });
+    };
+
+    const handleEditDebtInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditingDebt((prev) => {
+            const updatedDebt = { ...prev, [name]: value };
+
+            if (name === 'date' && value) {
+                updatedDebt.month = getMonthName(value);
+            }
+
+            return updatedDebt;
+        });
     };
 
     const handleAddPayment = (e) => {
         e.preventDefault();
-        if (!newPayment.date || !newPayment.month || !newPayment.formaPago) {
-            alert("Por favor, complete todos los campos obligatorios.");
+        if (!newPayment.date || !newPayment.formaPago) {
+            alert('Por favor, complete todos los campos obligatorios.');
             return;
         }
-        setClientData(prevData => [...prevData, newPayment]);
+
+        // Calcula 'totalPagoCliente' si es necesario
+        const totalPagoCliente =
+            parseFloat(newPayment.honorarios) +
+            parseFloat(newPayment.iva) +
+            parseFloat(newPayment.imposiciones) +
+            parseFloat(newPayment.multas);
+
+        const paymentToAdd = {
+            ...newPayment,
+            totalPagoCliente,
+        };
+
+        setClientData((prevData) => [...prevData, paymentToAdd]);
         setNewPayment({
             date: '',
             month: '',
@@ -81,151 +152,104 @@ function SpreadsheetPage() {
             formaPago: '',
             talonario: '',
             observaciones: '',
-            honorariosPagados: false,
-            ivaPagado: false,
-            imposicionesPagadas: false,
-            multasPagadas: false,
         });
+        setIsPaymentFormVisible(false);
+    };
+
+    const handleAddDebt = (e) => {
+        e.preventDefault();
+        if (!newDebt.date || !newDebt.amount || !newDebt.description) {
+            alert('Por favor, complete todos los campos obligatorios.');
+            return;
+        }
+
+        setDebtData((prevData) => [
+            ...prevData,
+            { ...newDebt, id: debtData.length + 1 },
+        ]);
+        setNewDebt({
+            date: '',
+            month: '',
+            amount: 0,
+            description: '',
+            status: 'Pendiente',
+        });
+        setIsDebtFormVisible(false);
+    };
+
+    const handleEditDebt = (debt) => {
+        setEditingDebt(debt);
+        setIsDebtFormVisible(false);
+        setIsPaymentFormVisible(false);
+    };
+
+    const handleSaveEditedDebt = (e) => {
+        e.preventDefault();
+        setDebtData((prevData) =>
+            prevData.map((debt) => (debt.id === editingDebt.id ? editingDebt : debt))
+        );
+        setEditingDebt(null);
+    };
+
+    const handleDeleteDebt = (id) => {
+        setDebtData((prevData) => prevData.filter((debt) => debt.id !== id));
     };
 
     return (
-        <div className="container mx-auto p-5">
-            <h1 className="text-xl font-bold mb-4">Registro de Pagos de Cliente</h1>
+        <div className="container mx-auto p-8">
+            <h1 className="text-3xl font-bold mb-6 text-center text-indigo-600">
+                Registro de Pagos y Deudas de Cliente
+            </h1>
 
-            {/* Formulario para agregar nuevos pagos */}
-            <form onSubmit={handleAddPayment} className="mb-5 border p-4 rounded-lg">
-                <h2 className="font-semibold mb-3">Agregar Nuevo Pago</h2>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label className="block text-sm font-medium">Fecha</label>
-                        <input
-                            type="date"
-                            name="date"
-                            value={newPayment.date}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Mes</label>
-                        <input
-                            type="text"
-                            name="month"
-                            value={newPayment.month}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded"
-                            placeholder="Ej. Enero"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Honorarios</label>
-                        <input
-                            type="number"
-                            name="honorarios"
-                            value={newPayment.honorarios}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">IVA</label>
-                        <input
-                            type="number"
-                            name="iva"
-                            value={newPayment.iva}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Imposiciones</label>
-                        <input
-                            type="number"
-                            name="imposiciones"
-                            value={newPayment.imposiciones}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Multas</label>
-                        <input
-                            type="number"
-                            name="multas"
-                            value={newPayment.multas}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Forma de Pago</label>
-                        <input
-                            type="text"
-                            name="formaPago"
-                            value={newPayment.formaPago}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded"
-                            placeholder="Ej. Transferencia"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium">Talonario</label>
-                        <input
-                            type="text"
-                            name="talonario"
-                            value={newPayment.talonario}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded"
-                            placeholder="Ej. T-003"
-                        />
-                    </div>
-                    <div className="col-span-2">
-                        <label className="block text-sm font-medium">Observaciones</label>
-                        <textarea
-                            name="observaciones"
-                            value={newPayment.observaciones}
-                            onChange={handleInputChange}
-                            className="w-full p-2 border border-gray-300 rounded"
-                            placeholder="Observaciones adicionales"
-                        />
-                    </div>
-                </div>
-                <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Agregar Pago</button>
-            </form>
+            <div className="flex justify-center gap-4 mb-8">
+                <button
+                    onClick={() => {
+                        setIsPaymentFormVisible(!isPaymentFormVisible);
+                        setIsDebtFormVisible(false);
+                        setEditingDebt(null);
+                    }}
+                    className="bg-indigo-600 text-white py-3 px-6 rounded-md shadow-lg hover:bg-indigo-700 transition duration-300"
+                >
+                    Agregar Pago
+                </button>
+                <button
+                    onClick={() => {
+                        setIsDebtFormVisible(!isDebtFormVisible);
+                        setIsPaymentFormVisible(false);
+                        setEditingDebt(null);
+                    }}
+                    className="bg-red-600 text-white py-3 px-6 rounded-md shadow-lg hover:bg-red-700 transition duration-300"
+                >
+                    Agregar Deuda
+                </button>
+            </div>
 
-            {/* Tabla de registros de pagos */}
-            <table className="min-w-full table-auto border-collapse">
-                <thead>
-                <tr className="bg-gray-200 text-gray-700">
-                    <th className="px-4 py-2 text-left">Fecha</th>
-                    <th className="px-4 py-2 text-left">Mes</th>
-                    <th className="px-4 py-2 text-left">Honorarios</th>
-                    <th className="px-4 py-2 text-left">IVA</th>
-                    <th className="px-4 py-2 text-left">Imposiciones</th>
-                    <th className="px-4 py-2 text-left">Multas</th>
-                    <th className="px-4 py-2 text-left">Total Pago Cliente</th>
-                    <th className="px-4 py-2 text-left">Forma de Pago</th>
-                    <th className="px-4 py-2 text-left">Talonario</th>
-                    <th className="px-4 py-2 text-left">Observaciones</th>
-                </tr>
-                </thead>
-                <tbody>
-                {clientData.map((data, index) => (
-                    <tr key={index} className="border-b hover:bg-gray-100">
-                        <td className="px-4 py-2">{data.date}</td>
-                        <td className="px-4 py-2">{data.month}</td>
-                        <td className="px-4 py-2">${data.honorarios.toLocaleString()}</td>
-                        <td className="px-4 py-2">${data.iva.toLocaleString()}</td>
-                        <td className="px-4 py-2">${data.imposiciones.toLocaleString()}</td>
-                        <td className="px-4 py-2">${data.multas.toLocaleString()}</td>
-                        <td className="px-4 py-2">${data.totalPagoCliente.toLocaleString()}</td>
-                        <td className="px-4 py-2">{data.formaPago}</td>
-                        <td className="px-4 py-2">{data.talonario}</td>
-                        <td className="px-4 py-2">{data.observaciones}</td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+            {isPaymentFormVisible && (
+                <PaymentForm
+                    newPayment={newPayment}
+                    handleInputChange={handleInputChange}
+                    handleAddPayment={handleAddPayment}
+                />
+            )}
+
+            {(isDebtFormVisible || editingDebt) && (
+                <DebtForm
+                    editingDebt={editingDebt}
+                    newDebt={newDebt}
+                    handleDebtInputChange={handleDebtInputChange}
+                    handleEditDebtInputChange={handleEditDebtInputChange}
+                    handleAddDebt={handleAddDebt}
+                    handleSaveEditedDebt={handleSaveEditedDebt}
+                />
+            )}
+
+            <PaymentsTable clientData={clientData} />
+
+            <DebtsTable
+                debtData={debtData}
+                handleEditDebt={handleEditDebt}
+                handleDeleteDebt={handleDeleteDebt}
+            />
         </div>
     );
 }
