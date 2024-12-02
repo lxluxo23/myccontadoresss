@@ -6,15 +6,6 @@ function ClientRow({ client = {}, showAddClientForm }) {
     const [expanded, setExpanded] = useState(false);
     const navigate = useNavigate();
 
-    const {
-        name = "Nombre no disponible",
-        status = "Estado no disponible",
-        date = "Fecha no disponible",
-        contact = "Contacto no disponible",
-        rut = "RUT no disponible",
-        paymentDate = "Fecha de pago no disponible",
-    } = client;
-
     const handleRowClick = () => {
         setExpanded(!expanded);
     };
@@ -49,22 +40,22 @@ function ClientRow({ client = {}, showAddClientForm }) {
                 onClick={handleRowClick}
             >
                 <div className={`w-[200px] ${expanded ? 'text-white' : 'text-green-600'} font-sans text-[14px]`}>
-                    {name}
+                    {client.nombre || "Nombre no disponible"}
                 </div>
                 <div className={`w-[120px] ${expanded ? 'text-white' : 'text-zinc-700'} font-sans text-[14px]`}>
-                    {status}
+                    {client.estado || "Estado no disponible"}
                 </div>
                 <div className={`w-[150px] ${expanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}>
-                    {date}
+                    {client.fechaCreacion || "Fecha no disponible"}
                 </div>
                 <div className={`w-[100px] ${expanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}>
-                    {contact}
+                    {client.email || "Correo no disponible"}
                 </div>
                 <div className={`w-[150px] ${expanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}>
-                    {rut}
+                    {client.rut || "RUT no disponible"}
                 </div>
                 <div className={`w-[180px] ${expanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}>
-                    {paymentDate}
+                    {client.fechaPago || "Fecha de pago no disponible"}
                 </div>
                 <div className="w-[120px] flex justify-center gap-4">
                     <div
