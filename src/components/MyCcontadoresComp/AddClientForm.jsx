@@ -1,5 +1,4 @@
 ﻿import React, { useState } from 'react';
-import axios from "axios";
 
 function AddClientForm({ onClose, onAddClient }) {
     const [clientData, setClientData] = useState({
@@ -18,20 +17,10 @@ function AddClientForm({ onClose, onAddClient }) {
         }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        try {
-            const response = await axios.post('http://localhost:8080/api/clientes', clientData);
-            onAddClient(response.data); // Notifica al componente padre sobre el nuevo cliente
-            onClose(); // Cierra el formulario después de añadir
-        } catch (error) {
-            console.error('Error al añadir el cliente:', error);
-            if (error.response && error.response.data) {
-                alert(`Error: ${error.response.data}`);
-            } else {
-                alert('Hubo un problema al intentar añadir el cliente.');
-            }
-        }
+        onAddClient(clientData); // Notifica al componente padre para manejar el nuevo cliente
+        onClose(); // Cierra el formulario
     };
 
     return (
@@ -83,7 +72,7 @@ function AddClientForm({ onClose, onAddClient }) {
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="block text-sm font-medium">Direccion</label>
+                        <label className="block text-sm font-medium">Dirección</label>
                         <input
                             type="text"
                             name="direccion"
