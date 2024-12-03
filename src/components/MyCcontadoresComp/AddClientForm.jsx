@@ -7,6 +7,7 @@ function AddClientForm({ onClose, onAddClient }) {
         email: '',
         telefono: '',
         direccion: '',
+        clave: '',
     });
 
     const handleChange = (e) => {
@@ -77,6 +78,16 @@ function AddClientForm({ onClose, onAddClient }) {
                             type="text"
                             name="direccion"
                             value={clientData.direccion}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded-lg"
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium">Clave</label>
+                        <input
+                            type="text"
+                            name="clave"
+                            value={clientData.clave}
                             onChange={handleChange}
                             className="w-full p-2 border rounded-lg"
                         />

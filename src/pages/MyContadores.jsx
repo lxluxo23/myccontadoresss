@@ -91,7 +91,7 @@ function MyContadores() {
                                 expanded={expandedClients[client.id]}
                                 onDelete={() => setClients(clients.filter(c => c.id !== client.id))}
                             />
-                            {expandedClients[client.id] && <ExpandedClientRow client={client} />}
+                             {expandedClients[client.id] && <ExpandedClientRow client={client} />}
                         </React.Fragment>
                     ))}
                 </section>

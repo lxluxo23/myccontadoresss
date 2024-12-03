@@ -12,7 +12,7 @@ function ClientRow({ client = {}, showAddClientForm }) {
 
     const handleDetailClick = (event) => {
         event.stopPropagation();
-        navigate('/spreadsheet');
+        navigate(`/spreadsheet/${client.idCliente}`);
     };
 
     const handleEditClick = (event) => {

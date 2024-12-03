@@ -10,7 +10,7 @@ function App() {
                 {/* Ruta principal */}
                 <Route path="/" element={<MyContadores />} />
                 {/* Ruta para la hoja de cálculo */}
-                <Route path="/spreadsheet" element={<SpreadsheetPage />} />
+                <Route path="/spreadsheet/:clientId" element={<SpreadsheetPage />} />
             </Routes>
         </Router>
     );
