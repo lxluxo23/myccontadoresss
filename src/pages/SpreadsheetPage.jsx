@@ -34,16 +34,16 @@ const SpreadsheetPage = () => {
         <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
             <Sidebar />
             <div className="flex-1 p-6">
-                <ClientSummary summary={clientData.summary} />
-                <div className="indicators mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <ClientIndicators indicators={clientData.indicators} />
+                <ClientSummary summary={clientData.summary}/>
+                <div className="indicators mt-6">
+                    <ClientIndicators indicators={clientData.indicators}/>
                 </div>
                 <div className="lower-section mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <RecentMovements movements={clientData.movements} />
-                    <AlertsNotifications alerts={clientData.alerts} />
+                    <RecentMovements movements={clientData.movements}/>
+                    <AlertsNotifications alerts={clientData.alerts}/>
                 </div>
             </div>
-            <ThemeToggle /> {/* Botón de Modo Oscuro */}
+            <ThemeToggle/> {/* Botón de Modo Oscuro */}
         </div>
     );
 };
