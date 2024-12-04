@@ -1,6 +1,6 @@
 ﻿import React from "react";
 
-const DebtTable = ({ debts }) => {
+const DebtTable = ({ debts = [] }) => {
     return (
         <div className="overflow-x-auto">
             <table className="table-auto w-full text-left text-gray-700 dark:text-gray-300">
@@ -23,8 +23,12 @@ const DebtTable = ({ debts }) => {
                             <td className="px-4 py-2">${debt.montoTotal.toLocaleString()}</td>
                             <td className="px-4 py-2">${debt.montoRestante.toLocaleString()}</td>
                             <td className="px-4 py-2">{debt.estado}</td>
-                            <td className="px-4 py-2">{new Date(debt.fechaCreacion).toLocaleDateString()}</td>
-                            <td className="px-4 py-2">{new Date(debt.fechaVencimiento).toLocaleDateString()}</td>
+                            <td className="px-4 py-2">
+                                {new Date(debt.fechaCreacion).toLocaleDateString()}
+                            </td>
+                            <td className="px-4 py-2">
+                                {new Date(debt.fechaVencimiento).toLocaleDateString()}
+                            </td>
                             <td className="px-4 py-2">
                                 <button className="text-indigo-500 hover:underline">Ver</button>
                             </td>

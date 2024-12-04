@@ -15,8 +15,9 @@ function App() {
                 <Route path="/" element={<MyContadores />} />
                 {/* Ruta para la hoja de cálculo */}
                 <Route path="/spreadsheet/:clientId" element={<SpreadsheetPage />} />
-                <Route path="/debts" element={<DebtsPage />} />
-                <Route path="/payments" element={<PaymentsPage/>} />
+                {/* Ruta para deudas */}
+                <Route path="/clientes/:clientId/deudas" element={<DebtsPage />} />
+                <Route path="/clientes/:clientId/pagos" element={<PaymentsPage/>} />
                 <Route path="/transactions" element={<TransactionsPage />} />
                 <Route path="/finance" element={<DebtsAndPaymentsPage />} />
             </Routes>

@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import {
     FaTachometerAlt,
     FaMoneyCheckAlt,
@@ -11,6 +11,7 @@ import {
 
 const Sidebar = () => {
     const navigate = useNavigate();
+    const { clientId } = useParams();
     const location = useLocation();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -37,7 +38,7 @@ const Sidebar = () => {
             icon: FaTachometerAlt,
             text: "Dashboard",
             path: `/spreadsheet/${1}`,
-            action: () => navigate(`/spreadsheet/${1}`),
+            action: () => navigate(`/spreadsheet/${clientId}`),
         },
 
         {
@@ -49,14 +50,14 @@ const Sidebar = () => {
         {
             icon: FaMoneyCheckAlt,
             text: "Pagos",
-            path: `/payments`,
-            action: () => navigate(`/payments`),
+            path: `/clientes/${clientId}/pagos`,
+            action: () => navigate(`/clientes/${clientId}/pagos`),
         },
         {
             icon: FaFileInvoiceDollar,
             text: "Deudas",
-            path: `/debts`,
-            action: () => navigate(`/debts`),
+            path: `/clientes/${clientId}/deudas`, // Cambiar la ruta para incluir el clientId
+            action: () => navigate(`/clientes/${clientId}/deudas`), // Actualizar la acción para redirigir a la ruta correcta
         },
         {
             icon: FaExchangeAlt,

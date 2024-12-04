@@ -1,12 +1,14 @@
-﻿import React, { useState } from "react";
+﻿import React, {useEffect, useState} from "react";
 import Sidebar from "../components/Sidebar";
 import PaymentTable from "../components/PaymentsComp/PaymentTable";
 import AddPaymentForm from "../components/PaymentsComp/AddPaymentForm";
 import Modal from "../components/Modal";
 import FiltersButton from "../components/DebtsAndPaymentsComp/Filters";
 import { FaPlus } from "react-icons/fa";
+import { useParams } from "react-router-dom";
 
 const PaymentsPage = () => {
+    const { clientId } = useParams();
     const [payments, setPayments] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -14,6 +16,20 @@ const PaymentsPage = () => {
         setPayments([...payments, newPayment]);
         setIsModalOpen(false);
     };
+
+    useEffect(() => {
+        const fetchPayments = async () => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/clientes/${clientId}/pagos`);
+            const data = await response.json();
+            setPayments(data);
+        } catch (error) {
+            console.error("Error al cargar pagos:", error);
+        }
+    };
+
+    fetchPayments();
+}, [clientId]);
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
