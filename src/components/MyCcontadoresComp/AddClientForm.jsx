@@ -2,10 +2,11 @@
 
 function AddClientForm({ onClose, onAddClient }) {
     const [clientData, setClientData] = useState({
-        name: '',
+        nombre: '',
         rut: '',
         email: '',
-        phone: '',
+        telefono: '',
+        direccion: '',
     });
 
     const handleChange = (e) => {
@@ -18,8 +19,8 @@ function AddClientForm({ onClose, onAddClient }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onAddClient(clientData);
-        onClose();
+        onAddClient(clientData); // Notifica al componente padre para manejar el nuevo cliente
+        onClose(); // Cierra el formulario
     };
 
     return (
@@ -31,8 +32,8 @@ function AddClientForm({ onClose, onAddClient }) {
                         <label className="block text-sm font-medium">Nombre</label>
                         <input
                             type="text"
-                            name="name"
-                            value={clientData.name}
+                            name="nombre"
+                            value={clientData.nombre}
                             onChange={handleChange}
                             className="w-full p-2 border rounded-lg"
                             required
@@ -64,11 +65,20 @@ function AddClientForm({ onClose, onAddClient }) {
                         <label className="block text-sm font-medium">Teléfono</label>
                         <input
                             type="tel"
-                            name="phone"
-                            value={clientData.phone}
+                            name="telefono"
+                            value={clientData.telefono}
                             onChange={handleChange}
                             className="w-full p-2 border rounded-lg"
-                            required
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium">Dirección</label>
+                        <input
+                            type="text"
+                            name="direccion"
+                            value={clientData.direccion}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded-lg"
                         />
                     </div>
                     <div className="flex justify-end space-x-2">

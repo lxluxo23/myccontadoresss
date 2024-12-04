@@ -49,3 +49,7 @@ body {
         display: none;
     }
 }
+html {
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
