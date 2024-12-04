@@ -39,6 +39,13 @@ const Sidebar = () => {
             path: `/spreadsheet/${1}`,
             action: () => navigate(`/spreadsheet/${1}`),
         },
+
+        {
+            icon: FaCog,
+            text: "Finanzas",
+            path: `/finance`,
+            action: () => navigate(`/finance`),
+        },
         {
             icon: FaMoneyCheckAlt,
             text: "Pagos",
@@ -56,12 +63,6 @@ const Sidebar = () => {
             text: "Transacciones",
             path: `/transactions`,
             action: () => navigate(`/transactions`),
-        },
-        {
-            icon: FaCog,
-            text: "Configuración",
-            path: `/settings`,
-            action: () => navigate(`/settings`),
         },
     ];
 

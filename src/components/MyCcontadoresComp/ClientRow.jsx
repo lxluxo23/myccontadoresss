@@ -11,8 +11,8 @@ function ClientRow({ client = {}, showAddClientForm }) {
     };
 
     const handleDetailClick = (event) => {
-        event.stopPropagation();
-        navigate(`/spreadsheet/${client.idCliente}`);
+        event.stopPropagation(); // Evita que se disparen otros eventos del contenedor
+        navigate(`/spreadsheet/${client.clienteId}`); // Asegúrate de usar el nombre correcto de la propiedad
     };
 
     const handleEditClick = (event) => {
