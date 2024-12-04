@@ -20,7 +20,7 @@ const PaymentsPage = () => {
     useEffect(() => {
         const fetchPayments = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/api/clientes/${clientId}/pagos`);
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clientId}/pagos`);
             const data = await response.json();
             setPayments(data);
         } catch (error) {

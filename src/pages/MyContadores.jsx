@@ -17,7 +17,7 @@ function MyContadores() {
     useEffect(() => {
         const fetchClients = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/api/clientes');
+                const response = await axios.get('https://backend.cobros.myccontadores.cl/api/clientes');
                 const sortedClients = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 setClients(sortedClients);
             } catch (error) {
@@ -29,10 +29,10 @@ function MyContadores() {
     }, []);
 
     const handleAddClient = (newClient) => {
-        axios.post('http://localhost:8080/api/clientes', newClient)
+        axios.post('https://backend.cobros.myccontadores.cl/api/clientes', newClient)
             .then(() => {
                 console.log('Cliente agregado exitosamente.');
-                return axios.get('http://localhost:8080/api/clientes');
+                return axios.get('https://backend.cobros.myccontadores.cl/api/clientes');
             })
             .then(response => {
                 const sortedClients = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));

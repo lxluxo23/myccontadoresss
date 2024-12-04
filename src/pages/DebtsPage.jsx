@@ -14,7 +14,7 @@ const DebtsPage = () => {
     useEffect(() => {
         const fetchDebts = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/clientes/${clientId}/deudas`);
+                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clientId}/deudas`);
                 const data = await response.json();
                 setDebts(data);
             } catch (error) {
@@ -27,7 +27,7 @@ const DebtsPage = () => {
 
     const handleAddDebt = async (newDebt) => {
         try {
-            const response = await fetch("http://localhost:8080/api/deudas", {
+            const response = await fetch("https://backend.cobros.myccontadores.cl/api/deudas", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newDebt),
