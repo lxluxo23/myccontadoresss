@@ -19,7 +19,7 @@ const SpreadsheetPage = () => {
     useEffect(() => {
         const fetchClientData = async () => {
             try {
-                const response = await fetch(`/api/clients/${clientId}`);
+                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clients/${clientId}`);
                 const data = await response.json();
                 setClientData(data);
             } catch (error) {
