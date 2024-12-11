@@ -16,7 +16,21 @@ module.exports = {
         darkAccent: '#38bdf8',
         darkError: '#f87171',
       },
+
     },
+
+
+
   },
-  plugins: [],
-}
+  plugins: [
+    function({ addUtilities }) {
+      addUtilities({
+        '.no-spinner': {
+          '-moz-appearance': 'textfield',
+          '-webkit-appearance': 'none',
+          'appearance': 'none',
+        },
+      });
+    },
+  ],
+};

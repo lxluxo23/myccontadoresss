@@ -4,15 +4,13 @@ import Sidebar from "../components/Sidebar";
 import DebtTable from "../components/DebtsComp/DebtTable";
 import Modal from "../components/Modal";
 import AddAccountingHonorary from "../components/DebtsComp/AddAccountingHonorary";
-import { FaPlus } from "react-icons/fa";
 import { useCliente } from "../components/context/ClienteContext";
+import { FaPlus } from "react-icons/fa";
 
 const DebtsPage = () => {
-    const { clienteId, clienteData } = useCliente();
+    const { clienteId } = useCliente();
     const [debts, setDebts] = useState([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [isHonoraryModalOpen, setIsHonoraryModalOpen] = useState(false);
-    const [lastHonoraryDate, setLastHonoraryDate] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -29,12 +27,6 @@ const DebtsPage = () => {
                 }
                 const data = await response.json();
                 setDebts(data);
-
-                const lastHonorary = data
-                    .filter((deuda) => deuda.tipo === "Honorario Contable")
-                    .sort((a, b) => new Date(b.fechaInicio) - new Date(a.fechaInicio))[0];
-
-                setLastHonoraryDate(lastHonorary?.fechaInicio || null);
             } catch (error) {
                 console.error("Error al cargar deudas:", error);
             }
@@ -43,33 +35,49 @@ const DebtsPage = () => {
         fetchDebts();
     }, [clienteId, navigate]);
 
-    const handleAddDebt = async (newDebt) => {
-        try {
-            const response = await fetch("http://localhost:8080/api/deudas", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newDebt),
-            });
-            if (!response.ok) {
-                throw new Error("Error al agregar la deuda");
-            }
-            const addedDebt = await response.json();
-            setDebts([...debts, addedDebt]);
+    const handleAddHonorary = async (clienteId, payload) => {
+        const formData = new FormData();
+        formData.append("montoMensual", payload.montoMensual);
 
-            if (newDebt.tipo === "Honorario Contable") {
-                setLastHonoraryDate(newDebt.fechaInicio);
+        // Siempre se crean 12 meses en el backend, aquí solo enviamos info extra.
+        // payload.mesesData es un array de { mes, comprobante, montoPagado }
+        payload.mesesData.forEach((dataMes) => {
+            // Si hay monto pagado:
+            if (dataMes.montoPagado && dataMes.montoPagado > 0) {
+                formData.append(`montoPagado[${dataMes.mes}]`, dataMes.montoPagado);
+            }
+
+            // Si hay comprobante:
+            if (dataMes.comprobante) {
+                formData.append("mesesPagados", dataMes.comprobante, `${dataMes.mes}_${dataMes.comprobante.name}`);
+            }
+        });
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/honorarios/${clienteId}`, {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Error desconocido al agregar honorario contable");
+            }
+
+            const responseData = await response.json();
+            alert(responseData.message);
+
+            // Actualizar las deudas
+            const debtsResponse = await fetch(`http://localhost:8080/api/clientes/${clienteId}/deudas`);
+            if (debtsResponse.ok) {
+                const updatedDebts = await debtsResponse.json();
+                setDebts(updatedDebts);
             }
         } catch (error) {
-            console.error("Error al agregar deuda:", error);
-        } finally {
-            setIsModalOpen(false);
-            setIsHonoraryModalOpen(false);
+            console.error("Error al agregar honorario contable:", error);
+            alert("No se pudo agregar el honorario contable.");
         }
     };
-
-    if (!clienteData) {
-        return <p>Cargando datos del cliente...</p>;
-    }
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -79,33 +87,17 @@ const DebtsPage = () => {
                 <DebtTable debts={debts} />
                 <div className="flex justify-end gap-4">
                     <button
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => setIsHonoraryModalOpen(true)}
                         className="px-4 py-3 bg-indigo-500 text-white rounded-full shadow-lg hover:bg-indigo-600 flex items-center"
                     >
                         <FaPlus />
-                        <span className="ml-2">Agregar Deuda</span>
-                    </button>
-                    <button
-                        onClick={() => setIsHonoraryModalOpen(true)}
-                        className={`px-4 py-2 rounded-md shadow ${
-                            lastHonoraryDate
-                                ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-                                : "bg-green-500 text-white hover:bg-green-600"
-                        }`}
-                        disabled={!!lastHonoraryDate}
-                    >
-                        {lastHonoraryDate
-                            ? "Honorario Contable ya añadido"
-                            : "Agregar Honorario Contable"}
+                        <span className="ml-2">Agregar Honorario Contable</span>
                     </button>
                 </div>
-                <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                    {/* Otro formulario para agregar deuda */}
-                </Modal>
                 <Modal isOpen={isHonoraryModalOpen} onClose={() => setIsHonoraryModalOpen(false)}>
                     <AddAccountingHonorary
-                        onSubmit={handleAddDebt}
-                        lastHonoraryDate={lastHonoraryDate}
+                        onSubmit={handleAddHonorary}
+                        clienteId={clienteId}
                         onClose={() => setIsHonoraryModalOpen(false)}
                     />
                 </Modal>
