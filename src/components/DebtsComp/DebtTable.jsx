@@ -18,7 +18,12 @@ const DebtTable = ({ debts = [] }) => {
                 <tbody>
                 {debts.length > 0 ? (
                     debts.map((debt, index) => (
-                        <tr key={index} className="border-b hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <tr
+                            key={index}
+                            className={`border-b hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                                debt.tipo === "Honorario Contable" ? "bg-green-100" : ""
+                            }`}
+                        >
                             <td className="px-4 py-2">{debt.tipo}</td>
                             <td className="px-4 py-2">${debt.montoTotal.toLocaleString()}</td>
                             <td className="px-4 py-2">${debt.montoRestante.toLocaleString()}</td>

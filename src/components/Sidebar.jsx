@@ -44,8 +44,8 @@ const Sidebar = () => {
         {
             icon: FaCog,
             text: "Finanzas",
-            path: `/finance`,
-            action: () => navigate(`/finance`),
+            path: `/clientes/${clientId}/finanzas`,
+            action: () => navigate(`/clientes/${clientId}/finanzas`),
         },
         {
             icon: FaMoneyCheckAlt,

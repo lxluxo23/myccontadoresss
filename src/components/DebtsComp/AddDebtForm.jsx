@@ -1,6 +1,6 @@
 ﻿import React, { useState } from "react";
 
-const AddDebtForm = ({ onSubmit, onClose }) => {
+export const AddDebtForm = ({ onSubmit, onClose }) => {
     const [formData, setFormData] = useState({
         tipo: "",
         montoTotal: "",
@@ -28,7 +28,7 @@ const AddDebtForm = ({ onSubmit, onClose }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
             <h2 className="text-2xl font-bold text-indigo-600">Agregar Nueva Deuda</h2>
             <div className="space-y-2">
-                <label className="block text-gray-700 dark:text-gray-300">Tipo de Deuda</label>
+                <label className="block text-gray-700">Tipo de Deuda</label>
                 <select
                     name="tipo"
                     value={formData.tipo}
@@ -47,7 +47,7 @@ const AddDebtForm = ({ onSubmit, onClose }) => {
                 </select>
             </div>
             <div className="space-y-2">
-                <label className="block text-gray-700 dark:text-gray-300">Monto Total</label>
+                <label className="block text-gray-700">Monto Total</label>
                 <input
                     type="number"
                     step="0.01"
@@ -59,7 +59,7 @@ const AddDebtForm = ({ onSubmit, onClose }) => {
                 />
             </div>
             <div className="space-y-2">
-                <label className="block text-gray-700 dark:text-gray-300">Fecha Inicio</label>
+                <label className="block text-gray-700">Fecha Inicio</label>
                 <input
                     type="date"
                     name="fechaInicio"
@@ -70,7 +70,7 @@ const AddDebtForm = ({ onSubmit, onClose }) => {
                 />
             </div>
             <div className="space-y-2">
-                <label className="block text-gray-700 dark:text-gray-300">Fecha Vencimiento</label>
+                <label className="block text-gray-700">Fecha Vencimiento</label>
                 <input
                     type="date"
                     name="fechaVencimiento"
@@ -81,7 +81,7 @@ const AddDebtForm = ({ onSubmit, onClose }) => {
                 />
             </div>
             <div className="space-y-2">
-                <label className="block text-gray-700 dark:text-gray-300">Observaciones</label>
+                <label className="block text-gray-700">Observaciones</label>
                 <textarea
                     name="observaciones"
                     value={formData.observaciones}
@@ -108,4 +108,46 @@ const AddDebtForm = ({ onSubmit, onClose }) => {
     );
 };
 
-export default AddDebtForm;
+export const AddAccountingHonorary = ({ onSubmit, lastHonoraryDate }) => {
+    const currentDate = new Date();
+    const lastDate = new Date(lastHonoraryDate);
+
+    const isDisabled =
+        lastHonoraryDate &&
+        currentDate.getFullYear() === lastDate.getFullYear() &&
+        currentDate.getMonth() === lastDate.getMonth();
+
+    const handleSubmit = () => {
+        if (isDisabled) return;
+
+        const honoraryData = {
+            tipo: "Honorario Contable",
+            montoTotal: 1000,
+            fechaInicio: new Date().toISOString().split("T")[0],
+            fechaVencimiento: new Date(
+                new Date().setFullYear(new Date().getFullYear() + 1)
+            )
+                .toISOString()
+                .split("T")[0],
+            observaciones: "Honorario Contable anual",
+        };
+
+        onSubmit(honoraryData);
+    };
+
+    return (
+        <button
+            onClick={handleSubmit}
+            disabled={isDisabled}
+            className={`px-4 py-2 rounded-md shadow ${
+                isDisabled
+                    ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                    : "bg-green-500 text-white hover:bg-green-600"
+            }`}
+        >
+            {isDisabled
+                ? "Honorario Contable ya añadido"
+                : "Agregar Honorario Contable"}
+        </button>
+    );
+};

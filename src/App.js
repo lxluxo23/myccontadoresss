@@ -6,22 +6,25 @@ import DebtsPage from "./pages/DebtsPage";
 import PaymentsPage from "./pages/PaymentsPage";
 import TransactionsPage from "./pages/TransactionsPage";
 import DebtsAndPaymentsPage from "./pages/DebtsAndPaymentsPage";
+import { ClienteProvider } from './components/context/ClienteContext'; // Asegúrate de usar el path correcto
 
 function App() {
     return (
-        <Router>
-            <Routes>
-                {/* Ruta principal */}
-                <Route path="/" element={<MyContadores />} />
-                {/* Ruta para la hoja de cálculo */}
-                <Route path="/spreadsheet/:clientId" element={<SpreadsheetPage />} />
-                {/* Ruta para deudas */}
-                <Route path="/clientes/:clientId/deudas" element={<DebtsPage />} />
-                <Route path="/clientes/:clientId/pagos" element={<PaymentsPage/>} />
-                <Route path="/transactions" element={<TransactionsPage />} />
-                <Route path="/finance" element={<DebtsAndPaymentsPage />} />
-            </Routes>
-        </Router>
+        <ClienteProvider> {/* Proveedor de contexto para toda la aplicación */}
+            <Router>
+                <Routes>
+                    {/* Ruta principal */}
+                    <Route path="/" element={<MyContadores />} />
+
+                    {/* Rutas relacionadas con clientes */}
+                    <Route path="/spreadsheet/:clientId" element={<SpreadsheetPage />} />
+                    <Route path="/clientes/:clientId/deudas" element={<DebtsPage />} />
+                    <Route path="/clientes/:clientId/pagos" element={<PaymentsPage />} />
+                    <Route path="/transactions" element={<TransactionsPage />} />
+                    <Route path="/clientes/:clientId/finanzas" element={<DebtsAndPaymentsPage />} />
+                </Routes>
+            </Router>
+        </ClienteProvider>
     );
 }
 

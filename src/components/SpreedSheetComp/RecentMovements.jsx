@@ -1,12 +1,11 @@
 ﻿import React, { useState } from "react";
 import { FaArrowUp, FaArrowDown, FaInfoCircle, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-const RecentMovements = ({ movements }) => {
+const RecentMovements = ({ movements = [] }) => {
     const [expandedRow, setExpandedRow] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 5;
 
-    // Función para obtener el ícono basado en el tipo
     const getIconByType = (type) => {
         switch (type) {
             case "Ingreso":
@@ -18,15 +17,13 @@ const RecentMovements = ({ movements }) => {
         }
     };
 
-    // Filtrar filas para la página actual
-    const currentRows = movements.slice(
+    const currentRows = (movements || []).slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
 
     return (
         <div className="recent-movements bg-white dark:bg-darkCard text-gray-800 dark:text-darkText shadow-md dark:shadow-dark rounded-xl p-6">
-            {/* Título Centrando */}
             <h2 className="text-lg font-bold mb-4 text-gray-800 dark:text-gray-200 text-center">
                 Últimos Movimientos
             </h2>
@@ -83,7 +80,6 @@ const RecentMovements = ({ movements }) => {
                 </table>
             </div>
 
-            {/* Paginación con Iconos */}
             <div className="flex justify-between items-center mt-4">
                 <button
                     disabled={currentPage === 1}
@@ -93,10 +89,10 @@ const RecentMovements = ({ movements }) => {
                     <FaChevronLeft className="text-gray-500 dark:text-gray-300" />
                 </button>
                 <span className="text-sm dark:text-gray-400">
-                    Página {currentPage} de {Math.ceil(movements.length / rowsPerPage)}
+                    Página {currentPage} de {Math.ceil(movements?.length / rowsPerPage)}
                 </span>
                 <button
-                    disabled={currentPage === Math.ceil(movements.length / rowsPerPage)}
+                    disabled={currentPage === Math.ceil(movements?.length / rowsPerPage)}
                     onClick={() => setCurrentPage(currentPage + 1)}
                     className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full disabled:opacity-50"
                 >

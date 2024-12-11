@@ -1,7 +1,7 @@
 ﻿import React from "react";
 import { FaDollarSign, FaCalendar, FaChartBar, FaExchangeAlt } from "react-icons/fa";
 
-const ClientIndicators = ({ indicators }) => {
+const ClientIndicators = ({ indicators = {} }) => {
     const lastTransaction = indicators.lastTransaction || { date: "Sin datos", amount: 0 };
 
     const cards = [

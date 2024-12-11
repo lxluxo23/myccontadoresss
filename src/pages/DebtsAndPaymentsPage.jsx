@@ -1,71 +1,70 @@
-﻿import React, { useState } from "react";
+﻿import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
-import Filters from "../components/DebtsAndPaymentsComp/Filters";
-import DebtTable from "../components/DebtsComp/DebtTable";
-import PaymentTable from "../components/PaymentsComp/PaymentTable";
+import Header from "../components/DebtsAndPaymentsComp/Header";
+import Overview from "../components/DebtsAndPaymentsComp/Overview";
+import Analytics from "../components/DebtsAndPaymentsComp/Analytics";
+import DetailsTable from "../components/DebtsAndPaymentsComp/DetailsTable";
+import { useCliente } from "../components/context/ClienteContext";
 
-const DebtsAndPaymentsPage = ({ debts = [], payments = [] }) => {
-    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+const DebtsAndPaymentsPage = () => {
+    const { clienteId, clienteData, setClienteData } = useCliente();
+    const navigate = useNavigate();
 
-    // Filtrar deudas y pagos
-    const filteredDebts = debts.filter(
-        (debt) =>
-            new Date(debt.fechaCreacion).getMonth() + 1 === selectedMonth &&
-            new Date(debt.fechaCreacion).getFullYear() === selectedYear
-    );
+    useEffect(() => {
+        if (!clienteId) {
+            navigate("/clientes");
+            return;
+        }
 
-    const filteredPayments = payments.filter(
-        (payment) =>
-            new Date(payment.fechaTransaccion).getMonth() + 1 === selectedMonth &&
-            new Date(payment.fechaTransaccion).getFullYear() === selectedYear
-    );
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/api/clientes/${clienteId}/finanzas`);
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
 
-    // Calcular totales
-    const totalDebts = filteredDebts.reduce((sum, debt) => sum + debt.montoTotal, 0);
-    const totalPayments = filteredPayments.reduce((sum, payment) => sum + payment.monto, 0);
+                const rawData = await response.json();
+
+                // Estructura los datos como los subcomponentes los necesitan
+                const data = {
+                    nextDueDate: rawData.nextDueDate || "No disponible",
+                    totalDebt: rawData.totalDebt || 0,
+                    totalPayments: rawData.totalPayments || 0,
+                    pendingPayments: rawData.pendingPayments || 0,
+                    movements: rawData.movements || []
+                };
+
+                setClienteData(data);
+            } catch (error) {
+                console.error("Error al cargar los datos financieros:", error);
+                navigate("/clientes");
+            }
+        };
+
+        if (!clienteData) {
+            fetchData();
+        }
+    }, [clienteId, clienteData, setClienteData, navigate]);
+
+    if (!clienteData) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <p className="text-lg font-semibold">Cargando datos financieros...</p>
+            </div>
+        );
+    }
 
     return (
-        <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="flex min-h-screen bg-gray-100">
             <Sidebar />
-            <div className="flex-1 p-6">
-                <h2 className="text-3xl font-bold mb-6 text-indigo-600 dark:text-indigo-400">
-                    Gestión de Deudas y Pagos
-                </h2>
-
-                {/* Filtros */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div className="bg-white dark:bg-gray-800 p-4 rounded-md shadow-md">
-                        <Filters
-                            selectedMonth={selectedMonth}
-                            selectedYear={selectedYear}
-                            onMonthChange={setSelectedMonth}
-                            onYearChange={setSelectedYear}
-                        />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-indigo-500 text-white p-4 rounded-md shadow-md">
-                            <h3 className="text-lg font-semibold">Total Deudas</h3>
-                            <p className="text-2xl font-bold">${totalDebts.toLocaleString()}</p>
-                        </div>
-                        <div className="bg-green-500 text-white p-4 rounded-md shadow-md">
-                            <h3 className="text-lg font-semibold">Total Pagos</h3>
-                            <p className="text-2xl font-bold">${totalPayments.toLocaleString()}</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Tablas */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-md shadow-md">
-                        <h3 className="text-xl font-bold mb-4 text-indigo-600">Deudas</h3>
-                        <DebtTable debts={filteredDebts} />
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 p-6 rounded-md shadow-md">
-                        <h3 className="text-xl font-bold mb-4 text-green-600">Pagos</h3>
-                        <PaymentTable payments={filteredPayments} />
-                    </div>
-                </div>
+            <div className="flex-1 flex flex-col">
+                <Header />
+                <main className="flex-1 p-6 space-y-6">
+                    <Overview finance={clienteData} />
+                    <Analytics finance={clienteData} />
+                    <DetailsTable movements={clienteData.movements} />
+                </main>
             </div>
         </div>
     );
