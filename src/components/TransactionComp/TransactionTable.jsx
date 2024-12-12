@@ -12,23 +12,33 @@ const TransactionTable = ({ transactions }) => {
             </tr>
             </thead>
             <tbody>
-            {transactions.map((transaction, index) => (
-                <tr
-                    key={index}
-                    className="border-b hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                    <td className="p-3">{transaction.fecha}</td>
-                    <td className="p-3">{transaction.tipo}</td>
-                    <td className="p-3">{transaction.descripcion}</td>
-                    <td
-                        className={`p-3 text-right ${
-                            transaction.monto > 0 ? "text-green-500" : "text-red-500"
-                        }`}
+            {transactions.map((transaction, index) => {
+                const fechaFormateada = new Date(transaction.fecha).toLocaleString("es-ES", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                });
+
+                return (
+                    <tr
+                        key={index}
+                        className="border-b hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
-                        ${transaction.monto.toLocaleString()}
-                    </td>
-                </tr>
-            ))}
+                        <td className="p-3">{fechaFormateada}</td>
+                        <td className="p-3">{transaction.tipo}</td>
+                        <td className="p-3">{transaction.descripcion}</td>
+                        <td
+                            className={`p-3 text-right ${
+                                transaction.monto > 0 ? "text-green-500" : "text-red-500"
+                            }`}
+                        >
+                            ${transaction.monto.toLocaleString()}
+                        </td>
+                    </tr>
+                );
+            })}
             </tbody>
         </table>
     );

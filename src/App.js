@@ -20,7 +20,7 @@ function App() {
                     <Route path="/spreadsheet/:clientId" element={<SpreadsheetPage />} />
                     <Route path="/clientes/:clientId/deudas" element={<DebtsPage />} />
                     <Route path="/clientes/:clientId/pagos" element={<PaymentsPage />} />
-                    <Route path="/transactions" element={<TransactionsPage />} />
+                    <Route path="/clientes/:clientId/transactions" element={<TransactionsPage />} />
                     <Route path="/clientes/:clientId/finanzas" element={<DebtsAndPaymentsPage />} />
                 </Routes>
             </Router>

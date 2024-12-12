@@ -62,8 +62,8 @@ const Sidebar = () => {
         {
             icon: FaExchangeAlt,
             text: "Transacciones",
-            path: `/transactions`,
-            action: () => navigate(`/transactions`),
+            path: `/clientes/${clientId}/transactions`,
+            action: () => navigate(`/clientes/${clientId}/transactions`),
         },
     ];
 

@@ -46,15 +46,17 @@ const AddAccountingHonorary = ({ onSubmit, clienteId, onClose }) => {
 
         if (!validateForm()) return;
 
-        const mesesData = selectedMonths.map((month) => ({
-            mes: month,
-            comprobante: comprobantes[month] || null,
-            montoPagado: pagosMeses[month] ? Number(pagosMeses[month]) : 0,
-        }));
+        const mesesPagados = selectedMonths
+            .filter((month) => pagosMeses[month] && Number(pagosMeses[month]) > 0)
+            .map((month) => ({
+                mes: month,
+                comprobante: comprobantes[month]?.name || null,
+                montoPagado: Number(pagosMeses[month]),
+            }));
 
         const payload = {
             montoMensual: honoraryData.montoMensual,
-            mesesData,
+            mesesPagados,
         };
 
         try {

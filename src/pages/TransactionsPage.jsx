@@ -1,10 +1,37 @@
-﻿import React, { useState } from "react";
+﻿import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Para redirigir si no hay cliente seleccionado
 import Sidebar from "../components/Sidebar";
 import TransactionTable from "../components/TransactionComp/TransactionTable";
 import FiltersButton from "../components/DebtsAndPaymentsComp/Filters";
+import { useCliente } from "../components/context/ClienteContext";
 
 const TransactionsPage = () => {
+    const { clienteId } = useCliente(); // Obtener clienteId desde el contexto
     const [transactions, setTransactions] = useState([]);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!clienteId) {
+            // Si no hay clienteId, redirigir al usuario a una página de selección de cliente
+            navigate("/clientes");
+            return;
+        }
+
+        const fetchTransactions = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/api/historial?clienteId=${clienteId}`);
+                if (!response.ok) {
+                    throw new Error("Error al cargar transacciones");
+                }
+                const data = await response.json();
+                setTransactions(data);
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        };
+
+        fetchTransactions();
+    }, [clienteId, navigate]);
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
