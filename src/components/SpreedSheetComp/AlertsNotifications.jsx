@@ -1,7 +1,7 @@
 ﻿import React from "react";
 import { FaExclamationTriangle, FaTimesCircle, FaInfoCircle } from "react-icons/fa";
 
-const AlertsNotifications = ({ alerts }) => {
+const AlertsNotifications = ({ alerts = [] }) => {
     const getIconByType = (type) => {
         switch (type) {
             case "warning":
@@ -19,7 +19,7 @@ const AlertsNotifications = ({ alerts }) => {
             <h2 className="text-lg font-bold mb-4 text-gray-800 dark:text-darkText text-center">
                 Alertas y Notificaciones
             </h2>
-            {alerts.length > 0 ? (
+            {alerts?.length > 0 ? (
                 <ul className="space-y-4">
                     {alerts.map((alert, index) => (
                         <li
@@ -32,9 +32,7 @@ const AlertsNotifications = ({ alerts }) => {
                                         : "bg-blue-50 dark:bg-blue-900 border-blue-500"
                             }`}
                         >
-                            <div className="flex-shrink-0">
-                                {getIconByType(alert.type)}
-                            </div>
+                            <div className="flex-shrink-0">{getIconByType(alert.type)}</div>
                             <div>
                                 <div
                                     className={`font-bold ${

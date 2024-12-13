@@ -1,77 +1,133 @@
-﻿import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import PaymentTable from "../components/PaymentsComp/PaymentTable";
 import AddPaymentForm from "../components/PaymentsComp/AddPaymentForm";
 import Modal from "../components/Modal";
-import FiltersButton from "../components/DebtsAndPaymentsComp/Filters";
+import { useCliente } from "../components/context/ClienteContext";
 import { FaPlus } from "react-icons/fa";
-import { useParams } from "react-router-dom";
+import ThemeToggle from "../components/ThemeToggle";
 
 const PaymentsPage = () => {
-    const { clientId } = useParams();
+    const { clienteId } = useCliente();
     const [payments, setPayments] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const handleAddPayment = (newPayment) => {
-        setPayments([...payments, newPayment]);
-        setIsModalOpen(false);
-    };
+    const navigate = useNavigate();
 
     useEffect(() => {
+        if (!clienteId) {
+            navigate("/clientes");
+            return;
+        }
+
         const fetchPayments = async () => {
+            try {
+                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/pagos`);
+                if (!response.ok) {
+                    throw new Error("Error al cargar los datos");
+                }
+                const data = await response.json();
+                setPayments(data);
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchPayments();
+    }, [clienteId, navigate]);
+
+    const handleAddPayment = async (newPayment) => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clientId}/pagos`);
-            const data = await response.json();
-            setPayments(data);
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/pagos/registrar/${newPayment.deudaSeleccionada}`, {
+                method: "POST",
+                body: JSON.stringify({
+                    fechaTransaccion: newPayment.fechaPago,
+                    monto: newPayment.monto,
+                    metodoPago: newPayment.metodoPago,
+                    observaciones: newPayment.observaciones,
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                try {
+                    const errorData = JSON.parse(errorText);
+                    throw new Error(errorData.error || "Error desconocido al agregar el pago");
+                } catch {
+                    throw new Error(errorText);
+                }
+            }
+
+            const addedPayment = await response.json();
+
+            // Actualiza el estado local añadiendo el nuevo pago
+            setPayments((prevPayments) => {
+                // Valida que el pago no esté duplicado
+                const isDuplicate = prevPayments.some((payment) => payment.pagoId === addedPayment.pagoId);
+                if (isDuplicate) {
+                    console.warn("Pago duplicado detectado, no se agregará nuevamente.");
+                    return prevPayments;
+                }
+                return [...prevPayments, addedPayment];
+            });
         } catch (error) {
-            console.error("Error al cargar pagos:", error);
+            console.error("Error al agregar el pago:", error.message);
+            alert(`Error al agregar el pago: ${error.message}`);
+        } finally {
+            setIsModalOpen(false);
         }
     };
 
-    fetchPayments();
-}, [clientId]);
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-gray-600 dark:text-gray-400">Cargando...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-red-500 dark:text-red-400">{error}</div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
             <Sidebar />
-            <div className="flex-1 p-6 space-y-6 relative">
-                {/* Encabezado */}
-                <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-                        Gestión de Pagos
-                    </h1>
-                    {/* Botón Flotante para Filtros */}
-                    <FiltersButton />
+            <div className="flex-1 p-6">
+                <div>
+                    <PaymentTable payments={payments} />
                 </div>
-
-                {/* Tabla de Pagos */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-md shadow-md">
-                    {payments.length > 0 ? (
-                        <PaymentTable payments={payments} />
-                    ) : (
-                        <p className="text-center text-gray-500 dark:text-gray-400">
-                            No hay pagos registrados.
-                        </p>
-                    )}
+                <div className="flex justify-end">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="inline-flex items-center px-4 py-2 bg-indigo-500 text-white dark:bg-indigo-600 dark:text-gray-200 rounded hover:bg-indigo-600 dark:hover:bg-indigo-700"
+                    >
+                        <FaPlus className="mr-2" />
+                        Agregar Pago
+                    </button>
                 </div>
-
-                {/* Botón Flotante para Agregar Pago */}
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="fixed bottom-6 right-6 flex items-center px-6 py-3 bg-indigo-500 text-white rounded-full shadow-lg hover:bg-indigo-600 transition space-x-2"
-                >
-                    <FaPlus />
-                    <span>Agregar Pago</span>
-                </button>
-
-                {/* Modal para Agregar Pago */}
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
                     <AddPaymentForm
                         onSubmit={handleAddPayment}
+                        userId={clienteId}
                         onClose={() => setIsModalOpen(false)}
                     />
                 </Modal>
             </div>
+            <ThemeToggle />
         </div>
     );
 };
