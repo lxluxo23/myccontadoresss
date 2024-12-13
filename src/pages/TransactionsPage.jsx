@@ -2,7 +2,6 @@
 import { useNavigate } from "react-router-dom"; // Para redirigir si no hay cliente seleccionado
 import Sidebar from "../components/Sidebar";
 import TransactionTable from "../components/TransactionComp/TransactionTable";
-import FiltersButton from "../components/DebtsAndPaymentsComp/Filters";
 import { useCliente } from "../components/context/ClienteContext";
 
 const TransactionsPage = () => {
@@ -43,7 +42,6 @@ const TransactionsPage = () => {
                         Historial de Transacciones
                     </h1>
                     {/* Botón Flotante para Filtros */}
-                    <FiltersButton />
                 </div>
 
                 {/* Tabla de Transacciones */}

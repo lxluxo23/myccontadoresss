@@ -3,20 +3,23 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import PaymentTable from "../components/PaymentsComp/PaymentTable";
 import AddPaymentForm from "../components/PaymentsComp/AddPaymentForm";
+import FiltersAccordion from "../components/PaymentsComp/FiltersAccordion";
 import Modal from "../components/Modal";
-import FiltersButton from "../components/DebtsAndPaymentsComp/Filters";
-import { FaPlus } from "react-icons/fa";
 import { useCliente } from "../components/context/ClienteContext";
+import { FaPlus } from "react-icons/fa";
 
 const PaymentsPage = () => {
-    const { clienteId, clienteData } = useCliente(); // Acceso al cliente seleccionado desde el contexto
+    const { clienteId } = useCliente();
     const [payments, setPayments] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const navigate = useNavigate();
 
     useEffect(() => {
         if (!clienteId) {
-            navigate("/clientes"); // Redirige a la lista de clientes si no hay cliente seleccionado
+            navigate("/clientes");
             return;
         }
 
@@ -24,12 +27,14 @@ const PaymentsPage = () => {
             try {
                 const response = await fetch(`http://localhost:8080/api/clientes/${clienteId}/pagos`);
                 if (!response.ok) {
-                    throw new Error("Error al cargar pagos");
+                    throw new Error("Error al cargar los datos");
                 }
                 const data = await response.json();
                 setPayments(data);
             } catch (error) {
-                console.error("Error al cargar pagos:", error);
+                setError(error.message);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -40,64 +45,81 @@ const PaymentsPage = () => {
         try {
             const response = await fetch(`http://localhost:8080/api/pagos`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(newPayment),
+                headers: { "Content-Type": "application/json" },
             });
             if (!response.ok) {
                 throw new Error("Error al agregar el pago");
             }
             const addedPayment = await response.json();
-            setPayments([...payments, addedPayment]); // Actualiza la lista de pagos
+            setPayments((prevPayments) => [...prevPayments, addedPayment]);
         } catch (error) {
-            console.error("Error al agregar el pago:", error);
+            console.error("Error al agregar pago:", error);
         } finally {
-            setIsModalOpen(false); // Cierra el modal al finalizar
+            setIsModalOpen(false);
         }
     };
 
-    if (!clienteData) {
-        return <p>Cargando datos del cliente...</p>;
+    const handleFilter = (filters) => {
+        console.log("Filtros aplicados:", filters);
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-gray-600">Cargando...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-red-500">{error}</div>
+            </div>
+        );
     }
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
             <Sidebar />
-            <div className="flex-1 p-6 space-y-6 relative">
-                {/* Encabezado */}
-                <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-                        Gestión de Pagos
-                    </h1>
-                    {/* Botón Flotante para Filtros */}
-                    <FiltersButton />
-                </div>
+            <div className="flex-1 p-6">
 
-                {/* Tabla de Pagos */}
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-md shadow-md">
-                    {payments.length > 0 ? (
+                {/* Contenedor principal similar a la página de Deudas */}
+                <div className="space-y-6 bg-white rounded-xl shadow-lg p-6">
+
+                    {/* Encabezado */}
+                    <div className="flex justify-between items-center mb-3">
+                        <div className="text-xl font-bold text-gray-800">Gestión de Pagos</div>
+                    </div>
+
+                    {/* Filtros */}
+                    <div>
+                        <div className="text-lg font-semibold text-gray-700 mb-4">Filtros Avanzados</div>
+                        <FiltersAccordion onFilter={handleFilter} />
+                    </div>
+
+                    {/* Tabla de Pagos */}
+                    <div>
+                        <div className="text-lg font-semibold text-gray-700 mb-4">Lista de Pagos</div>
                         <PaymentTable payments={payments} />
-                    ) : (
-                        <p className="text-center text-gray-500 dark:text-gray-400">
-                            No hay pagos registrados.
-                        </p>
-                    )}
+                    </div>
+
+                    {/* Botón para agregar pago */}
+                    <div className="flex justify-end">
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="inline-flex items-center px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
+                        >
+                            <FaPlus className="mr-2" />
+                            Agregar Pago
+                        </button>
+                    </div>
                 </div>
 
-                {/* Botón Flotante para Agregar Pago */}
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="fixed bottom-6 right-6 flex items-center px-6 py-3 bg-indigo-500 text-white rounded-full shadow-lg hover:bg-indigo-600 transition space-x-2"
-                >
-                    <FaPlus />
-                    <span>Agregar Pago</span>
-                </button>
-
-                {/* Modal para Agregar Pago */}
+                {/* Modal para agregar pago */}
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-                    <AddPaymentForm
-                        onSubmit={handleAddPayment}
-                        onClose={() => setIsModalOpen(false)}
-                    />
+                    <AddPaymentForm onSubmit={handleAddPayment} />
                 </Modal>
             </div>
         </div>

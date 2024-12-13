@@ -12,7 +12,7 @@ const DebtsPage = () => {
     const [debts, setDebts] = useState([]);
     const [honorariosContables, setHonorariosContables] = useState([]);
     const [isHonoraryModalOpen, setIsHonoraryModalOpen] = useState(false);
-    const [error, setError] = useState(null); // Para manejar errores
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -28,7 +28,6 @@ const DebtsPage = () => {
                     throw new Error("Error al cargar deudas");
                 }
                 const data = await response.json();
-                console.log("Deudas:", data); // Depuración
                 setDebts(data);
             } catch (error) {
                 console.error("Error al cargar deudas:", error);
@@ -43,7 +42,6 @@ const DebtsPage = () => {
                     throw new Error("Error al cargar honorarios contables");
                 }
                 const data = await response.json();
-                console.log("Honorarios Contables:", data); // Depuración
                 setHonorariosContables(data);
             } catch (error) {
                 console.error("Error al cargar honorarios contables:", error);
@@ -56,7 +54,6 @@ const DebtsPage = () => {
     }, [clienteId, navigate]);
 
     const handleAddHonorary = async (clienteId, payload) => {
-        console.log("Payload enviado:", payload); // Depuración
         try {
             const response = await fetch(`http://localhost:8080/api/honorarios/${clienteId}`, {
                 method: "POST",
@@ -66,12 +63,8 @@ const DebtsPage = () => {
             if (!response.ok) {
                 throw new Error("Error al agregar honorario contable");
             }
-            const data = await response.json();
-            console.log("Respuesta del servidor:", data); // Depuración
-
-            // Vuelve a cargar los honorarios contables
             await fetchHonorarios();
-            setIsHonoraryModalOpen(false); // Cierra el modal
+            setIsHonoraryModalOpen(false);
         } catch (error) {
             console.error("Error al agregar honorario contable:", error);
             setError("No se pudo agregar el honorario contable. Inténtalo de nuevo.");
@@ -96,16 +89,20 @@ const DebtsPage = () => {
             <Sidebar />
             <div className="flex-1 p-6 space-y-6 relative">
                 {error && <div className="text-red-500">{error}</div>}
-                <DebtTable debts={debts} honorariosContables={honorariosContables} />
-                <div className="flex justify-end gap-4">
-                    <button
-                        onClick={() => setIsHonoraryModalOpen(true)}
-                        className="px-4 py-3 bg-indigo-500 text-white rounded-full shadow-lg hover:bg-indigo-600 flex items-center"
-                    >
-                        <FaPlus />
-                        <span className="ml-2">Agregar Honorario Contable</span>
-                    </button>
+                <div className="space-y-6 bg-white rounded-xl shadow-lg p-6">
+                    <div className="text-xl font-bold text-gray-800">Gestión de Deudas</div>
+                    <DebtTable debts={debts} honorariosContables={honorariosContables} />
+                    <div className="flex justify-end">
+                        <button
+                            onClick={() => setIsHonoraryModalOpen(true)}
+                            className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 inline-flex items-center"
+                        >
+                            <FaPlus className="mr-2" />
+                            Agregar Honorario Contable
+                        </button>
+                    </div>
                 </div>
+
                 <Modal isOpen={isHonoraryModalOpen} onClose={() => setIsHonoraryModalOpen(false)}>
                     <AddAccountingHonorary
                         onSubmit={handleAddHonorary}
