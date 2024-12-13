@@ -24,7 +24,7 @@ function MyContadores() {
             console.error('Error al añadir el cliente:', error);
         }
     };
-
+ 
     // Cargar los clientes desde el backend
     useEffect(() => {
         clearCliente(); // Limpia el cliente seleccionado al cargar la lista
