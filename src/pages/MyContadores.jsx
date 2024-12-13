@@ -7,7 +7,7 @@ import ClientRow from '../components/MyCcontadoresComp/ClientRow';
 import Pagination from '../components/MyCcontadoresComp/Pagination';
 import { useCliente } from '../components/context/ClienteContext'; // Corrige la ruta del contexto
 import { useNavigate } from 'react-router-dom';
-
+ 
 function MyContadores() {
     const [clients, setClients] = useState([]);
     const [searchName, setSearchName] = useState(''); // Estado para la búsqueda
