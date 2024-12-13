@@ -2,7 +2,7 @@
 
 export const AddDebtForm = ({ onSubmit, onClose }) => {
     const [formData, setFormData] = useState({
-        tipo: "",
+        tipoDeuda: "",
         montoTotal: "",
         fechaInicio: "",
         fechaVencimiento: "",
@@ -16,9 +16,13 @@ export const AddDebtForm = ({ onSubmit, onClose }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        // Construir el objeto exactamente como en Postman
         const debtData = {
-            ...formData,
+            tipoDeuda: formData.tipoDeuda,
             montoTotal: parseFloat(formData.montoTotal),
+            fechaInicio: formData.fechaInicio,       // "YYYY-MM-DD"
+            fechaVencimiento: formData.fechaVencimiento, // "YYYY-MM-DD"
+            observaciones: formData.observaciones,
         };
 
         onSubmit(debtData);
@@ -30,19 +34,19 @@ export const AddDebtForm = ({ onSubmit, onClose }) => {
             <div className="space-y-2">
                 <label className="block text-gray-700">Tipo de Deuda</label>
                 <select
-                    name="tipo"
-                    value={formData.tipo}
+                    name="tipoDeuda"
+                    value={formData.tipoDeuda}
                     onChange={handleChange}
                     required
                     className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                     <option value="">Seleccione</option>
-                    <option value="Impuesto IVA">Impuesto IVA</option>
-                    <option value="Impuesto Renta">Impuesto Renta</option>
-                    <option value="Honorario Mensual">Honorario Mensual</option>
-                    <option value="Honorario Renta AT">Honorario Renta AT</option>
-                    <option value="Multa">Multa</option>
                     <option value="Imposiciones">Imposiciones</option>
+                    <option value="Impuesto IVA">Impuesto IVA</option>
+                    <option value="Talonarios">Talonarios</option>
+                    <option value="Multas">Multas</option>
+                    <option value="Impuesto Renta">Impuesto Renta</option>
+                    <option value="Contribuciones">Contribuciones</option>
                     <option value="Otros">Otros</option>
                 </select>
             </div>
@@ -105,49 +109,5 @@ export const AddDebtForm = ({ onSubmit, onClose }) => {
                 </button>
             </div>
         </form>
-    );
-};
-
-export const AddAccountingHonorary = ({ onSubmit, lastHonoraryDate }) => {
-    const currentDate = new Date();
-    const lastDate = new Date(lastHonoraryDate);
-
-    const isDisabled =
-        lastHonoraryDate &&
-        currentDate.getFullYear() === lastDate.getFullYear() &&
-        currentDate.getMonth() === lastDate.getMonth();
-
-    const handleSubmit = () => {
-        if (isDisabled) return;
-
-        const honoraryData = {
-            tipo: "Honorario Contable",
-            montoTotal: 1000,
-            fechaInicio: new Date().toISOString().split("T")[0],
-            fechaVencimiento: new Date(
-                new Date().setFullYear(new Date().getFullYear() + 1)
-            )
-                .toISOString()
-                .split("T")[0],
-            observaciones: "Honorario Contable anual",
-        };
-
-        onSubmit(honoraryData);
-    };
-
-    return (
-        <button
-            onClick={handleSubmit}
-            disabled={isDisabled}
-            className={`px-4 py-2 rounded-md shadow ${
-                isDisabled
-                    ? "bg-gray-400 text-gray-600 cursor-not-allowed"
-                    : "bg-green-500 text-white hover:bg-green-600"
-            }`}
-        >
-            {isDisabled
-                ? "Honorario Contable ya añadido"
-                : "Agregar Honorario Contable"}
-        </button>
     );
 };

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import PaymentTable from "../components/PaymentsComp/PaymentTable";
 import AddPaymentForm from "../components/PaymentsComp/AddPaymentForm";
+import AddHonoraryPayment from "../components/PaymentsComp/AddHonoraryPayment";
 import Modal from "../components/Modal";
 import { useCliente } from "../components/context/ClienteContext";
 import { FaPlus } from "react-icons/fa";
@@ -11,7 +12,8 @@ import ThemeToggle from "../components/ThemeToggle";
 const PaymentsPage = () => {
     const { clienteId } = useCliente();
     const [payments, setPayments] = useState([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false);
+    const [isAddHonoraryPaymentModalOpen, setIsAddHonoraryPaymentModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -70,7 +72,6 @@ const PaymentsPage = () => {
 
             // Actualiza el estado local añadiendo el nuevo pago
             setPayments((prevPayments) => {
-                // Valida que el pago no esté duplicado
                 const isDuplicate = prevPayments.some((payment) => payment.pagoId === addedPayment.pagoId);
                 if (isDuplicate) {
                     console.warn("Pago duplicado detectado, no se agregará nuevamente.");
@@ -82,7 +83,42 @@ const PaymentsPage = () => {
             console.error("Error al agregar el pago:", error.message);
             alert(`Error al agregar el pago: ${error.message}`);
         } finally {
-            setIsModalOpen(false);
+            setIsAddPaymentModalOpen(false);
+        }
+    };
+
+    const handleAddHonoraryPayment = async (newPayment) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/honorarios/${newPayment.honorarioId}/pagos`, {
+                method: "POST",
+                body: JSON.stringify({
+                    mes: newPayment.mes,
+                    montoPago: newPayment.montoPago,
+                    comprobante: newPayment.comprobante,
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            // Manejo de respuestas no JSON
+            const isJson = response.headers.get("content-type")?.includes("application/json");
+            const data = isJson ? await response.json() : await response.text();
+
+            if (!response.ok) {
+                throw new Error(isJson ? data.error || "Error desconocido" : data);
+            }
+
+            if (isJson) {
+                setPayments((prev) => [...prev, data]);
+            } else {
+                console.log(data); // Mensaje de éxito del backend
+            }
+        } catch (error) {
+            console.error("Error al registrar el pago de honorario:", error.message);
+            alert(`Error al registrar el pago de honorario: ${error.message}`);
+        } finally {
+            setIsAddHonoraryPaymentModalOpen(false);
         }
     };
 
@@ -110,20 +146,44 @@ const PaymentsPage = () => {
                 <div>
                     <PaymentTable payments={payments} />
                 </div>
-                <div className="flex justify-end">
+
+                {/* Botón para agregar pago normal */}
+                <div className="flex justify-end mt-4">
                     <button
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={() => setIsAddPaymentModalOpen(true)}
                         className="inline-flex items-center px-4 py-2 bg-indigo-500 text-white dark:bg-indigo-600 dark:text-gray-200 rounded hover:bg-indigo-600 dark:hover:bg-indigo-700"
                     >
                         <FaPlus className="mr-2" />
                         Agregar Pago
                     </button>
                 </div>
-                <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+
+                {/* Botón para registrar pago de honorario */}
+                <div className="flex justify-end mt-4">
+                    <button
+                        onClick={() => setIsAddHonoraryPaymentModalOpen(true)}
+                        className="inline-flex items-center px-4 py-2 bg-green-500 text-white dark:bg-green-600 dark:text-gray-200 rounded hover:bg-green-600 dark:hover:bg-green-700"
+                    >
+                        <FaPlus className="mr-2" />
+                        Registrar Pago de Honorario
+                    </button>
+                </div>
+
+                {/* Modal para agregar pago normal */}
+                <Modal isOpen={isAddPaymentModalOpen} onClose={() => setIsAddPaymentModalOpen(false)}>
                     <AddPaymentForm
                         onSubmit={handleAddPayment}
                         userId={clienteId}
-                        onClose={() => setIsModalOpen(false)}
+                        onClose={() => setIsAddPaymentModalOpen(false)}
+                    />
+                </Modal>
+
+                {/* Modal para registrar pago de honorario */}
+                <Modal isOpen={isAddHonoraryPaymentModalOpen} onClose={() => setIsAddHonoraryPaymentModalOpen(false)}>
+                    <AddHonoraryPayment
+                        onSubmit={handleAddHonoraryPayment}
+                        honorarioId={clienteId} // Ajusta este ID según corresponda
+                        onClose={() => setIsAddHonoraryPaymentModalOpen(false)}
                     />
                 </Modal>
             </div>
