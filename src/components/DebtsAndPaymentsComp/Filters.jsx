@@ -25,7 +25,7 @@ const Filters = ({
         "Noviembre",
         "Diciembre",
     ];
-
+ 
     const types = [
         "Impuesto IVA",
         "Impuesto Renta",
