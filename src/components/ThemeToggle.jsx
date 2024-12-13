@@ -1,14 +1,21 @@
 ﻿import React, { useState, useEffect } from 'react';
 
 const ThemeToggle = () => {
-    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        // Intenta cargar la preferencia del usuario desde localStorage
+        const savedTheme = localStorage.getItem('theme');
+        return savedTheme === 'dark'; // Si es 'dark', inicia en modo oscuro
+    });
 
     useEffect(() => {
         const root = document.documentElement;
+
         if (isDarkMode) {
             root.classList.add('dark');
+            localStorage.setItem('theme', 'dark'); // Guarda la preferencia como 'dark'
         } else {
             root.classList.remove('dark');
+            localStorage.setItem('theme', 'light'); // Guarda la preferencia como 'light'
         }
     }, [isDarkMode]);
 
@@ -24,7 +31,6 @@ const ThemeToggle = () => {
         >
             {isDarkMode ? '☀️' : '🌙'}
         </button>
-
     );
 };
 

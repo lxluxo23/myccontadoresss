@@ -6,6 +6,7 @@ import Modal from "../components/Modal";
 import AddAccountingHonorary from "../components/DebtsComp/AddAccountingHonorary";
 import { useCliente } from "../components/context/ClienteContext";
 import { FaPlus } from "react-icons/fa";
+import ThemeToggle from "../components/ThemeToggle";
 
 const DebtsPage = () => {
     const { clienteId } = useCliente();
@@ -23,28 +24,26 @@ const DebtsPage = () => {
 
         const fetchDebts = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/clientes/${clienteId}/deudas`);
+                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/deudas`);
                 if (!response.ok) {
                     throw new Error("Error al cargar deudas");
                 }
                 const data = await response.json();
                 setDebts(data);
             } catch (error) {
-                console.error("Error al cargar deudas:", error);
                 setError("Error al cargar deudas. Inténtalo más tarde.");
             }
         };
 
         const fetchHonorarios = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/honorarios/cliente/${clienteId}`);
+                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/cliente/${clienteId}`);
                 if (!response.ok) {
                     throw new Error("Error al cargar honorarios contables");
                 }
                 const data = await response.json();
                 setHonorariosContables(data);
             } catch (error) {
-                console.error("Error al cargar honorarios contables:", error);
                 setError("Error al cargar honorarios contables. Inténtalo más tarde.");
             }
         };
@@ -55,7 +54,7 @@ const DebtsPage = () => {
 
     const handleAddHonorary = async (clienteId, payload) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/honorarios/${clienteId}`, {
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${clienteId}`, {
                 method: "POST",
                 body: JSON.stringify(payload),
                 headers: { "Content-Type": "application/json" },
@@ -66,14 +65,13 @@ const DebtsPage = () => {
             await fetchHonorarios();
             setIsHonoraryModalOpen(false);
         } catch (error) {
-            console.error("Error al agregar honorario contable:", error);
             setError("No se pudo agregar el honorario contable. Inténtalo de nuevo.");
         }
     };
 
     const fetchHonorarios = async () => {
         try {
-            const response = await fetch(`http://localhost:8080/api/honorarios/cliente/${clienteId}`);
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/cliente/${clienteId}`);
             if (!response.ok) {
                 throw new Error("Error al cargar honorarios contables");
             }
@@ -87,21 +85,17 @@ const DebtsPage = () => {
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
             <Sidebar />
-            <div className="flex-1 p-6 space-y-6 relative">
-                {error && <div className="text-red-500">{error}</div>}
-                <div className="space-y-6 bg-white rounded-xl shadow-lg p-6">
-                    <div className="text-xl font-bold text-gray-800">Gestión de Deudas</div>
+            <div className="flex-1 p-6">
                     <DebtTable debts={debts} honorariosContables={honorariosContables} />
                     <div className="flex justify-end">
                         <button
                             onClick={() => setIsHonoraryModalOpen(true)}
-                            className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 inline-flex items-center"
+                            className="px-4 py-2 bg-indigo-500 text-white dark:bg-indigo-600 dark:text-gray-200 rounded hover:bg-indigo-600 dark:hover:bg-indigo-700 inline-flex items-center"
                         >
                             <FaPlus className="mr-2" />
                             Agregar Honorario Contable
                         </button>
                     </div>
-                </div>
 
                 <Modal isOpen={isHonoraryModalOpen} onClose={() => setIsHonoraryModalOpen(false)}>
                     <AddAccountingHonorary
@@ -111,6 +105,7 @@ const DebtsPage = () => {
                     />
                 </Modal>
             </div>
+            <ThemeToggle />
         </div>
     );
 };

@@ -40,13 +40,6 @@ const Sidebar = () => {
             path: `/spreadsheet/${1}`,
             action: () => navigate(`/spreadsheet/${clientId}`),
         },
-
-        {
-            icon: FaCog,
-            text: "Finanzas",
-            path: `/clientes/${clientId}/finanzas`,
-            action: () => navigate(`/clientes/${clientId}/finanzas`),
-        },
         {
             icon: FaMoneyCheckAlt,
             text: "Pagos",
@@ -58,12 +51,6 @@ const Sidebar = () => {
             text: "Deudas",
             path: `/clientes/${clientId}/deudas`, // Cambiar la ruta para incluir el clientId
             action: () => navigate(`/clientes/${clientId}/deudas`), // Actualizar la acción para redirigir a la ruta correcta
-        },
-        {
-            icon: FaExchangeAlt,
-            text: "Transacciones",
-            path: `/clientes/${clientId}/transactions`,
-            action: () => navigate(`/clientes/${clientId}/transactions`),
         },
     ];
 

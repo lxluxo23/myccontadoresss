@@ -4,9 +4,7 @@ import MyContadores from './pages/MyContadores';
 import SpreadsheetPage from './pages/SpreadsheetPage';
 import DebtsPage from "./pages/DebtsPage";
 import PaymentsPage from "./pages/PaymentsPage";
-import TransactionsPage from "./pages/TransactionsPage";
-import DebtsAndPaymentsPage from "./pages/DebtsAndPaymentsPage";
-import { ClienteProvider } from './components/context/ClienteContext'; // Asegúrate de usar el path correcto
+import { ClienteProvider } from './components/context/ClienteContext';
 
 function App() {
     return (
@@ -20,8 +18,6 @@ function App() {
                     <Route path="/spreadsheet/:clientId" element={<SpreadsheetPage />} />
                     <Route path="/clientes/:clientId/deudas" element={<DebtsPage />} />
                     <Route path="/clientes/:clientId/pagos" element={<PaymentsPage />} />
-                    <Route path="/clientes/:clientId/transactions" element={<TransactionsPage />} />
-                    <Route path="/clientes/:clientId/finanzas" element={<DebtsAndPaymentsPage />} />
                 </Routes>
             </Router>
         </ClienteProvider>

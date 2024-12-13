@@ -1,18 +1,39 @@
-﻿import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-const AddPaymentForm = ({ onSubmit, onClose }) => {
+const AddPaymentForm = ({ onSubmit, onClose, userId }) => {
     const [fechaPago, setFechaPago] = useState("");
     const [monto, setMonto] = useState("");
     const [metodoPago, setMetodoPago] = useState("");
     const [observaciones, setObservaciones] = useState("");
+    const [deudaSeleccionada, setDeudaSeleccionada] = useState("");
+    const [deudas, setDeudas] = useState([]);
+
+    useEffect(() => {
+        if (userId) {
+            axios
+                .get(`http://localhost:8080/api/deudas/usuario/${userId}/pendientes`)
+                .then((response) => {
+                    setDeudas(response.data);
+                })
+                .catch((error) => {
+                    console.error("Error al obtener las deudas pendientes:", error);
+                });
+        }
+    }, [userId]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (!deudaSeleccionada) {
+            alert("Debe seleccionar una deuda pendiente para registrar el pago.");
+            return;
+        }
         onSubmit({
             fechaPago,
             monto: parseFloat(monto),
             metodoPago,
             observaciones,
+            deudaSeleccionada,
         });
         onClose();
     };
@@ -52,12 +73,19 @@ const AddPaymentForm = ({ onSubmit, onClose }) => {
                 </select>
             </div>
             <div>
-                <label className="block text-gray-700 dark:text-gray-300">Observaciones</label>
-                <textarea
-                    value={observaciones}
-                    onChange={(e) => setObservaciones(e.target.value)}
+                <label className="block text-gray-700 dark:text-gray-300">Seleccionar Deuda</label>
+                <select
+                    value={deudaSeleccionada}
+                    onChange={(e) => setDeudaSeleccionada(e.target.value)}
                     className="w-full p-2 border rounded-md"
-                />
+                >
+                    <option value="">Seleccione una deuda pendiente</option>
+                    {deudas.map((deuda) => (
+                        <option key={deuda.deudaId} value={deuda.deudaId}>
+                            {deuda.descripcion}
+                        </option>
+                    ))}
+                </select>
             </div>
             <button type="submit" className="w-full bg-indigo-500 text-white py-2 rounded-md">
                 Agregar Pago
