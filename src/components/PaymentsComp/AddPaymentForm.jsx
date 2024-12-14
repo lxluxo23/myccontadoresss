@@ -3,10 +3,10 @@ import axios from "axios";
 
 const AddPaymentForm = ({ onSubmit, onClose, userId }) => {
     const [fechaPago, setFechaPago] = useState("");
-    const [monto, setMonto] = useState("");
+    const [monto, setMonto] = useState("0");
     const [metodoPago, setMetodoPago] = useState("");
     const [observaciones, setObservaciones] = useState("");
-    const [deudaSeleccionada, setDeudaSeleccionada] = useState("");
+    const [deudaSeleccionada, setDeudaSeleccionada] = useState(null);
     const [deudas, setDeudas] = useState([]);
 
     useEffect(() => {
@@ -14,28 +14,54 @@ const AddPaymentForm = ({ onSubmit, onClose, userId }) => {
             axios
                 .get(`https://backend.cobros.myccontadores.cl/api/deudas/usuario/${userId}/pendientes`)
                 .then((response) => {
-                    setDeudas(response.data);
+                    const deudasPendientes = Array.isArray(response.data) ? response.data : [];
+                    setDeudas(deudasPendientes);
                 })
                 .catch((error) => {
                     console.error("Error al obtener las deudas pendientes:", error);
+                    setDeudas([]);
                 });
         }
     }, [userId]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validaciones del formulario
+        if (!fechaPago) {
+            alert("Debe seleccionar una fecha de pago.");
+            return;
+        }
+        if (!monto || isNaN(parseFloat(monto)) || parseFloat(monto) <= 0) {
+            alert("Debe ingresar un monto válido mayor a 0.");
+            return;
+        }
+        if (!metodoPago) {
+            alert("Debe seleccionar un método de pago.");
+            return;
+        }
         if (!deudaSeleccionada) {
             alert("Debe seleccionar una deuda pendiente para registrar el pago.");
             return;
         }
-        onSubmit({
-            fechaPago,
-            monto: parseFloat(monto),
-            metodoPago,
-            observaciones,
-            deudaSeleccionada,
-        });
-        onClose();
+
+        try {
+            // Enviar datos al backend
+            await axios.post(
+                `https://backend.cobros.myccontadores.cl/api/pagos/registrar/${deudaSeleccionada}`,
+                {
+                    fechaPago,
+                    monto: parseFloat(monto),
+                    metodoPago,
+                    observaciones,
+                }
+            );
+            alert("Pago registrado con éxito.");
+            onClose();
+        } catch (error) {
+            console.error("Error al registrar el pago:", error.response?.data || error.message);
+            alert("Hubo un error al registrar el pago. Intente nuevamente.");
+        }
     };
 
     return (
@@ -80,12 +106,24 @@ const AddPaymentForm = ({ onSubmit, onClose, userId }) => {
                     className="w-full p-2 border rounded-md"
                 >
                     <option value="">Seleccione una deuda pendiente</option>
-                    {deudas.map((deuda) => (
-                        <option key={deuda.deudaId} value={deuda.deudaId}>
-                            {deuda.descripcion}
-                        </option>
-                    ))}
+                    {deudas.length > 0 ? (
+                        deudas.map((deuda) => (
+                            <option key={deuda.deudaId} value={deuda.deudaId}>
+                                {deuda.descripcion || "Sin descripción"}
+                            </option>
+                        ))
+                    ) : (
+                        <option disabled>No hay deudas pendientes</option>
+                    )}
                 </select>
+            </div>
+            <div>
+                <label className="block text-gray-700 dark:text-gray-300">Observaciones</label>
+                <textarea
+                    value={observaciones}
+                    onChange={(e) => setObservaciones(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                />
             </div>
             <button type="submit" className="w-full bg-indigo-500 text-white py-2 rounded-md">
                 Agregar Pago
