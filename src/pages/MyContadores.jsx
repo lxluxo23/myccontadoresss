@@ -26,21 +26,30 @@ function MyContadores() {
     };
  
     // Cargar los clientes desde el backend
+    const [loading, setLoading] = useState(false);
+
     useEffect(() => {
-        clearCliente(); // Limpia el cliente seleccionado al cargar la lista
+        clearCliente();
 
         const fetchClients = async () => {
+            setLoading(true);
             try {
-                const response = await axios.get('https://backend.cobros.myccontadores.cl/api/clientes'); // Endpoint del backend
+                const response = await axios.get('https://backend.cobros.myccontadores.cl/api/clientes');
                 const sortedClients = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 setClients(sortedClients);
             } catch (error) {
-                console.error('Error al cargar los clientes:', error);
+                console.error('Error al cargar los clientes:', error.response?.data || error.message);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchClients();
     }, [clearCliente]);
+
+    if (loading) {
+        return <p>Cargando clientes...</p>;
+    }
 
     // Cambiar el orden de la lista
     const handleSortChange = (newSortOrder) => {
