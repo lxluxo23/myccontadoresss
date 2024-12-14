@@ -1,112 +1,135 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-function AddClientForm({ onClose, onAddClient }) {
-    const [clientData, setClientData] = useState({
-        nombre: '',
-        rut: '',
-        email: '',
-        telefono: '',
-        direccion: '',
-    });
+const AddPaymentForm = ({ onSubmit, onClose, userId }) => {
+    const [fechaPago, setFechaPago] = useState("");
+    const [monto, setMonto] = useState("0");
+    const [metodoPago, setMetodoPago] = useState("");
+    const [observaciones, setObservaciones] = useState("");
+    const [deudaSeleccionada, setDeudaSeleccionada] = useState(null);
+    const [deudas, setDeudas] = useState([]);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setClientData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
+    useEffect(() => {
+        if (userId) {
+            axios
+                .get(`https://backend.cobros.myccontadores.cl/api/deudas/usuario/${userId}/pendientes`)
+                .then((response) => {
+                    const deudasPendientes = Array.isArray(response.data) ? response.data : [];
+                    setDeudas(deudasPendientes);
+                })
+                .catch((error) => {
+                    console.error("Error al obtener las deudas pendientes:", error);
+                    setDeudas([]);
+                });
+        }
+    }, [userId]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validar campos obligatorios
-        if (!clientData.nombre.trim() || !clientData.rut.trim()) {
-            alert('Los campos Nombre y RUT son obligatorios.');
+        // Validaciones del formulario
+        if (!fechaPago) {
+            alert("Debe seleccionar una fecha de pago.");
+            return;
+        }
+        if (!monto || isNaN(parseFloat(monto)) || parseFloat(monto) <= 0) {
+            alert("Debe ingresar un monto válido mayor a 0.");
+            return;
+        }
+        if (!metodoPago) {
+            alert("Debe seleccionar un método de pago.");
+            return;
+        }
+        if (!deudaSeleccionada) {
+            alert("Debe seleccionar una deuda pendiente para registrar el pago.");
             return;
         }
 
-        // Enviar datos al componente padre
-        onAddClient(clientData);
-        onClose();
+        try {
+            // Enviar datos al backend
+            await axios.post(
+                `https://backend.cobros.myccontadores.cl/api/pagos/registrar/${deudaSeleccionada}`,
+                {
+                    fechaPago,
+                    monto: parseFloat(monto),
+                    metodoPago,
+                    observaciones,
+                }
+            );
+            alert("Pago registrado con éxito.");
+            onClose();
+        } catch (error) {
+            console.error("Error al registrar el pago:", error.response?.data || error.message);
+            alert("Hubo un error al registrar el pago. Intente nuevamente.");
+        }
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-                <h2 className="text-xl font-bold mb-4">Añadir Cliente</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium">Nombre</label>
-                        <input
-                            type="text"
-                            name="nombre"
-                            value={clientData.nombre}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded-lg"
-                            required
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium">RUT</label>
-                        <input
-                            type="text"
-                            name="rut"
-                            value={clientData.rut}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded-lg"
-                            required
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium">Correo Electrónico</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={clientData.email}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded-lg"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium">Teléfono</label>
-                        <input
-                            type="tel"
-                            name="telefono"
-                            value={clientData.telefono}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded-lg"
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium">Dirección</label>
-                        <input
-                            type="text"
-                            name="direccion"
-                            value={clientData.direccion}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded-lg"
-                        />
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 bg-gray-300 rounded-lg"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            className="px-4 py-2 bg-indigo-500 text-white rounded-lg"
-                        >
-                            Añadir
-                        </button>
-                    </div>
-                </form>
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+                <label className="block text-gray-700 dark:text-gray-300">Fecha de Pago</label>
+                <input
+                    type="date"
+                    value={fechaPago}
+                    onChange={(e) => setFechaPago(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                />
             </div>
-        </div>
+            <div>
+                <label className="block text-gray-700 dark:text-gray-300">Monto</label>
+                <input
+                    type="number"
+                    value={monto}
+                    onChange={(e) => setMonto(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                />
+            </div>
+            <div>
+                <label className="block text-gray-700 dark:text-gray-300">Método de Pago</label>
+                <select
+                    value={metodoPago}
+                    onChange={(e) => setMetodoPago(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                >
+                    <option value="">Seleccione</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Tarjeta">Tarjeta</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Cheque">Cheque</option>
+                </select>
+            </div>
+            <div>
+                <label className="block text-gray-700 dark:text-gray-300">Seleccionar Deuda</label>
+                <select
+                    value={deudaSeleccionada}
+                    onChange={(e) => setDeudaSeleccionada(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                >
+                    <option value="">Seleccione una deuda pendiente</option>
+                    {deudas.length > 0 ? (
+                        deudas.map((deuda) => (
+                            <option key={deuda.deudaId} value={deuda.deudaId}>
+                                {deuda.descripcion || "Sin descripción"}
+                            </option>
+                        ))
+                    ) : (
+                        <option disabled>No hay deudas pendientes</option>
+                    )}
+                </select>
+            </div>
+            <div>
+                <label className="block text-gray-700 dark:text-gray-300">Observaciones</label>
+                <textarea
+                    value={observaciones}
+                    onChange={(e) => setObservaciones(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                />
+            </div>
+            <button type="submit" className="w-full bg-indigo-500 text-white py-2 rounded-md">
+                Agregar Pago
+            </button>
+        </form>
     );
-}
+};
 
-export default AddClientForm;
+export default AddPaymentForm;

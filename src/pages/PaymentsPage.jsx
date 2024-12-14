@@ -44,6 +44,17 @@ const PaymentsPage = () => {
     }, [clienteId, navigate]);
 
     const handleAddPayment = async (newPayment) => {
+        if (
+            !newPayment.deudaSeleccionada ||
+            !newPayment.fechaPago ||
+            !newPayment.monto ||
+            parseFloat(newPayment.monto) <= 0 ||
+            !newPayment.metodoPago
+        ) {
+            alert("Por favor, complete todos los campos correctamente antes de enviar el pago.");
+            return;
+        }
+
         try {
             const response = await fetch(`https://backend.cobros.myccontadores.cl/api/pagos/registrar/${newPayment.deudaSeleccionada}`, {
                 method: "POST",
@@ -51,7 +62,7 @@ const PaymentsPage = () => {
                     fechaTransaccion: newPayment.fechaPago,
                     monto: newPayment.monto,
                     metodoPago: newPayment.metodoPago,
-                    observaciones: newPayment.observaciones,
+                    observaciones: newPayment.observaciones || "",
                 }),
                 headers: {
                     "Content-Type": "application/json",
@@ -70,7 +81,6 @@ const PaymentsPage = () => {
 
             const addedPayment = await response.json();
 
-            // Actualiza el estado local añadiendo el nuevo pago
             setPayments((prevPayments) => {
                 const isDuplicate = prevPayments.some((payment) => payment.pagoId === addedPayment.pagoId);
                 if (isDuplicate) {
@@ -89,7 +99,7 @@ const PaymentsPage = () => {
 
     const handleAddHonoraryPayment = async (newPayment) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/honorarios/${newPayment.honorarioId}/pagos`, {
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${newPayment.honorarioId}/pagos`, {
                 method: "POST",
                 body: JSON.stringify({
                     mes: newPayment.mes,
@@ -101,7 +111,6 @@ const PaymentsPage = () => {
                 },
             });
 
-            // Manejo de respuestas no JSON
             const isJson = response.headers.get("content-type")?.includes("application/json");
             const data = isJson ? await response.json() : await response.text();
 
@@ -122,7 +131,6 @@ const PaymentsPage = () => {
         }
     };
 
-
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -134,7 +142,9 @@ const PaymentsPage = () => {
     if (error) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <div className="text-red-500 dark:text-red-400">{error}</div>
+                <div className="text-red-500 dark:text-red-400">
+                    Hubo un problema al cargar los pagos. Por favor, intente nuevamente más tarde.
+                </div>
             </div>
         );
     }
@@ -147,7 +157,6 @@ const PaymentsPage = () => {
                     <PaymentTable payments={payments} />
                 </div>
 
-                {/* Botón para agregar pago normal */}
                 <div className="flex justify-end mt-4">
                     <button
                         onClick={() => setIsAddPaymentModalOpen(true)}
@@ -158,7 +167,6 @@ const PaymentsPage = () => {
                     </button>
                 </div>
 
-                {/* Botón para registrar pago de honorario */}
                 <div className="flex justify-end mt-4">
                     <button
                         onClick={() => setIsAddHonoraryPaymentModalOpen(true)}
@@ -169,7 +177,6 @@ const PaymentsPage = () => {
                     </button>
                 </div>
 
-                {/* Modal para agregar pago normal */}
                 <Modal isOpen={isAddPaymentModalOpen} onClose={() => setIsAddPaymentModalOpen(false)}>
                     <AddPaymentForm
                         onSubmit={handleAddPayment}
@@ -178,11 +185,10 @@ const PaymentsPage = () => {
                     />
                 </Modal>
 
-                {/* Modal para registrar pago de honorario */}
                 <Modal isOpen={isAddHonoraryPaymentModalOpen} onClose={() => setIsAddHonoraryPaymentModalOpen(false)}>
                     <AddHonoraryPayment
                         onSubmit={handleAddHonoraryPayment}
-                        honorarioId={clienteId} // Ajusta este ID según corresponda
+                        honorarioId={clienteId}
                         onClose={() => setIsAddHonoraryPaymentModalOpen(false)}
                     />
                 </Modal>
