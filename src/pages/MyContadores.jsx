@@ -32,7 +32,8 @@ function MyContadores() {
         const fetchClients = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('https://cobros.myccontadores.cl/api/clientes'); // Cambiado a localhost
+                const response = await axios.get('https://cobros.myccontadores.cl/api/clientes');
+                console.log("Respuesta del servidor:", response.data);
                 const sortedClients = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 setClients(sortedClients);
             } catch (error) {
