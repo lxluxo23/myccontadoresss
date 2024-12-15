@@ -46,7 +46,7 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
 
         try {
             const response = await axios.post(
-                `http://localhost:8080/api/pagos/registrar/${deudaSeleccionada}`,
+                `https://backend.cobros.myccontadores.cl/api/pagos/registrar/${deudaSeleccionada}`,
                 {
                     monto: parseFloat(monto),
                     metodoPago,
