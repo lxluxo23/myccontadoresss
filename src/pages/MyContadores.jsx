@@ -18,7 +18,7 @@ function MyContadores() {
 
     const handleAddClient = async (newClient) => {
         try {
-            const response = await axios.post('https://cobros.myccontadores.cl/api/clientes', newClient);
+            const response = await axios.post('https://backend.cobros.myccontadores.cl/api/clientes', newClient);
             console.log("Añadiendo cliente:", response.data);
             setClients((prevClients) => [...prevClients, response.data]);
         } catch (error) {
@@ -32,7 +32,7 @@ function MyContadores() {
         const fetchClients = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('https://cobros.myccontadores.cl/api/clientes');
+                const response = await axios.get('https://backend.cobros.myccontadores.cl/api/clientes');
                 console.log("Respuesta del servidor:", response.data);
                 const sortedClients = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 setClients(sortedClients);

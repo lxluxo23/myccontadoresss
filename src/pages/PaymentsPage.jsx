@@ -27,7 +27,7 @@ const PaymentsPage = () => {
 
         const fetchPayments = async () => {
             try {
-                const response = await fetch(`https://cobros.myccontadores.cl/api/clientes/${clienteId}/pagos`);
+                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/pagos`);
                 if (!response.ok) {
                     throw new Error("Error al cargar los datos");
                 }

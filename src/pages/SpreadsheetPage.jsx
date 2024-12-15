@@ -20,7 +20,7 @@ const SpreadsheetPage = () => {
 
         const fetchClientData = async () => {
             try {
-                const response = await fetch(`https://cobros.myccontadores.cl/api/clientes/${clienteId}`);
+                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}`);
                 if (!response.ok) {
                     throw new Error(`Error HTTP: ${response.status}`);
                 }

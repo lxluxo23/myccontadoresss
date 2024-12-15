@@ -12,7 +12,7 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
     useEffect(() => {
         if (userId) {
             axios
-                .get(`https://cobros.myccontadores.cl/api/deudas/usuario/${userId}/pendientes`)
+                .get(`https://backend.cobros.myccontadores.cl/api/deudas/usuario/${userId}/pendientes`)
                 .then((response) => {
                     const deudasPendientes = Array.isArray(response.data) ? response.data : [];
                     setDeudas(deudasPendientes);
