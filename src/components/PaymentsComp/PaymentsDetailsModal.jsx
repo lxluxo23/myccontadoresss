@@ -1,4 +1,4 @@
-﻿// PaymentDetailsModal.jsx
+// PaymentDetailsModal.jsx
 import React from "react";
 
 const PaymentDetailsModal = ({ payment, onClose }) => {
@@ -17,9 +17,13 @@ const PaymentDetailsModal = ({ payment, onClose }) => {
                     Detalles del Pago
                 </h2>
                 <div className="space-y-2">
-                    <p><strong>Fecha:</strong> {payment.fechaPago}</p>
-                    <p><strong>Monto:</strong> ${payment.monto.toLocaleString()}</p>
-                    <p><strong>Método:</strong> {payment.metodoPago}</p>
+                    <p><strong>Fecha:</strong> {payment.fechaTransaccion || "N/A"}</p>
+                    <p>
+                        <strong>Monto:</strong> ${payment.monto?.toLocaleString("es-CL", {
+                        minimumFractionDigits: 2,
+                    })}
+                    </p>
+                    <p><strong>Método:</strong> {payment.metodoPago || "N/A"}</p>
                     <p><strong>Observaciones:</strong> {payment.observaciones || "N/A"}</p>
                 </div>
             </div>

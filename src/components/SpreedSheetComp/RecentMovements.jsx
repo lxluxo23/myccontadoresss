@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { FaArrowUp, FaArrowDown, FaInfoCircle, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const RecentMovements = ({ movements = [] }) => {
@@ -50,19 +50,33 @@ const RecentMovements = ({ movements = [] }) => {
                                         setExpandedRow(expandedRow === index ? null : index)
                                     }
                                 >
-                                    <td className="p-3 text-center">{movement.date}</td>
+                                    <td className="p-3 text-center">
+                                        {movement.date
+                                            ? new Date(movement.date).toLocaleDateString("es-CL")
+                                            : "Sin fecha"}
+                                    </td>
                                     <td className="p-3 flex justify-center items-center space-x-2">
                                         {getIconByType(movement.type)}
-                                        <span>{movement.type}</span>
+                                        <span>{movement.type || "N/A"}</span>
                                     </td>
-                                    <td className="p-3 text-center text-green-600">{`$${movement.amount}`}</td>
-                                    <td className="p-3 text-center">{movement.description}</td>
+                                    <td className="p-3 text-center text-green-600">
+                                        {movement.amount !== undefined
+                                            ? `$${movement.amount.toLocaleString("es-CL")}`
+                                            : "N/A"}
+                                    </td>
+                                    <td className="p-3 text-center">
+                                        {movement.description || "Sin descripción"}
+                                    </td>
                                 </tr>
                                 {expandedRow === index && (
                                     <tr>
-                                        <td className="p-3 bg-gray-100 dark:bg-gray-800 text-center" colSpan="4">
+                                        <td
+                                            className="p-3 bg-gray-100 dark:bg-gray-800 text-center"
+                                            colSpan="4"
+                                        >
                                             <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                Detalles adicionales: {movement.details || "N/A"}
+                                                Detalles adicionales:{" "}
+                                                {movement.details || "N/A"}
                                             </p>
                                         </td>
                                     </tr>

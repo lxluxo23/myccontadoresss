@@ -14,23 +14,22 @@ const SpreadsheetPage = () => {
 
     useEffect(() => {
         if (!clienteId) {
-            // Si no hay clienteId en el contexto, redirige a la lista de clientes
-            navigate("/clientes");
+            navigate("/");
             return;
         }
 
         const fetchClientData = async () => {
             try {
-                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}`);
+                const response = await fetch(`https://cobros.myccontadores.cl/api/clientes/${clienteId}`);
                 if (!response.ok) {
                     throw new Error(`Error HTTP: ${response.status}`);
                 }
                 const data = await response.json();
-                setClienteData(data); // Almacena los datos del cliente en el contexto
+                setClienteData(data);
             } catch (error) {
                 console.error("Error fetching client data:", error);
-                clearCliente(); // Limpia el contexto si ocurre un error
-                navigate("/clientes"); // Redirige a la lista de clientes
+                clearCliente();
+                navigate("/");
             }
         };
 
@@ -43,12 +42,21 @@ const SpreadsheetPage = () => {
         return <p>Cargando datos del cliente...</p>;
     }
 
-
     return (
         <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
             <Sidebar />
             <div className="flex-1 p-6">
-                <ClientSummary summary={clienteData.summary || {}} />
+                {/* Pasamos los datos completos a ClientSummary */}
+                <ClientSummary
+                    summary={{
+                        nombre: clienteData.nombre,
+                        rut: clienteData.rut,
+                        email: clienteData.email,
+                        telefono: clienteData.telefono,
+                        direccion: clienteData.direccion,
+                        photo: clienteData.photo, // Si existe la propiedad
+                    }}
+                />
                 <div className="indicators mt-6">
                     <ClientIndicators indicators={clienteData.indicators || {}} />
                 </div>

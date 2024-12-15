@@ -17,25 +17,25 @@ const DebtDetailsModal = ({ debt, onClose }) => {
                 </h2>
                 <div className="space-y-2">
                     <p>
-                        <strong>Tipo:</strong> {debt.tipo || "Sin Tipo"}
+                        <strong>Tipo:</strong> {debt.tipoDeuda || "Sin Tipo"}
                     </p>
                     <p>
                         <strong>Monto Total:</strong> $
-                        {debt.montoTotal ? debt.montoTotal.toLocaleString() : "0"}
+                        {debt.montoTotal ? debt.montoTotal.toLocaleString("es-CL") : "0"}
                     </p>
                     <p>
                         <strong>Monto Restante:</strong> $
-                        {debt.montoRestante ? debt.montoRestante.toLocaleString() : "0"}
+                        {debt.montoRestante ? debt.montoRestante.toLocaleString("es-CL") : "0"}
                     </p>
                     <p>
                         <strong>Estado:</strong>{" "}
                         <span
                             className={`${
-                                debt.estado === "Pendiente" ? "text-red-500" : "text-green-500"
+                                debt.estadoDeuda === "Pendiente" ? "text-red-500" : "text-green-500"
                             }`}
                         >
-              {debt.estado || "Desconocido"}
-            </span>
+                            {debt.estadoDeuda || "Desconocido"}
+                        </span>
                     </p>
                     <p>
                         <strong>Fecha Creación:</strong> {debt.fechaCreacion || "N/A"}

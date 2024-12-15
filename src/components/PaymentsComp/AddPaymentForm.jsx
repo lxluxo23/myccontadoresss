@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const AddPaymentForm = ({ onSubmit, onClose, userId }) => {
+const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
     const [fechaPago, setFechaPago] = useState("");
     const [monto, setMonto] = useState("0");
-    const [metodoPago, setMetodoPago] = useState("");
+    const [metodoPago, setMetodoPago] = useState(""); // Inicializado como cadena vacía
     const [observaciones, setObservaciones] = useState("");
-    const [deudaSeleccionada, setDeudaSeleccionada] = useState(null);
+    const [deudaSeleccionada, setDeudaSeleccionada] = useState(""); // Inicializado como cadena vacía
     const [deudas, setDeudas] = useState([]);
 
     useEffect(() => {
         if (userId) {
             axios
-                .get(`https://backend.cobros.myccontadores.cl/api/deudas/usuario/${userId}/pendientes`)
+                .get(`https://cobros.myccontadores.cl/api/deudas/usuario/${userId}/pendientes`)
                 .then((response) => {
                     const deudasPendientes = Array.isArray(response.data) ? response.data : [];
                     setDeudas(deudasPendientes);
@@ -27,7 +27,6 @@ const AddPaymentForm = ({ onSubmit, onClose, userId }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validaciones del formulario
         if (!fechaPago) {
             alert("Debe seleccionar una fecha de pago.");
             return;
@@ -46,16 +45,18 @@ const AddPaymentForm = ({ onSubmit, onClose, userId }) => {
         }
 
         try {
-            // Enviar datos al backend
-            await axios.post(
-                `https://backend.cobros.myccontadores.cl/api/pagos/registrar/${deudaSeleccionada}`,
+            const response = await axios.post(
+                `http://localhost:8080/api/pagos/registrar/${deudaSeleccionada}`,
                 {
-                    fechaPago,
                     monto: parseFloat(monto),
                     metodoPago,
                     observaciones,
                 }
             );
+
+            // Llama a la función para actualizar la tabla con el nuevo pago
+            onPaymentAdded(response.data);
+
             alert("Pago registrado con éxito.");
             onClose();
         } catch (error) {
@@ -87,21 +88,21 @@ const AddPaymentForm = ({ onSubmit, onClose, userId }) => {
             <div>
                 <label className="block text-gray-700 dark:text-gray-300">Método de Pago</label>
                 <select
-                    value={metodoPago}
+                    value={metodoPago || ""} // Cadena vacía como fallback
                     onChange={(e) => setMetodoPago(e.target.value)}
                     className="w-full p-2 border rounded-md"
                 >
                     <option value="">Seleccione</option>
-                    <option value="Transferencia">Transferencia</option>
-                    <option value="Tarjeta">Tarjeta</option>
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Cheque">Cheque</option>
+                    <option value="TRANSFERENCIA">Transferencia</option>
+                    <option value="TARJETA">Tarjeta</option>
+                    <option value="EFECTIVO">Efectivo</option>
+                    <option value="CHEQUE">Cheque</option>
                 </select>
             </div>
             <div>
                 <label className="block text-gray-700 dark:text-gray-300">Seleccionar Deuda</label>
                 <select
-                    value={deudaSeleccionada}
+                    value={deudaSeleccionada || ""} // Cadena vacía como fallback
                     onChange={(e) => setDeudaSeleccionada(e.target.value)}
                     className="w-full p-2 border rounded-md"
                 >
@@ -109,7 +110,7 @@ const AddPaymentForm = ({ onSubmit, onClose, userId }) => {
                     {deudas.length > 0 ? (
                         deudas.map((deuda) => (
                             <option key={deuda.deudaId} value={deuda.deudaId}>
-                                {deuda.descripcion || "Sin descripción"}
+                                {deuda.descripcion || `Deuda #${deuda.deudaId}`}
                             </option>
                         ))
                     ) : (

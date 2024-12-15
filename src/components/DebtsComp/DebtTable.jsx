@@ -1,5 +1,5 @@
 ﻿import React, { useState } from "react";
-import {FaCheckCircle, FaChevronLeft, FaChevronRight, FaExclamationCircle, FaEye, FaTrashAlt} from "react-icons/fa";
+import { FaCheckCircle, FaChevronLeft, FaChevronRight, FaExclamationCircle, FaEye, FaTrashAlt } from "react-icons/fa";
 import dayjs from "dayjs";
 
 const DebtTable = ({ debts = [], honorariosContables = [] }) => {
@@ -9,7 +9,6 @@ const DebtTable = ({ debts = [], honorariosContables = [] }) => {
     const itemsPerPage = 10;
     const [sortKeyDebts, setSortKeyDebts] = useState(null);
     const [sortOrderDebts, setSortOrderDebts] = useState(true); // true para ascendente, false para descendente
-
     const [sortKeyHonorarios, setSortKeyHonorarios] = useState(null);
     const [sortOrderHonorarios, setSortOrderHonorarios] = useState(true);
 
@@ -85,44 +84,45 @@ const DebtTable = ({ debts = [], honorariosContables = [] }) => {
                         </tr>
                         </thead>
                         <tbody>
-                        {paginatedData(sortedDebts, currentPageDebts).map((debt, index) => {
-                            const montoTotalStr = debt.montoTotal != null ? Number(debt.montoTotal).toLocaleString() : null;
-                            const montoRestanteStr = debt.montoRestante != null ? Number(debt.montoRestante).toLocaleString() : null;
-                            const fechaInicioStr = debt.fechaInicio ? dayjs(debt.fechaInicio).format("DD/MM/YYYY") : "Sin fecha";
-                            const fechaVencimientoStr = debt.fechaVencimiento ? dayjs(debt.fechaVencimiento).format("DD/MM/YYYY") : "Sin fecha";
-
-                            return (
-                                <tr
-                                    key={index}
-                                    className={`border-b dark:border-gray-600 ${
-                                        index % 2 === 0 ? "bg-gray-50 dark:bg-gray-800" : ""
-                                    } hover:bg-indigo-100 dark:hover:bg-gray-700 transition-all duration-200 ease-in-out`}
-                                >
-                                    <td className="p-3 text-center">{debt.tipoDeuda || "Desconocido"}</td>
-                                    <td className="p-3 text-center">{montoTotalStr ? `$${montoTotalStr}` : "N/A"}</td>
-                                    <td className="p-3 text-center">{montoRestanteStr ? `$${montoRestanteStr}` : "N/A"}</td>
-                                    <td className="p-3 text-center">
-                                <span
-                                    className={`px-2 py-1 rounded-full text-white ${
-                                        debt.estadoDeuda === "Pagado" ? "bg-green-500" : "bg-red-500"
-                                    }`}
-                                >
-                                    {debt.estadoDeuda || "Desconocido"}
-                                </span>
-                                    </td>
-                                    <td className="p-3 text-center">{fechaInicioStr}</td>
-                                    <td className="p-3 text-center">{fechaVencimientoStr}</td>
-                                    <td className="p-3 text-center">
-                                        <button
-                                            onClick={() => handleViewDetails(debt)}
-                                            className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
+                        {paginatedData(sortedDebts, currentPageDebts).map((debt, index) => (
+                            <tr
+                                key={index}
+                                className={`border-b dark:border-gray-600 ${
+                                    index % 2 === 0 ? "bg-gray-50 dark:bg-gray-800" : ""
+                                } hover:bg-indigo-100 dark:hover:bg-gray-700 transition-all duration-200 ease-in-out`}
+                            >
+                                <td className="p-3 text-center">{debt.tipoDeuda || "Desconocido"}</td>
+                                <td className="p-3 text-center">
+                                    {debt.montoTotal ? `$${Number(debt.montoTotal).toLocaleString("es-CL")}` : "N/A"}
+                                </td>
+                                <td className="p-3 text-center">
+                                    {debt.montoRestante ? `$${Number(debt.montoRestante).toLocaleString("es-CL")}` : "N/A"}
+                                </td>
+                                <td className="p-3 text-center">
+                                        <span
+                                            className={`px-2 py-1 rounded-full text-white ${
+                                                debt.estadoDeuda === "Pagado" ? "bg-green-500" : "bg-red-500"
+                                            }`}
                                         >
-                                            <FaEye />
-                                        </button>
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                                            {debt.estadoDeuda || "Desconocido"}
+                                        </span>
+                                </td>
+                                <td className="p-3 text-center">
+                                    {debt.fechaInicio ? dayjs(debt.fechaInicio).format("DD/MM/YYYY") : "Sin fecha"}
+                                </td>
+                                <td className="p-3 text-center">
+                                    {debt.fechaVencimiento ? dayjs(debt.fechaVencimiento).format("DD/MM/YYYY") : "Sin fecha"}
+                                </td>
+                                <td className="p-3 text-center">
+                                    <button
+                                        onClick={() => handleViewDetails(debt)}
+                                        className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
+                                    >
+                                        <FaEye />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
                 </div>
@@ -135,8 +135,8 @@ const DebtTable = ({ debts = [], honorariosContables = [] }) => {
                         <FaChevronLeft className="text-gray-500 dark:text-gray-300" />
                     </button>
                     <span className="text-sm dark:text-gray-400">
-            Página {currentPageDebts} de {Math.ceil(debts.length / itemsPerPage)}
-        </span>
+                        Página {currentPageDebts} de {Math.ceil(debts.length / itemsPerPage)}
+                    </span>
                     <button
                         disabled={currentPageDebts === Math.ceil(debts.length / itemsPerPage)}
                         onClick={() => setCurrentPageDebts((prev) => prev + 1)}
@@ -171,16 +171,20 @@ const DebtTable = ({ debts = [], honorariosContables = [] }) => {
                                         mesIndex % 2 === 0 ? "bg-gray-50 dark:bg-gray-800" : ""
                                     } hover:bg-indigo-100 dark:hover:bg-gray-700 transition-all duration-200 ease-in-out`}
                                 >
-                                    <td className="p-3 text-center">${mes.montoMensual.toLocaleString()}</td>
-                                    <td className="p-3 text-center">${(mes.montoMensual - mes.montoPagado).toLocaleString()}</td>
                                     <td className="p-3 text-center">
-                                        <span
-                                            className={`px-2 py-1 rounded-full text-white ${
-                                                mes.estado === "Pagado" ? "bg-green-500" : "bg-red-500"
-                                            }`}
-                                        >
-                                            {mes.estado}
-                                        </span>
+                                        ${mes.montoMensual.toLocaleString("es-CL")}
+                                    </td>
+                                    <td className="p-3 text-center">
+                                        ${Number(mes.montoMensual - mes.montoPagado).toLocaleString("es-CL")}
+                                    </td>
+                                    <td className="p-3 text-center">
+                                            <span
+                                                className={`px-2 py-1 rounded-full text-white ${
+                                                    mes.estado === "Pagado" ? "bg-green-500" : "bg-red-500"
+                                                }`}
+                                            >
+                                                {mes.estado}
+                                            </span>
                                     </td>
                                     <td className="p-3 text-center">{obtenerNombreMes(mes.mes)}</td>
                                     <td className="p-3 text-center">{honorario.anio}</td>
@@ -207,8 +211,8 @@ const DebtTable = ({ debts = [], honorariosContables = [] }) => {
                         <FaChevronLeft className="text-gray-500 dark:text-gray-300" />
                     </button>
                     <span className="text-sm dark:text-gray-400">
-                    Página {currentPageHonorarios} de {Math.ceil(honorariosContables.length / itemsPerPage)}
-                </span>
+                        Página {currentPageHonorarios} de {Math.ceil(honorariosContables.length / itemsPerPage)}
+                    </span>
                     <button
                         disabled={currentPageHonorarios === Math.ceil(honorariosContables.length / itemsPerPage)}
                         onClick={() => setCurrentPageHonorarios((prev) => prev + 1)}
@@ -220,6 +224,6 @@ const DebtTable = ({ debts = [], honorariosContables = [] }) => {
             </div>
         </div>
     );
-}
+};
 
 export default DebtTable;

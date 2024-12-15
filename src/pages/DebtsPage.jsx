@@ -20,13 +20,13 @@ const DebtsPage = () => {
 
     useEffect(() => {
         if (!clienteId) {
-            navigate("/clientes");
+            navigate("/");
             return;
         }
 
         const fetchDebts = async () => {
             try {
-                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/deudas`);
+                const response = await fetch(`https://cobros.myccontadores.cl/${clienteId}/deudas`);
                 if (!response.ok) {
                     throw new Error("Error al cargar deudas");
                 }
@@ -39,7 +39,7 @@ const DebtsPage = () => {
 
         const fetchHonorarios = async () => {
             try {
-                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/cliente/${clienteId}`);
+                const response = await fetch(`hhttps://cobros.myccontadores.cl/api/honorarios/cliente/${clienteId}`);
                 if (!response.ok) {
                     throw new Error("Error al cargar honorarios contables");
                 }
@@ -56,7 +56,7 @@ const DebtsPage = () => {
 
     const handleAddHonorary = async (clienteId, payload) => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${clienteId}`, {
+            const response = await fetch(`https://cobros.myccontadores.cl/api/honorarios/${clienteId}`, {
                 method: "POST",
                 body: JSON.stringify(payload),
                 headers: { "Content-Type": "application/json" },
@@ -73,7 +73,7 @@ const DebtsPage = () => {
 
     const fetchHonorarios = async () => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/cliente/${clienteId}`);
+            const response = await fetch(`https://cobros.myccontadores.cl/api/honorarios/cliente/${clienteId}`);
             if (!response.ok) {
                 throw new Error("Error al cargar honorarios contables");
             }
@@ -86,8 +86,7 @@ const DebtsPage = () => {
 
     const handleAddDebt = async (debtData) => {
         try {
-            // Ajustamos la estructura para que coincida exactamente con el JSON de Postman.
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/deudas`, {
+            const response = await fetch(`https://cobros.myccontadores.cl/api/deudas`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -109,7 +108,6 @@ const DebtsPage = () => {
             setError(error.message || "No se pudo agregar la deuda. Inténtalo de nuevo.");
         }
     };
-
 
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">

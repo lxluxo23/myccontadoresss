@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { FaDollarSign, FaCalendar, FaChartBar, FaExchangeAlt } from "react-icons/fa";
 
 const ClientIndicators = ({ indicators = {} }) => {
@@ -7,28 +7,28 @@ const ClientIndicators = ({ indicators = {} }) => {
     const cards = [
         {
             title: "Pagos Totales",
-            value: `$${indicators.totalPayments || 0}`,
+            value: `$${indicators.totalPayments?.toLocaleString("es-CL", { minimumFractionDigits: 2 }) || 0}`,
             icon: FaChartBar,
             bgColor: "bg-blue-100",
             iconColor: "text-blue-500",
         },
         {
             title: "Deuda Total",
-            value: `$${indicators.totalDebt || 0}`,
+            value: `$${indicators.totalDebt?.toLocaleString("es-CL", { minimumFractionDigits: 2 }) || 0}`,
             icon: FaDollarSign,
             bgColor: "bg-red-100",
             iconColor: "text-red-500",
         },
         {
             title: "Deuda Mes Actual",
-            value: `$${indicators.currentMonthDebt || 0}`,
+            value: `$${indicators.currentMonthDebt?.toLocaleString("es-CL", { minimumFractionDigits: 2 }) || 0}`,
             icon: FaCalendar,
             bgColor: "bg-orange-100",
             iconColor: "text-orange-500",
         },
         {
             title: "Última Transacción",
-            value: `${lastTransaction.date} - $${lastTransaction.amount}`,
+            value: `${lastTransaction.date} - $${lastTransaction.amount?.toLocaleString("es-CL", { minimumFractionDigits: 2 })}`,
             icon: FaExchangeAlt,
             bgColor: "bg-green-100",
             iconColor: "text-green-500",

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 
 function AddClientForm({ onClose, onAddClient }) {
     const [clientData, setClientData] = useState({
@@ -19,8 +19,6 @@ function AddClientForm({ onClose, onAddClient }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onAddClient(clientData); // Notifica al componente padre para manejar el nuevo cliente
-        onClose(); // Cierra el formulario
 
         // Validar campos obligatorios
         if (!clientData.nombre.trim() || !clientData.rut.trim()) {
@@ -28,8 +26,10 @@ function AddClientForm({ onClose, onAddClient }) {
             return;
         }
 
-        // Enviar datos al componente padre
+        // Notifica al componente padre para manejar el nuevo cliente
         onAddClient(clientData);
+
+        // Cierra el formulario después de enviar los datos
         onClose();
     };
 
@@ -68,7 +68,6 @@ function AddClientForm({ onClose, onAddClient }) {
                             value={clientData.email}
                             onChange={handleChange}
                             className="w-full p-2 border rounded-lg"
-                            required
                         />
                     </div>
                     <div className="mb-4">
@@ -113,4 +112,3 @@ function AddClientForm({ onClose, onAddClient }) {
 }
 
 export default AddClientForm;
-

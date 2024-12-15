@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import PaymentDetailsModal from "./PaymentsDetailsModal";
 
 const PaymentTable = ({ payments }) => {
+    console.log("Prop payments:", payments);
     const [selectedPayment, setSelectedPayment] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [sortConfig, setSortConfig] = useState(null);
@@ -40,6 +41,8 @@ const PaymentTable = ({ payments }) => {
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
+
+    console.log("Paginated Payments:", paginatedPayments); // Verifica si los datos están aquí
 
     const requestSort = (key) => {
         let direction = "ascending";

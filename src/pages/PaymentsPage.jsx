@@ -11,28 +11,29 @@ import ThemeToggle from "../components/ThemeToggle";
 
 const PaymentsPage = () => {
     const { clienteId } = useCliente();
-    const [payments, setPayments] = useState([]);
-    const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false);
-    const [isAddHonoraryPaymentModalOpen, setIsAddHonoraryPaymentModalOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [payments, setPayments] = useState([]); // Estado para almacenar los pagos
+    const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false); // Modal para agregar pagos
+    const [isAddHonoraryPaymentModalOpen, setIsAddHonoraryPaymentModalOpen] = useState(false); // Modal para honorarios
+    const [isLoading, setIsLoading] = useState(true); // Estado de carga
+    const [error, setError] = useState(null); // Manejo de errores
 
     const navigate = useNavigate();
 
     useEffect(() => {
         if (!clienteId) {
-            navigate("/clientes");
+            navigate("/");
             return;
         }
 
         const fetchPayments = async () => {
             try {
-                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/pagos`);
+                const response = await fetch(`https://cobros.myccontadores.cl/api/clientes/${clienteId}/pagos`);
                 if (!response.ok) {
                     throw new Error("Error al cargar los datos");
                 }
                 const data = await response.json();
-                setPayments(data);
+                setPayments(data);// Establece los pagos obtenidos en el estado
+                console.log("Datos cargados:", data);
             } catch (error) {
                 setError(error.message);
             } finally {
@@ -43,92 +44,16 @@ const PaymentsPage = () => {
         fetchPayments();
     }, [clienteId, navigate]);
 
-    const handleAddPayment = async (newPayment) => {
-        if (
-            !newPayment.deudaSeleccionada ||
-            !newPayment.fechaPago ||
-            !newPayment.monto ||
-            parseFloat(newPayment.monto) <= 0 ||
-            !newPayment.metodoPago
-        ) {
-            alert("Por favor, complete todos los campos correctamente antes de enviar el pago.");
-            return;
-        }
-
-        try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/pagos/registrar/${newPayment.deudaSeleccionada}`, {
-                method: "POST",
-                body: JSON.stringify({
-                    fechaTransaccion: newPayment.fechaPago,
-                    monto: newPayment.monto,
-                    metodoPago: newPayment.metodoPago,
-                    observaciones: newPayment.observaciones || "",
-                }),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                try {
-                    const errorData = JSON.parse(errorText);
-                    throw new Error(errorData.error || "Error desconocido al agregar el pago");
-                } catch {
-                    throw new Error(errorText);
-                }
-            }
-
-            const addedPayment = await response.json();
-
-            setPayments((prevPayments) => {
-                const isDuplicate = prevPayments.some((payment) => payment.pagoId === addedPayment.pagoId);
-                if (isDuplicate) {
-                    console.warn("Pago duplicado detectado, no se agregará nuevamente.");
-                    return prevPayments;
-                }
-                return [...prevPayments, addedPayment];
-            });
-        } catch (error) {
-            console.error("Error al agregar el pago:", error.message);
-            alert(`Error al agregar el pago: ${error.message}`);
-        } finally {
-            setIsAddPaymentModalOpen(false);
-        }
+    // Función para manejar el agregado de nuevos pagos
+    const handleAddPayment = (newPayment) => {
+        setPayments((prevPayments) => [newPayment, ...prevPayments]); // Agrega el nuevo pago al inicio de la lista
+        setIsAddPaymentModalOpen(false); // Cierra el modal
     };
 
-    const handleAddHonoraryPayment = async (newPayment) => {
-        try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${newPayment.honorarioId}/pagos`, {
-                method: "POST",
-                body: JSON.stringify({
-                    mes: newPayment.mes,
-                    montoPago: newPayment.montoPago,
-                    comprobante: newPayment.comprobante,
-                }),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-
-            const isJson = response.headers.get("content-type")?.includes("application/json");
-            const data = isJson ? await response.json() : await response.text();
-
-            if (!response.ok) {
-                throw new Error(isJson ? data.error || "Error desconocido" : data);
-            }
-
-            if (isJson) {
-                setPayments((prev) => [...prev, data]);
-            } else {
-                console.log(data); // Mensaje de éxito del backend
-            }
-        } catch (error) {
-            console.error("Error al registrar el pago de honorario:", error.message);
-            alert(`Error al registrar el pago de honorario: ${error.message}`);
-        } finally {
-            setIsAddHonoraryPaymentModalOpen(false);
-        }
+    // Función para manejar el agregado de pagos de honorarios
+    const handleAddHonoraryPayment = (newHonoraryPayment) => {
+        setPayments((prevPayments) => [newHonoraryPayment, ...prevPayments]); // Agrega el nuevo honorario al inicio de la lista
+        setIsAddHonoraryPaymentModalOpen(false); // Cierra el modal
     };
 
     if (isLoading) {
@@ -154,7 +79,7 @@ const PaymentsPage = () => {
             <Sidebar />
             <div className="flex-1 p-6">
                 <div>
-                    <PaymentTable payments={payments} />
+                    <PaymentTable payments={payments} /> {/* Tabla que muestra los pagos */}
                 </div>
 
                 <div className="flex justify-end mt-4">
@@ -177,19 +102,22 @@ const PaymentsPage = () => {
                     </button>
                 </div>
 
+                {/* Modal para agregar pagos */}
                 <Modal isOpen={isAddPaymentModalOpen} onClose={() => setIsAddPaymentModalOpen(false)}>
                     <AddPaymentForm
-                        onSubmit={handleAddPayment}
+                        onSubmit={handleAddPayment} // Función para manejar el agregado de pagos
                         userId={clienteId}
-                        onClose={() => setIsAddPaymentModalOpen(false)}
+                        onClose={() => setIsAddPaymentModalOpen(false)} // Cierra el modal
+                        onPaymentAdded={handleAddPayment} // Agrega directamente el nuevo pago
                     />
                 </Modal>
 
+                {/* Modal para pagos de honorarios */}
                 <Modal isOpen={isAddHonoraryPaymentModalOpen} onClose={() => setIsAddHonoraryPaymentModalOpen(false)}>
                     <AddHonoraryPayment
-                        onSubmit={handleAddHonoraryPayment}
+                        onSubmit={handleAddHonoraryPayment} // Función para manejar pagos de honorarios
                         honorarioId={clienteId}
-                        onClose={() => setIsAddHonoraryPaymentModalOpen(false)}
+                        onClose={() => setIsAddHonoraryPaymentModalOpen(false)} // Cierra el modal
                     />
                 </Modal>
             </div>

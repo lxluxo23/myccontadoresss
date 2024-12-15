@@ -1,6 +1,6 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCliente } from "../context/ClienteContext"
+import { useCliente } from "../context/ClienteContext";
 import ExpandedClientRow from './ExpandedClientRow';
 
 function ClientRow({ client = {}, showAddClientForm }) {
@@ -50,7 +50,9 @@ function ClientRow({ client = {}, showAddClientForm }) {
                     {client.estado || "Estado no disponible"}
                 </div>
                 <div className={`w-[150px] ${expanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}>
-                    {client.fechaCreacion || "Fecha no disponible"}
+                    {client.fechaCreacion
+                        ? new Date(client.fechaCreacion).toLocaleDateString("es-CL")
+                        : "Fecha no disponible"}
                 </div>
                 <div className={`w-[100px] ${expanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}>
                     {client.email || "Correo no disponible"}
@@ -59,7 +61,9 @@ function ClientRow({ client = {}, showAddClientForm }) {
                     {client.rut || "RUT no disponible"}
                 </div>
                 <div className={`w-[180px] ${expanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}>
-                    {client.fechaPago || "Fecha de pago no disponible"}
+                    {client.fechaPago
+                        ? new Date(client.fechaPago).toLocaleDateString("es-CL")
+                        : "Fecha de pago no disponible"}
                 </div>
 
                 {/* Botones de acción */}

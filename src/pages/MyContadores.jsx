@@ -5,7 +5,7 @@ import FilterSection from '../components/MyCcontadoresComp/FilterSection';
 import TableHeader from '../components/MyCcontadoresComp/TableHeader';
 import ClientRow from '../components/MyCcontadoresComp/ClientRow';
 import Pagination from '../components/MyCcontadoresComp/Pagination';
-import { useCliente } from '../components/context/ClienteContext'; // Corrige la ruta del contexto
+import { useCliente } from '../components/context/ClienteContext';
 import { useNavigate } from 'react-router-dom';
 
 function MyContadores() {
@@ -14,19 +14,17 @@ function MyContadores() {
     const [sortOrder, setSortOrder] = useState('asc'); // Estado para el orden de la lista
     const { clearCliente } = useCliente(); // Función para limpiar el cliente seleccionado
     const navigate = useNavigate();
-    // Función para añadir un nuevo cliente
+    const [loading, setLoading] = useState(false);
 
     const handleAddClient = async (newClient) => {
         try {
-            const response = await axios.post('https://backend.cobros.myccontadores.cl/api/clientes', newClient);
+            const response = await axios.post('https://cobros.myccontadores.cl/api/clientes', newClient);
+            console.log("Añadiendo cliente:", response.data);
             setClients((prevClients) => [...prevClients, response.data]);
         } catch (error) {
-            console.error('Error al añadir el cliente:', error);
+            console.error('Error al añadir el cliente:', error.response?.data || error.message);
         }
     };
- 
-    // Cargar los clientes desde el backend
-    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         clearCliente();
@@ -34,7 +32,7 @@ function MyContadores() {
         const fetchClients = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('https://backend.cobros.myccontadores.cl/api/clientes');
+                const response = await axios.get('https://cobros.myccontadores.cl/api/clientes'); // Cambiado a localhost
                 const sortedClients = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 setClients(sortedClients);
             } catch (error) {
@@ -51,7 +49,6 @@ function MyContadores() {
         return <p>Cargando clientes...</p>;
     }
 
-    // Cambiar el orden de la lista
     const handleSortChange = (newSortOrder) => {
         setSortOrder(newSortOrder);
         const sortedClients = [...clients].sort((a, b) => {
@@ -64,12 +61,10 @@ function MyContadores() {
         setClients(sortedClients);
     };
 
-    // Filtrar clientes por nombre
     const filteredClients = clients.filter(client =>
         client.nombre.toLowerCase().includes(searchName.toLowerCase())
     );
 
-    // Navegar a la página de detalles del cliente
     const handleRowClick = (clientId) => {
         navigate(`/spreadsheet/${clientId}`); // Navega a la página del cliente con su ID
     };
@@ -80,24 +75,24 @@ function MyContadores() {
                 className="flex flex-col px-9 py-6 w-full max-w-[1400px] min-h-[892px] bg-white rounded-3xl shadow-md max-md:px-5 mt-16">
                 <Header />
                 <FilterSection
-                    onAddClient={handleAddClient} // Pasa la función a FilterSection
+                    onAddClient={handleAddClient}
                     onSearchNameChange={setSearchName}
                 />
                 <TableHeader
-                    sortOrder={sortOrder} // Estado actual del orden
-                    onSortChange={handleSortChange} // Controlador para cambiar el orden
+                    sortOrder={sortOrder}
+                    onSortChange={handleSortChange}
                 />
                 <section className="flex flex-col w-full gap-3">
                     {filteredClients.map(client => (
                         <ClientRow
-                            key={client.id}
+                            key={client.clienteId} // Usar clienteId del DTO
                             client={{
                                 ...client,
                                 email: client.email || "No disponible",
                                 telefono: client.telefono || "No disponible",
                                 direccion: client.direccion || "No disponible"
                             }}
-                            onClick={() => handleRowClick(client.id)}
+                            onClick={() => handleRowClick(client.clienteId)} // Usar clienteId del DTO
                         />
                     ))}
                 </section>

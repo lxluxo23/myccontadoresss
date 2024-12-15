@@ -16,13 +16,13 @@ export const AddDebtForm = ({ onSubmit, onClose }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Construir el objeto exactamente como en Postman
+        // Construir el objeto exactamente como se espera en el backend
         const debtData = {
             tipoDeuda: formData.tipoDeuda,
             montoTotal: parseFloat(formData.montoTotal),
-            fechaInicio: formData.fechaInicio,       // "YYYY-MM-DD"
-            fechaVencimiento: formData.fechaVencimiento, // "YYYY-MM-DD"
-            observaciones: formData.observaciones,
+            fechaInicio: formData.fechaInicio, // Formato "YYYY-MM-DD"
+            fechaVencimiento: formData.fechaVencimiento, // Formato "YYYY-MM-DD"
+            observaciones: formData.observaciones || null, // Permitir observaciones nulas
         };
 
         onSubmit(debtData);
@@ -90,6 +90,7 @@ export const AddDebtForm = ({ onSubmit, onClose }) => {
                     name="observaciones"
                     value={formData.observaciones}
                     onChange={handleChange}
+                    placeholder="Opcional"
                     className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
             </div>
