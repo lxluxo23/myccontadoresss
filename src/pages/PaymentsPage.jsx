@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import PaymentTable from "../components/PaymentsComp/PaymentTable";
 import AddPaymentForm from "../components/PaymentsComp/AddPaymentForm";
-import AddHonoraryPayment from "../components/PaymentsComp/AddHonoraryPayment";
+import RegisterPaymentForm from "../components/PaymentsComp/AddHonoraryPayment"; // Nuevo formulario para pagos de honorarios
 import Modal from "../components/Modal";
 import { useCliente } from "../components/context/ClienteContext";
 import { FaPlus } from "react-icons/fa";
@@ -12,8 +12,8 @@ import ThemeToggle from "../components/ThemeToggle";
 const PaymentsPage = () => {
     const { clienteId } = useCliente();
     const [payments, setPayments] = useState([]); // Estado para almacenar los pagos
-    const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false); // Modal para agregar pagos
-    const [isAddHonoraryPaymentModalOpen, setIsAddHonoraryPaymentModalOpen] = useState(false); // Modal para honorarios
+    const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false); // Modal para agregar pagos normales
+    const [isAddHonoraryPaymentModalOpen, setIsAddHonoraryPaymentModalOpen] = useState(false); // Modal para pagos de honorarios
     const [isLoading, setIsLoading] = useState(true); // Estado de carga
     const [error, setError] = useState(null); // Manejo de errores
 
@@ -32,7 +32,7 @@ const PaymentsPage = () => {
                     throw new Error("Error al cargar los datos");
                 }
                 const data = await response.json();
-                setPayments(data);// Establece los pagos obtenidos en el estado
+                setPayments(data); // Establece los pagos obtenidos en el estado
                 console.log("Datos cargados:", data);
             } catch (error) {
                 setError(error.message);
@@ -44,16 +44,29 @@ const PaymentsPage = () => {
         fetchPayments();
     }, [clienteId, navigate]);
 
-    // Función para manejar el agregado de nuevos pagos
+    // Función para manejar el agregado de nuevos pagos normales
     const handleAddPayment = (newPayment) => {
         setPayments((prevPayments) => [newPayment, ...prevPayments]); // Agrega el nuevo pago al inicio de la lista
         setIsAddPaymentModalOpen(false); // Cierra el modal
     };
 
     // Función para manejar el agregado de pagos de honorarios
-    const handleAddHonoraryPayment = (newHonoraryPayment) => {
-        setPayments((prevPayments) => [newHonoraryPayment, ...prevPayments]); // Agrega el nuevo honorario al inicio de la lista
-        setIsAddHonoraryPaymentModalOpen(false); // Cierra el modal
+    const handleAddHonoraryPayment = async (honorarioId, payload) => {
+        try {
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/pagos`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            if (!response.ok) {
+                throw new Error("Error al registrar el pago de honorario.");
+            }
+            const newHonoraryPayment = await response.json();
+            setPayments((prevPayments) => [newHonoraryPayment, ...prevPayments]); // Agrega el nuevo honorario al inicio de la lista
+            setIsAddHonoraryPaymentModalOpen(false); // Cierra el modal
+        } catch (error) {
+            setError("Error al registrar el pago de honorario: " + error.message);
+        }
     };
 
     if (isLoading) {
@@ -102,21 +115,20 @@ const PaymentsPage = () => {
                     </button>
                 </div>
 
-                {/* Modal para agregar pagos */}
+                {/* Modal para agregar pagos normales */}
                 <Modal isOpen={isAddPaymentModalOpen} onClose={() => setIsAddPaymentModalOpen(false)}>
                     <AddPaymentForm
-                        onSubmit={handleAddPayment} // Función para manejar el agregado de pagos
+                        onSubmit={handleAddPayment} // Función para manejar el agregado de pagos normales
                         userId={clienteId}
                         onClose={() => setIsAddPaymentModalOpen(false)} // Cierra el modal
-                        onPaymentAdded={handleAddPayment} // Agrega directamente el nuevo pago
                     />
                 </Modal>
 
                 {/* Modal para pagos de honorarios */}
                 <Modal isOpen={isAddHonoraryPaymentModalOpen} onClose={() => setIsAddHonoraryPaymentModalOpen(false)}>
-                    <AddHonoraryPayment
-                        onSubmit={handleAddHonoraryPayment} // Función para manejar pagos de honorarios
+                    <RegisterPaymentForm
                         honorarioId={clienteId}
+                        onSubmit={handleAddHonoraryPayment} // Función para manejar pagos de honorarios
                         onClose={() => setIsAddHonoraryPaymentModalOpen(false)} // Cierra el modal
                     />
                 </Modal>
