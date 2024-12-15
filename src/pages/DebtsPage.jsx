@@ -26,8 +26,7 @@ const DebtsPage = () => {
 
         const fetchDebts = async () => {
             try {
-                const response = await fetch(`https://backend.cobros.myccontadores.cl/${clienteId}/deudas`);
-                if (!response.ok) {
+                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/deudas/usuario/${clienteId}`);                if (!response.ok) {
                     throw new Error("Error al cargar deudas");
                 }
                 const data = await response.json();
