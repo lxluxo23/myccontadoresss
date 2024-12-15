@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import ClientSummary from "../components/SpreedSheetComp/ClientSummary";
@@ -10,43 +10,93 @@ import { useCliente } from "../components/context/ClienteContext";
 
 const SpreadsheetPage = () => {
     const navigate = useNavigate();
-    const { clienteId, clienteData, setClienteData, clearCliente } = useCliente();
+    const { clienteId, setClienteData, clearCliente } = useCliente();
+    const [clienteData, setLocalClienteData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         if (!clienteId) {
+            console.warn("Cliente ID no está definido. Redirigiendo al inicio.");
             navigate("/");
             return;
         }
 
         const fetchClientData = async () => {
             try {
-                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}`);
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
+                setIsLoading(true);
+                console.log("Cargando datos para cliente ID:", clienteId);
+
+                const [clientResponse, indicatorsResponse, movementsResponse] = await Promise.all([
+                    fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}`),
+                    fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/indicadores`),
+                    fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/movimientos`),
+                ]);
+
+                if (!clientResponse.ok || !indicatorsResponse.ok || !movementsResponse.ok) {
+                    throw new Error("Error al cargar datos del cliente.");
                 }
-                const data = await response.json();
-                setClienteData(data);
+
+                const [clientData, indicators, movements] = await Promise.all([
+                    clientResponse.json(),
+                    indicatorsResponse.json(),
+                    movementsResponse.json(),
+                ]);
+
+                const combinedData = {
+                    ...clientData,
+                    indicators,
+                    movements,
+                };
+
+                console.log("Datos combinados del cliente:", combinedData);
+
+                setClienteData(combinedData); // Actualiza el contexto global (si es necesario)
+                setLocalClienteData(combinedData); // Actualiza el estado local
             } catch (error) {
-                console.error("Error fetching client data:", error);
+                console.error("Error al cargar datos del cliente:", error);
+                setError("No se pudieron cargar los datos del cliente.");
                 clearCliente();
                 navigate("/");
+            } finally {
+                setIsLoading(false);
             }
         };
 
-        if (!clienteData) {
-            fetchClientData();
-        }
-    }, [clienteId, clienteData, setClienteData, clearCliente, navigate]);
+        fetchClientData();
+    }, [clienteId]); // Solo se ejecutará cuando `clienteId` cambie
+
+    if (isLoading) {
+        return (
+            <div className="text-center mt-20">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                <p className="mt-4 text-gray-500">Cargando datos del cliente...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="text-center text-red-500 mt-20">
+                <p>{error}</p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                >
+                    Reintentar
+                </button>
+            </div>
+        );
+    }
 
     if (!clienteData) {
-        return <p>Cargando datos del cliente...</p>;
+        return <p>No se encontraron datos del cliente.</p>;
     }
 
     return (
         <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900">
             <Sidebar />
             <div className="flex-1 p-6">
-                {/* Pasamos los datos completos a ClientSummary */}
                 <ClientSummary
                     summary={{
                         nombre: clienteData.nombre,
@@ -54,7 +104,7 @@ const SpreadsheetPage = () => {
                         email: clienteData.email,
                         telefono: clienteData.telefono,
                         direccion: clienteData.direccion,
-                        photo: clienteData.photo, // Si existe la propiedad
+                        photo: clienteData.photo,
                     }}
                 />
                 <div className="indicators mt-6">
