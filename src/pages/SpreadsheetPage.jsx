@@ -24,7 +24,7 @@ const SpreadsheetPage = () => {
 
         const fetchClientData = async () => {
             try {
-                setIsLoading(true);
+                setIsLoading(true); 
                 console.log("Cargando datos para cliente ID:", clienteId);
 
                 const [clientResponse, indicatorsResponse, movementsResponse] = await Promise.all([
