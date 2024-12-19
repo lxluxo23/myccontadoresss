@@ -1,24 +1,9 @@
 ﻿import React, { useState } from 'react';
-import DateRangePicker from './DateRangePicker';
-import StateSelector from './StateSelector';
 import AddClientForm from './AddClientForm';
 
 function FilterSection({ onAddClient, onSearchNameChange }) {
-    const [transactionDateRange, setTransactionDateRange] = useState({ startDate: null, endDate: null });
-    const [lastUpdateDate, setLastUpdateDate] = useState(null);
-    const [selectedState, setSelectedState] = useState('');
     const [searchName, setSearchName] = useState('');
     const [showAddClientForm, setShowAddClientForm] = useState(false);
-
-    const handleTransactionDateRangeChange = (range) => {
-        setTransactionDateRange(range);
-        setLastUpdateDate(null);
-    };
-
-    const handleLastUpdateDateChange = (date) => {
-        setLastUpdateDate(date);
-        setTransactionDateRange({ startDate: null, endDate: null });
-    };
 
     const handleNameSearchChange = (event) => {
         const value = event.target.value;
@@ -29,8 +14,6 @@ function FilterSection({ onAddClient, onSearchNameChange }) {
     return (
         <section className="flex flex-wrap justify-between gap-5 mt-10 w-full max-md:max-w-full text-sm">
             <div className="flex flex-wrap gap-4 items-center max-md:max-w-full">
-                <StateSelector selectedState={selectedState} setSelectedState={setSelectedState} />
-                <DateRangePicker dateRange={transactionDateRange} setDateRange={handleTransactionDateRangeChange} />
                 <div
                     className="flex items-center bg-white rounded-lg border border-neutral-200 p-2.5 w-[222px] h-[40px]"
                 >
@@ -51,7 +34,7 @@ function FilterSection({ onAddClient, onSearchNameChange }) {
 
             <button
                 onClick={() => setShowAddClientForm(true)}
-                className="flex items-center px-3 py-2 font-medium text-white bg-indigo-500 rounded-lg transform transition-all duration-500 ease-in-out hover:bg-indigo-600 hover:scale-105 hover:opacity-90"
+                className="px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-lg hover:from-indigo-600 hover:to-blue-600 hover:scale-105 transition-all font-semibold"
             >
                 <span>Añadir Cliente</span>
             </button>
