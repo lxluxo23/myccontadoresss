@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 function AddClientForm({ onClose, onAddClient }) {
     const [clientData, setClientData] = useState({
@@ -9,6 +10,8 @@ function AddClientForm({ onClose, onAddClient }) {
         direccion: '',
     });
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setClientData((prevData) => ({
@@ -17,7 +20,7 @@ function AddClientForm({ onClose, onAddClient }) {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         // Validar campos obligatorios
@@ -26,11 +29,23 @@ function AddClientForm({ onClose, onAddClient }) {
             return;
         }
 
-        // Notifica al componente padre para manejar el nuevo cliente
-        onAddClient(clientData);
+        setIsSubmitting(true); // Mostrar indicador de carga durante el envío
 
-        // Cierra el formulario después de enviar los datos
-        onClose();
+        try {
+            // Enviar los datos al backend
+            const response = await axios.post("https://backend.cobros.myccontadores.cl/api/clientes", clientData);
+
+            // Llamar a la función del componente padre para actualizar la lista de clientes
+            onAddClient(response.data);
+
+            // Cerrar el formulario después de enviar los datos
+            onClose();
+        } catch (error) {
+            console.error("Error al agregar cliente:", error.response?.data || error.message);
+            alert("Hubo un problema al agregar el cliente. Por favor, inténtalo nuevamente.");
+        } finally {
+            setIsSubmitting(false); // Ocultar indicador de carga
+        }
     };
 
     return (
@@ -100,9 +115,14 @@ function AddClientForm({ onClose, onAddClient }) {
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-indigo-500 text-white rounded-lg"
+                            className={`px-4 py-2 rounded-lg ${
+                                isSubmitting
+                                    ? "bg-gray-400 text-gray-800 cursor-not-allowed"
+                                    : "bg-indigo-500 text-white hover:bg-indigo-600"
+                            }`}
+                            disabled={isSubmitting}
                         >
-                            Añadir
+                            {isSubmitting ? "Añadiendo..." : "Añadir"}
                         </button>
                     </div>
                 </form>

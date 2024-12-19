@@ -1,12 +1,11 @@
 ﻿import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import {
+    FaHome,  // Ícono de casa (Home)
+    FaBars,  // Ícono de barra para el menú
     FaTachometerAlt,
     FaMoneyCheckAlt,
     FaFileInvoiceDollar,
-    FaExchangeAlt,
-    FaCog,
-    FaBars,
 } from "react-icons/fa";
 
 const Sidebar = () => {
@@ -33,11 +32,16 @@ const Sidebar = () => {
         };
     }, []);
 
+    // Función para volver a la página principal
+    const handleHomeButtonClick = () => {
+        navigate("/"); // Navega a la página principal
+    };
+
     const menuItems = [
         {
             icon: FaTachometerAlt,
             text: "Dashboard",
-            path: `/spreadsheet/${1}`,
+            path: `/spreadsheet/${clientId}`,
             action: () => navigate(`/spreadsheet/${clientId}`),
         },
         {
@@ -49,8 +53,8 @@ const Sidebar = () => {
         {
             icon: FaFileInvoiceDollar,
             text: "Deudas",
-            path: `/clientes/${clientId}/deudas`, // Cambiar la ruta para incluir el clientId
-            action: () => navigate(`/clientes/${clientId}/deudas`), // Actualizar la acción para redirigir a la ruta correcta
+            path: `/clientes/${clientId}/deudas`,
+            action: () => navigate(`/clientes/${clientId}/deudas`),
         },
     ];
 
@@ -102,6 +106,15 @@ const Sidebar = () => {
                         </li>
                     ))}
                 </ul>
+                {/* Botón de Home (Minimalista) */}
+                <div className="mb-6 text-center">
+                    <button
+                        onClick={handleHomeButtonClick}
+                        className="p-2 bg-indigo-700 hover:bg-gray-600 text-white rounded-full"
+                    >
+                        <FaHome className="text-2xl" />
+                    </button>
+                </div>
 
                 {/* Footer */}
                 <div className="mt-auto border-t border-gray-300 dark:border-gray-600 pt-4 text-center text-xs text-gray-200 dark:text-gray-400">

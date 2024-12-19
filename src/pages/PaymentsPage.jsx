@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 import PaymentTable from "../components/PaymentsComp/PaymentTable";
 import AddPaymentForm from "../components/PaymentsComp/AddPaymentForm";
 import RegisterPaymentForm from "../components/PaymentsComp/AddHonoraryPayment"; // Nuevo formulario para pagos de honorarios
-import Modal from "../components/Modal";
+import Modal from "../components/DebtsComp/Modal";
 import { useCliente } from "../components/context/ClienteContext";
 import { FaPlus } from "react-icons/fa";
 import ThemeToggle from "../components/ThemeToggle";
@@ -53,7 +53,7 @@ const PaymentsPage = () => {
     // Función para manejar el agregado de pagos de honorarios
     const handleAddHonoraryPayment = async (honorarioId, payload) => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/pagos`, {
+            const response = await fetch(`hhttps://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/pagos`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
@@ -118,7 +118,7 @@ const PaymentsPage = () => {
                 {/* Modal para agregar pagos normales */}
                 <Modal isOpen={isAddPaymentModalOpen} onClose={() => setIsAddPaymentModalOpen(false)}>
                     <AddPaymentForm
-                        onSubmit={handleAddPayment} // Función para manejar el agregado de pagos normales
+                        onPaymentAdded={handleAddPayment} // Función para manejar el agregado de pagos normales
                         userId={clienteId}
                         onClose={() => setIsAddPaymentModalOpen(false)} // Cierra el modal
                     />

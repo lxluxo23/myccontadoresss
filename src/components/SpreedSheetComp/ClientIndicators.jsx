@@ -15,9 +15,9 @@ const ClientIndicators = ({ indicators }) => {
     const formatCurrency = (amount) => {
         if (amount === null || amount === undefined) {
             console.warn("El valor de 'amount' no está definido o es nulo:", amount);
-            return "$0,00";
+            return "$0";
         }
-        return `$${amount?.toLocaleString("es-CL", { minimumFractionDigits: 2 }) || "0,00"}`;
+        return `$${amount?.toLocaleString("es-CL", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || "0"}`;
     };
 
     const lastTransaction = indicators.lastTransaction || { date: "Sin datos", amount: 0 };

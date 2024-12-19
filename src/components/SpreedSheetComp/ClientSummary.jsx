@@ -47,19 +47,20 @@ const ClientSummary = ({ summary = {}, onEdit }) => {
                 <hr className="border-t border-gray-300 dark:border-gray-500 col-span-2" />
                 <p className="flex items-center text-gray-600 dark:text-gray-200">
                     <FaIdCard className="mr-2 text-lg" />
-                    <strong>RUT:</strong> {summary.rut || "Sin datos"}
+                    <strong>RUT:</strong>&nbsp;{summary.rut || "Sin datos"}
                 </p>
                 <p className="flex items-center text-gray-600 dark:text-gray-200">
                     <FaEnvelope className="mr-2 text-lg" />
-                    <strong>Email:</strong> {summary.email || "Sin datos"}
+                    <strong>Email:</strong>&nbsp;{summary.email || "Sin datos"}
                 </p>
                 <p className="flex items-center text-gray-600 dark:text-gray-200">
-                    <FaPhone className="mr-2 text-lg" />
-                    <strong>Teléfono:</strong> {summary.telefono || "Sin datos"}
+                    <FaPhone className="mr-2 text-lg"/>
+                    <strong>Teléfono:</strong>&nbsp;{summary.telefono || "Sin datos"}
                 </p>
+
                 <p className="flex items-center text-gray-600 dark:text-gray-200">
-                    <FaMapMarkerAlt className="mr-2 text-lg" />
-                    <strong>Dirección:</strong> {summary.direccion || "Sin datos"}
+                    <FaMapMarkerAlt className="mr-2 text-lg"/>
+                    <strong>Dirección: </strong>&nbsp;{summary.direccion || "Sin datos"}
                 </p>
             </div>
         </div>

@@ -194,25 +194,29 @@ const RecentMovements = () => {
 
             <div className="flex justify-between items-center mt-4">
                 <button
-                    disabled={currentPage === 1}
+                    disabled={currentPage === 1 || movements.length === 0}
                     onClick={() => setCurrentPage(currentPage - 1)}
                     className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full disabled:opacity-50 hover:disabled:cursor-not-allowed"
                     aria-label="Página anterior"
                 >
-                    <FaChevronLeft className="text-gray-500 dark:text-gray-300" />
+                    <FaChevronLeft className="text-gray-500 dark:text-gray-300"/>
                 </button>
                 <span className="text-sm dark:text-gray-400">
-                    Página {currentPage} de {Math.ceil(movements?.length / rowsPerPage)}
-                </span>
+        Página {movements.length === 0 ? 0 : currentPage} de{" "}
+                    {Math.ceil(movements?.length / rowsPerPage) || 0}
+    </span>
                 <button
-                    disabled={currentPage === Math.ceil(movements?.length / rowsPerPage)}
+                    disabled={
+                        currentPage === Math.ceil(movements?.length / rowsPerPage) || movements.length === 0
+                    }
                     onClick={() => setCurrentPage(currentPage + 1)}
                     className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full disabled:opacity-50 hover:disabled:cursor-not-allowed"
                     aria-label="Página siguiente"
                 >
-                    <FaChevronRight className="text-gray-500 dark:text-gray-300" />
+                    <FaChevronRight className="text-gray-500 dark:text-gray-300"/>
                 </button>
             </div>
+
         </div>
     );
 };
