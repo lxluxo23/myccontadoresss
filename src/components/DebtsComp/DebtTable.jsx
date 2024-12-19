@@ -117,7 +117,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
     const confirmDeleteHonorario = async () => {
         try {
-            const response = await fetch(`hhttps://backend.cobros.myccontadores.cl/api/honorarios/${honorarioToDelete.honorarioId}`, {
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioToDelete.honorarioId}`, {
                 method: "DELETE",
             });
             if (!response.ok) {
