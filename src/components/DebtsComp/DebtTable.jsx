@@ -485,57 +485,50 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
                                         ).toLocaleString("es-CL")}
                                         </td>
                                         <td className="py-4 px-6 text-center">
-                                    <span
-                                        className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                            mes.estado === "Pagado"
-                                                ? "bg-green-500 text-white"
-                                                : "bg-yellow-500 text-white"
-                                        }`}
-                                    >
-                                        {mes.estado}
-                                    </span>
-                                        </td>
-                                        <td className="py-4 px-6 text-center">
-                                            {mes.mes}
-                                        </td>
-                                        <td className="py-4 px-6 text-center">
-                                            {honorario.anio}
-                                        </td>
-                                        <td className="py-4 px-6 text-center">
-                                            <div className="flex justify-center space-x-2">
-                                                {/* Botón para Eliminar Honorario */}
-                                                <button
-                                                    onClick={() => handleDeleteHonorario(honorario)}
-                                                    title="Eliminar Honorario"
-                                                    className="text-red-500 dark:text-red-300 hover:text-red-700 dark:hover:text-red-100"
+                                                <span
+                                                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                                        mes.estado === "Pagado"
+                                                            ? "bg-green-500 text-white"
+                                                            : "bg-yellow-500 text-white"
+                                                    }`}
                                                 >
-                                                    <FaTrash size={18} />
-                                                </button>
+                                                    {mes.estado}
+                                                </span>
+                                        </td>
+                                        <td className="py-4 px-6 text-center space-x-2">
+                                            {/* Botón para Eliminar Honorario */}
+                                            <button
+                                                onClick={() => handleDeleteHonorario(honorario)}
+                                                title="Eliminar Honorario"
+                                                className="text-red-500 dark:text-red-300 hover:text-red-700 dark:hover:text-red-100"
+                                            >
+                                                <FaTrash size={18}/>
+                                            </button>
 
-                                                {/* Botón para Registrar Pago */}
-                                                <button
-                                                    onClick={() =>
-                                                        setSelectedHonorario({
-                                                            honorarioId: honorario.honorarioId,
-                                                            mes: mes.mes,
-                                                        })
-                                                    }
-                                                    title="Registrar Pago"
-                                                    className="text-blue-500 dark:text-blue-300 hover:text-blue-700 dark:hover:text-blue-100"
-                                                >
-                                                    <FaPlus size={18} />
-                                                </button>
+                                            {/* Botón para Registrar Pago */}
+                                            <button
+                                                onClick={() =>
+                                                    setSelectedHonorario({
+                                                        honorarioId: honorario.honorarioId,
+                                                        mes: mes.mes,
+                                                    })
+                                                }
+                                                title="Registrar Pago"
+                                                className="text-blue-500 dark:text-blue-300 hover:text-blue-700 dark:hover:text-blue-100"
+                                            >
+                                                <FaPlus size={18}/>
+                                            </button>
 
-                                                {/* Botón para Ver Información */}
-                                                <button
-                                                    onClick={() => handleViewMonthDetails(honorario.honorarioId, mes.mes)}
-                                                    title="Ver Información del Mes"
-                                                    className="text-green-500 dark:text-green-300 hover:text-green-700 dark:hover:text-green-100"
-                                                >
-                                                    <FaInfoCircle size={18} />
-                                                </button>
-                                            </div>
+                                            {/* Botón para Ver Información */}
+                                            <button
+                                                onClick={() => handleViewMonthDetails(honorario.honorarioId, mes.mes)}
+                                                title="Ver Información del Mes"
+                                                className="text-green-500 dark:text-green-300 hover:text-green-700 dark:hover:text-green-100"
+                                            >
+                                                <FaInfoCircle size={18} />
+                                            </button>
                                         </td>
+
                                     </tr>
                                 ))
                             )
@@ -543,7 +536,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
                         </tbody>
                     </table>
                 </div>
-            {/* Paginación de Honorarios */}
+                {/* Paginación de Honorarios */}
                 <div className="flex justify-between items-center mt-4">
                     <button
                         disabled={currentPageHonorarios === 1}
