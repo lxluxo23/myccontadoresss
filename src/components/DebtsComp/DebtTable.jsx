@@ -227,6 +227,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
         }
     };
 
+
     const handleViewHonorarioInfo = async (honorarioId) => {
         try {
             const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/detalle`);
