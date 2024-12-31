@@ -53,7 +53,7 @@ const PaymentsPage = () => {
     // Función para manejar el agregado de pagos de honorarios
     const handleAddHonoraryPayment = async (honorarioId, payload) => {
         try {
-            const response = await fetch(`hhttps://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/pagos`, {
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/pagos`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),

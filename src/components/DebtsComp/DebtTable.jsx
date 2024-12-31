@@ -5,7 +5,7 @@ import {
     FaChevronLeft,
     FaChevronRight,
     FaTrash,
-    FaPlus,
+    FaPlus, FaInfoCircle,
 } from "react-icons/fa";
 import dayjs from "dayjs";
 import AddAccountingHonorary from "./AddAccountingHonorary"; // Asegúrate de que esta ruta sea correcta
@@ -23,7 +23,17 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
     const [honorariosData, setHonorariosData] = useState([]);
     const [loadingHonorarios, setLoadingHonorarios] = useState(false);
     const [selectedHonorario, setSelectedHonorario] = useState(null);
+    const [selectedHonorarioDetails, setSelectedHonorarioDetails] = useState(null);
+    const [montoPago, setMontoPago] = useState("");
+    const [comprobante, setComprobante] = useState(null);
+    const [comprobanteSeleccionado, setComprobanteSeleccionado] = useState(null); // URL del comprobante
+    const [formatoComprobanteSeleccionado, setFormatoComprobanteSeleccionado] = useState(""); // Formato del comprobante
+    const [fechaPagoReal, setFechaPagoReal] = useState("");
+    const [metodoPago, setMetodoPago] = useState("");
     const [showAddHonorarioModal, setShowAddHonorarioModal] = useState(false);
+    const [comprobanteUrl, setComprobanteUrl] = useState(null);
+
+
     // Eliminados: showEditHonorarioModal, setShowEditHonorarioModal
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
     const [honorarioToDelete, setHonorarioToDelete] = useState(null);
@@ -171,15 +181,6 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
             if (!response.ok) {
                 throw new Error("Error al eliminar la deuda.");
             }
-            // Refrescar la lista de deudas
-            // Asumiendo que hay una función para obtener las deudas, si no, necesitarías implementar una
-            // Por ejemplo:
-            // fetchDebts();
-            // Si no, puedes manejarlo pasando la lista de deudas como props desde un componente padre
-            // Aquí, para simplificar, filtramos localmente
-            // setDebts(prevDebts => prevDebts.filter(d => d.deudaId !== debtToDelete.deudaId));
-            // Pero dado que debts viene como prop, deberías manejarlo en el componente padre
-            // Así que notificamos al usuario que la deuda ha sido eliminada
             setError(null);
             alert("Deuda eliminada exitosamente.");
             setShowDeleteDebtConfirmation(false);
@@ -191,6 +192,112 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
             setDebtToDelete(null);
         }
     };
+
+    const handleRegisterPayment = async (e) => {
+        e.preventDefault();
+
+        if (!selectedHonorario || !montoPago || !comprobante || !fechaPagoReal || !metodoPago) {
+            alert("Por favor, completa todos los campos.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("mes", selectedHonorario.mes);
+        formData.append("montoPago", montoPago);
+        formData.append("comprobante", comprobante);
+        formData.append("fechaPagoReal", fechaPagoReal);
+        formData.append("metodoPago", metodoPago);
+
+        try {
+            const response = await fetch(
+                `https://backend.cobros.myccontadores.cl/api/honorarios/${selectedHonorario.honorarioId}/pagos`,
+                { method: "POST", body: formData }
+            );
+
+            if (!response.ok) {
+                throw new Error("Error al registrar el pago.");
+            }
+
+            alert("Pago registrado exitosamente.");
+            setSelectedHonorario(null); // Cierra el modal
+            fetchHonorarios(); // Refresca la lista de honorarios
+        } catch (err) {
+            console.error("Error al registrar el pago:", err);
+            alert("No se pudo registrar el pago.");
+        }
+    };
+
+    const handleViewHonorarioInfo = async (honorarioId) => {
+        try {
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/detalle`);
+            if (!response.ok) {
+                throw new Error("Error al cargar los detalles del honorario.");
+            }
+
+            const data = await response.json();
+            setSelectedHonorarioDetails(data); // Actualiza el estado con los detalles
+        } catch (err) {
+            console.error("Error al cargar los detalles:", err);
+        }
+    };
+
+    const descargarComprobante = async (pagoId) => {
+        try {
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/pagos/comprobante/${pagoId}`);
+            if (!response.ok) {
+                throw new Error("No se pudo descargar el comprobante.");
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `comprobante_${pagoId}.bin`; // Cambia la extensión según el tipo real
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Error al descargar el comprobante:", err);
+            alert("No se pudo descargar el comprobante.");
+        }
+    };
+
+    const visualizarComprobante = async (pagoId) => {
+        try {
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/pagos/comprobante/${pagoId}`);
+            if (!response.ok) {
+                throw new Error("No se pudo cargar el comprobante.");
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const formato = response.headers.get("Content-Type"); // Obtener el tipo MIME
+
+            setComprobanteUrl(url); // Actualiza la URL del comprobante
+            setFormatoComprobanteSeleccionado(formato); // Actualiza el formato del comprobante
+        } catch (err) {
+            console.error("Error al cargar el comprobante:", err);
+            alert("No se pudo cargar el comprobante.");
+        }
+    };
+
+
+
+
+    const handleViewMonthDetails = async (honorarioId, mes) => {
+        try {
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/mes/${mes}`);
+            if (!response.ok) {
+                throw new Error("No se pudo cargar la información del mes.");
+            }
+            const data = await response.json();
+            setSelectedHonorarioDetails(data); // Actualiza el estado con los detalles del mes
+        } catch (err) {
+            console.error("Error al obtener los detalles del mes:", err);
+            alert("Error al cargar los detalles del mes.");
+        }
+    };
+
+
 
     return (
         <div className="space-y-6 bg-white dark:bg-gray-900 rounded-xl shadow-md dark:shadow-gray-700 p-6 transition-colors duration-300">
@@ -311,13 +418,6 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
                     <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
                         Honorarios Contables
                     </h3>
-                    <button
-                        onClick={handleAddHonorario}
-                        title="Agregar Honorario Contable"
-                        className="flex items-center px-4 py-2 bg-green-500 dark:bg-green-600 text-white rounded-lg hover:bg-green-600 dark:hover:bg-green-700 transition-colors duration-200"
-                    >
-                        <FaPlus className="mr-2" /> Agregar Honorario
-                    </button>
                 </div>
                 {error && (
                     <div className="text-red-500 text-sm mb-2">{error}</div>
@@ -385,31 +485,56 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
                                         ).toLocaleString("es-CL")}
                                         </td>
                                         <td className="py-4 px-6 text-center">
-                                                <span
-                                                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                                        mes.estado === "Pagado"
-                                                            ? "bg-green-500 text-white"
-                                                            : "bg-yellow-500 text-white"
-                                                    }`}
-                                                >
-                                                    {mes.estado}
-                                                </span>
+                                    <span
+                                        className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                            mes.estado === "Pagado"
+                                                ? "bg-green-500 text-white"
+                                                : "bg-yellow-500 text-white"
+                                        }`}
+                                    >
+                                        {mes.estado}
+                                    </span>
                                         </td>
-                                        <td className="py-4 px-6 text-center text-gray-700 dark:text-gray-300">
-                                            {obtenerNombreMes(mes.mes)}
+                                        <td className="py-4 px-6 text-center">
+                                            {mes.mes}
                                         </td>
-                                        <td className="py-4 px-6 text-center text-gray-700 dark:text-gray-300">
+                                        <td className="py-4 px-6 text-center">
                                             {honorario.anio}
                                         </td>
-                                        <td className="py-4 px-6 text-center space-x-2">
-                                            {/* Eliminado: Botón de Editar */}
-                                            <button
-                                                onClick={() => handleDeleteHonorario(honorario)}
-                                                title="Eliminar Honorario"
-                                                className="text-red-500 dark:text-red-300 hover:text-red-700 dark:hover:text-red-100"
-                                            >
-                                                <FaTrash size={18} />
-                                            </button>
+                                        <td className="py-4 px-6 text-center">
+                                            <div className="flex justify-center space-x-2">
+                                                {/* Botón para Eliminar Honorario */}
+                                                <button
+                                                    onClick={() => handleDeleteHonorario(honorario)}
+                                                    title="Eliminar Honorario"
+                                                    className="text-red-500 dark:text-red-300 hover:text-red-700 dark:hover:text-red-100"
+                                                >
+                                                    <FaTrash size={18} />
+                                                </button>
+
+                                                {/* Botón para Registrar Pago */}
+                                                <button
+                                                    onClick={() =>
+                                                        setSelectedHonorario({
+                                                            honorarioId: honorario.honorarioId,
+                                                            mes: mes.mes,
+                                                        })
+                                                    }
+                                                    title="Registrar Pago"
+                                                    className="text-blue-500 dark:text-blue-300 hover:text-blue-700 dark:hover:text-blue-100"
+                                                >
+                                                    <FaPlus size={18} />
+                                                </button>
+
+                                                {/* Botón para Ver Información */}
+                                                <button
+                                                    onClick={() => handleViewMonthDetails(honorario.honorarioId, mes.mes)}
+                                                    title="Ver Información del Mes"
+                                                    className="text-green-500 dark:text-green-300 hover:text-green-700 dark:hover:text-green-100"
+                                                >
+                                                    <FaInfoCircle size={18} />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -418,7 +543,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
                         </tbody>
                     </table>
                 </div>
-                {/* Paginación de Honorarios */}
+            {/* Paginación de Honorarios */}
                 <div className="flex justify-between items-center mt-4">
                     <button
                         disabled={currentPageHonorarios === 1}
@@ -426,7 +551,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
                         title="Página anterior"
                         className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full disabled:opacity-50 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200"
                     >
-                        <FaChevronLeft className="text-gray-500 dark:text-gray-300" />
+                        <FaChevronLeft className="text-gray-500 dark:text-gray-300"/>
                     </button>
                     <span className="text-sm text-gray-600 dark:text-gray-400">
                         Página {currentPageHonorarios} de {Math.ceil(honorariosData.length / itemsPerPage)}
@@ -452,6 +577,77 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
                         clienteId={clienteId}
                         onClose={() => setShowAddHonorarioModal(false)}
                     />
+                </Modal>
+            )}
+
+            {/* Modal para Registrar Pago */}
+            {selectedHonorario && (
+                <Modal isOpen={!!selectedHonorario} onClose={() => setSelectedHonorario(null)}>
+                    <form onSubmit={handleRegisterPayment} className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Registrar Pago</h3>
+                        <div>
+                            <label className="block text-gray-700 dark:text-gray-300">Mes</label>
+                            <input
+                                type="text"
+                                value={obtenerNombreMes(selectedHonorario.mes)}
+                                readOnly
+                                className="w-full border rounded-lg p-2 bg-gray-100 dark:bg-gray-700"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 dark:text-gray-300">Monto a Pagar</label>
+                            <input
+                                type="number"
+                                value={montoPago}
+                                onChange={(e) => setMontoPago(e.target.value)}
+                                className="w-full border rounded-lg p-2"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 dark:text-gray-300">Fecha de Pago</label>
+                            <input
+                                type="date"
+                                onChange={(e) => setFechaPagoReal(e.target.value)}
+                                className="w-full border rounded-lg p-2"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 dark:text-gray-300">Método de Pago</label>
+                            <select
+                                onChange={(e) => setMetodoPago(e.target.value)}
+                                className="w-full border rounded-lg p-2"
+                            >
+                                <option value="">Seleccionar Método</option>
+                                <option value="EFECTIVO">Efectivo</option>
+                                <option value="TARJETA">Tarjeta</option>
+                                <option value="TRANSFERENCIA">Transferencia</option>
+                                <option value="CHEQUE">Cheque</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 dark:text-gray-300">Comprobante</label>
+                            <input
+                                type="file"
+                                onChange={(e) => setComprobante(e.target.files[0])}
+                                className="w-full border rounded-lg p-2"
+                            />
+                        </div>
+                        <div className="flex justify-end gap-4">
+                            <button
+                                type="button"
+                                onClick={() => setSelectedHonorario(null)}
+                                className="px-4 py-2 bg-gray-300 rounded-lg"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 bg-green-500 text-white rounded-lg"
+                            >
+                                Registrar Pago
+                            </button>
+                        </div>
+                    </form>
                 </Modal>
             )}
 
@@ -551,6 +747,68 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
                     </div>
                 </Modal>
             )}
+
+            {/* Modal para Detalles de Honorario del mes */}
+            {selectedHonorarioDetails && (
+                <Modal isOpen={!!selectedHonorarioDetails} onClose={() => {
+                    setSelectedHonorarioDetails(null); // Cerrar el modal
+                    setComprobanteUrl(null); // Limpiar la URL del comprobante
+                }}>
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-bold text-gray-700 dark:text-gray-300">
+                            Detalles del Mes: {obtenerNombreMes(selectedHonorarioDetails.mes)}
+                        </h3>
+                        <p><strong>Monto Mensual:</strong> ${Number(selectedHonorarioDetails.montoMensual).toLocaleString("es-CL")}</p>
+                        <p><strong>Monto Pagado:</strong> ${Number(selectedHonorarioDetails.montoPagado).toLocaleString("es-CL")}</p>
+                        <p><strong>Estado:</strong> {selectedHonorarioDetails.estado}</p>
+
+                        <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Pagos Relacionados</h4>
+                        {selectedHonorarioDetails.pagos.length > 0 ? (
+                            <ul className="list-disc pl-5 space-y-2">
+                                {selectedHonorarioDetails.pagos.map((pago, idx) => (
+                                    <li key={idx} className="border-b pb-2">
+                                        <p><strong>Fecha de Pago:</strong> {dayjs(pago.fechaPago).format("DD/MM/YYYY")}</p>
+                                        <p><strong>Monto:</strong> ${Number(pago.monto).toLocaleString("es-CL")}</p>
+                                        <p><strong>Método:</strong> {pago.metodoPago}</p>
+                                        {pago.comprobante && (
+                                            <>
+                                                <button
+                                                    onClick={() => visualizarComprobante(pago.id)} // Al hacer clic se actualiza el estado
+                                                    className="text-blue-500 hover:underline"
+                                                >
+                                                    Ver Comprobante
+                                                </button>
+                                            </>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p>No hay pagos registrados para este mes.</p>
+                        )}
+
+                        {/* Mostrar solo el comprobante seleccionado */}
+                        {comprobanteUrl && (
+                            <div className="mt-4">
+                                {formatoComprobanteSeleccionado === "application/pdf" ? (
+                                    <iframe
+                                        src={comprobanteUrl}
+                                        className="w-full h-96 border rounded-lg"
+                                        title="Vista previa del comprobante"
+                                    />
+                                ) : (
+                                    <img
+                                        src={comprobanteUrl}
+                                        alt="Comprobante"
+                                        className="w-full h-auto max-h-96 object-contain border rounded-lg"
+                                    />
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </Modal>
+            )}
+
 
             {/* Spinner de Carga para Honorarios */}
             {loadingHonorarios && (

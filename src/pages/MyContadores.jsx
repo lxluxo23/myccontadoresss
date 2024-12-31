@@ -6,6 +6,7 @@ import TableHeader from "../components/MyCcontadoresComp/TableHeader";
 import ClientRow from "../components/MyCcontadoresComp/ClientRow";
 import Pagination from "../components/MyCcontadoresComp/Pagination";
 import EditClientForm from "../components/MyCcontadoresComp/EditClientForm";
+import FloatingExcelButton from "../components/MyCcontadoresComp/FloatingExcelButton";  // Importar el nuevo botón flotante
 
 function MyContadores() {
     const [clients, setClients] = useState([]);
@@ -70,6 +71,25 @@ function MyContadores() {
         setClients(sortedClients);
     };
 
+    // Función para descargar el archivo Excel
+    const descargarExcel = async () => {
+        try {
+            const response = await fetch('https://backend.cobros.myccontadores.cl/api/honorarios/exportar/deudas-pagos/clienteId');  // Cambia "clienteId" por el id correspondiente
+            if (!response.ok) {
+                throw new Error("No se pudo descargar el archivo Excel.");
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "deudas_y_pagos_clientes.xlsx"; // Nombre del archivo
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error("Error al descargar el archivo Excel:", err);
+        }
+    };
+
     if (loading) {
         return <p className="text-center mt-6 text-lg">Cargando clientes...</p>;
     }
@@ -124,6 +144,9 @@ function MyContadores() {
                     )}
                 </div>
             </main>
+
+            {/* Botón Flotante para Descargar el Excel */}
+            <FloatingExcelButton onClick={descargarExcel} /> {/* El botón flotante que descarga el Excel */}
         </div>
     );
 }
