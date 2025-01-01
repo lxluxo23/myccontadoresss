@@ -1,3 +1,5 @@
+// PaymentsPage.jsx
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
@@ -27,7 +29,7 @@ const PaymentsPage = () => {
 
         const fetchPayments = async () => {
             try {
-                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/pagos`);
+                const response = await fetch(`http://localhost:8080/api/clientes/${clienteId}/pagos`);
                 if (!response.ok) {
                     throw new Error("Error al cargar los datos");
                 }
@@ -53,7 +55,7 @@ const PaymentsPage = () => {
     // Función para manejar el agregado de pagos de honorarios
     const handleAddHonoraryPayment = async (honorarioId, payload) => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/pagos`, {
+            const response = await fetch(`http://localhost:8080/api/honorarios/${honorarioId}/pagos`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
@@ -69,6 +71,11 @@ const PaymentsPage = () => {
         }
     };
 
+    // Función para manejar la eliminación de pagos desde PaymentTable
+    const handleDeletePayment = (deletedPagoId) => {
+        setPayments((prevPayments) => prevPayments.filter(p => p.pagoId !== deletedPagoId));
+    };
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -80,7 +87,7 @@ const PaymentsPage = () => {
     if (error) {
         return (
             <div className="flex justify-center items-center h-screen">
-                <div className="text-red-500 dark:text-red-400">
+                <div className="text-red-500 dark:text-gray-400">
                     Hubo un problema al cargar los pagos. Por favor, intente nuevamente más tarde.
                 </div>
             </div>
@@ -92,7 +99,10 @@ const PaymentsPage = () => {
             <Sidebar />
             <div className="flex-1 p-6">
                 <div>
-                    <PaymentTable payments={payments} /> {/* Tabla que muestra los pagos */}
+                    <PaymentTable
+                        payments={payments} // Tabla que muestra los pagos
+                        onDeletePayment={handleDeletePayment} // Función para manejar la eliminación
+                    />
                 </div>
 
                 <div className="flex justify-end mt-4">
@@ -136,6 +146,7 @@ const PaymentsPage = () => {
             <ThemeToggle />
         </div>
     );
+
 };
 
 export default PaymentsPage;

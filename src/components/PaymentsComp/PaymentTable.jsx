@@ -1,49 +1,32 @@
 // PaymentTable.jsx
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { FaChevronLeft, FaChevronRight, FaEye, FaTrashAlt } from "react-icons/fa";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // Importar el plugin
-import axios from "axios";
 import PaymentDetailsModal from "./PaymentsDetailsModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 // Extender Day.js con el plugin isBetween
 dayjs.extend(isBetween);
 
-const PaymentTable = () => {
-    const [payments, setPayments] = useState([]);
+const PaymentTable = ({ payments }) => { // Recibe payments como prop
     const [selectedPayment, setSelectedPayment] = useState(null);
     const [paymentToDelete, setPaymentToDelete] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10; // Ítems por página fijo en 10
     const [searchTerm, setSearchTerm] = useState("");
     const [sortConfig, setSortConfig] = useState({ key: "fechaTransaccion", direction: "ascending" });
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [debtTypes, setDebtTypes] = useState([]); // Para filtros por tipo de deuda
     const [selectedDebtType, setSelectedDebtType] = useState(""); // Estado para filtro de tipo de deuda
     const [dateRange, setDateRange] = useState({ start: "", end: "" }); // Estado para filtro de rango de fechas
 
-    // Fetch payments from backend
-    useEffect(() => {
-        const fetchPayments = async () => {
-            setLoading(true);
-            try {
-                const response = await axios.get("https://backend.cobros.myccontadores.cl/api/pagos"); // Ajusta la URL según tu configuración
-                console.log(response.data); // Para verificar el formato de las fechas
-                setPayments(response.data);
-                // Extraer tipos de deuda únicos para el filtro
-                const tiposUnicos = [...new Set(response.data.map(pago => pago.deuda.tipoDeuda))];
-                setDebtTypes(tiposUnicos);
-            } catch (err) {
-                setError("Error al obtener los pagos.");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchPayments();
-    }, []);
+    // Establecer tipos únicos de deuda al recibir nuevos pagos
+    useMemo(() => {
+        const tiposUnicos = [...new Set(payments.map((pago) => pago.deuda?.tipoDeuda))].filter(Boolean);
+        setDebtTypes(tiposUnicos);
+    }, [payments]);
 
     // Función para manejar la vista de detalles
     const handleViewDetails = (payment) => {
@@ -61,15 +44,23 @@ const PaymentTable = () => {
 
     const confirmDelete = async () => {
         if (!paymentToDelete) return;
-        setLoading(true);
         try {
-            await axios.delete(`https://backend.cobros.myccontadores.cl/api/pagos/cancelar/${paymentToDelete.pagoId}`);
-            setPayments((prevPayments) => prevPayments.filter(p => p.pagoId !== paymentToDelete.pagoId));
+            const response = await fetch(`http://localhost:8080/api/pagos/cancelar/${paymentToDelete.pagoId}`, {
+                method: "DELETE",
+            });
+            if (!response.ok) {
+                throw new Error("Error al eliminar el pago.");
+            }
+            // Actualizar los pagos eliminando el pago eliminado
+            // Esto requiere que PaymentsPage maneje la actualización de los pagos
+            // Puedes pasar una función desde PaymentsPage para actualizar los pagos
+            // Por simplicidad, aquí asumimos que PaymentsPage está gestionando esto
             setPaymentToDelete(null);
+            // Opcional: notificar a PaymentsPage para que actualice el estado de payments
+            // Esto se puede hacer mediante props adicionales o context
         } catch (err) {
+            console.error("Error al eliminar el pago:", err);
             setError("Error al eliminar el pago.");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -77,17 +68,24 @@ const PaymentTable = () => {
         setPaymentToDelete(null);
     };
 
+    // Función para formatear el monto como pesos chilenos (CLP) con separadores de miles
+    const formatAmount = (amount) => {
+        return amount.toLocaleString("es-CL", { style: "currency", currency: "CLP" });
+    };
+
     // Filtros aplicados a los pagos
     const filteredPayments = useMemo(() => {
-        return payments.filter((payment) => {
-            const fechaTransaccion = dayjs(payment.fechaTransaccion).format("DD/MM/YYYY");
-            const monto = payment.monto ? payment.monto.toLocaleString("es-CL", { style: "currency", currency: "CLP" }) : "0";
-            const tipoDeuda = payment.deuda.tipoDeuda || "";
-            const observacionesDeuda = payment.deuda.observaciones || "";
+        const filtered = payments.filter((payment) => {
+            // Manejar posibles datos faltantes con encadenamiento opcional
+            const fechaTransaccion = payment.fechaTransaccion ? dayjs(payment.fechaTransaccion).format("DD/MM/YYYY") : "";
+            const monto = payment.monto ? formatAmount(payment.monto) : "0";
+            const tipoDeuda = payment.deuda?.tipoDeuda || "";
+            const observacionesDeuda = payment.deuda?.observaciones || "";
             const observacionesPago = payment.observaciones || "";
 
             // Filtrado por término de búsqueda
             const matchesSearchTerm =
+                searchTerm === "" ||
                 fechaTransaccion.includes(searchTerm) ||
                 monto.includes(searchTerm) ||
                 tipoDeuda.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -95,16 +93,15 @@ const PaymentTable = () => {
                 observacionesPago.toLowerCase().includes(searchTerm.toLowerCase());
 
             // Filtrado por tipo de deuda
-            const matchesDebtType = selectedDebtType
-                ? payment.deuda.tipoDeuda === selectedDebtType
-                : true;
+            const matchesDebtType = selectedDebtType === "" || tipoDeuda === selectedDebtType;
 
             // Filtrado por rango de fechas
             const matchesDateRange = (() => {
                 if (dateRange.start && dateRange.end) {
-                    const fecha = dayjs(payment.fechaTransaccion, "DD/MM/YYYY"); // Asegúrate de que el formato coincide con el recibido
-                    const inicio = dayjs(dateRange.start, "YYYY-MM-DD");
-                    const fin = dayjs(dateRange.end, "YYYY-MM-DD");
+                    const fecha = payment.fechaTransaccion ? dayjs(payment.fechaTransaccion) : null;
+                    const inicio = dayjs(dateRange.start);
+                    const fin = dayjs(dateRange.end);
+                    if (!fecha?.isValid()) return false;
                     return fecha.isBetween(inicio, fin, null, '[]'); // Inclusivo
                 }
                 return true;
@@ -112,6 +109,9 @@ const PaymentTable = () => {
 
             return matchesSearchTerm && matchesDebtType && matchesDateRange;
         });
+
+        console.log("Pagos después de aplicar filtros:", filtered);
+        return filtered;
     }, [payments, searchTerm, selectedDebtType, dateRange]);
 
     // Ordenar los pagos según la columna seleccionada
@@ -124,22 +124,22 @@ const PaymentTable = () => {
 
                 // Si la clave es 'tipoDeuda' o 'observacionesDeuda' o 'observaciones', acceder a los campos anidados
                 if (sortConfig.key === "tipoDeuda") {
-                    aKey = a.deuda.tipoDeuda;
-                    bKey = b.deuda.tipoDeuda;
+                    aKey = a.deuda?.tipoDeuda || "";
+                    bKey = b.deuda?.tipoDeuda || "";
                 }
                 if (sortConfig.key === "observacionesDeuda") {
-                    aKey = a.deuda.observaciones;
-                    bKey = b.deuda.observaciones;
+                    aKey = a.deuda?.observaciones || "";
+                    bKey = b.deuda?.observaciones || "";
                 }
                 if (sortConfig.key === "observaciones") {
-                    aKey = a.observaciones;
-                    bKey = b.observaciones;
+                    aKey = a.observaciones || "";
+                    bKey = b.observaciones || "";
                 }
 
                 // Para fechas, convertir a timestamps para una comparación adecuada
                 if (sortConfig.key === "fechaTransaccion") {
-                    aKey = aKey ? dayjs(aKey).valueOf() : 0;
-                    bKey = bKey ? dayjs(bKey).valueOf() : 0;
+                    aKey = a.fechaTransaccion ? dayjs(a.fechaTransaccion).valueOf() : 0;
+                    bKey = b.fechaTransaccion ? dayjs(b.fechaTransaccion).valueOf() : 0;
                 }
 
                 if (aKey < bKey) {
@@ -158,13 +158,10 @@ const PaymentTable = () => {
     const paginatedPayments = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
         const end = start + itemsPerPage;
-        return sortedPayments.slice(start, end);
-    }, [sortedPayments, currentPage]);
-
-    // Función para formatear el monto como pesos chilenos (CLP) con separadores de miles
-    const formatAmount = (amount) => {
-        return amount.toLocaleString("es-CL", { style: "currency", currency: "CLP" });
-    };
+        const paginated = sortedPayments.slice(start, end);
+        console.log(`Pagos en la página ${currentPage}:`, paginated);
+        return paginated;
+    }, [sortedPayments, currentPage, itemsPerPage]);
 
     // Función para manejar el ordenamiento de las columnas
     const requestSort = (key) => {
@@ -176,7 +173,7 @@ const PaymentTable = () => {
     };
 
     // Calcular el total de páginas
-    const totalPages = Math.ceil(filteredPayments.length / itemsPerPage);
+    const totalPages = Math.ceil(filteredPayments.length / itemsPerPage) || 1;
 
     // Función para manejar el cambio de página asegurando que esté dentro del rango válido
     const handlePageChange = (newPage) => {
@@ -258,11 +255,7 @@ const PaymentTable = () => {
 
             <div className="overflow-x-auto">
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Pagos</h3>
-                {loading ? (
-                    <div className="text-center py-10">
-                        <span className="text-gray-500 dark:text-gray-300">Cargando pagos...</span>
-                    </div>
-                ) : error ? (
+                {error ? (
                     <div className="text-center py-10">
                         <span className="text-red-500">{error}</span>
                     </div>
@@ -310,7 +303,7 @@ const PaymentTable = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {paginatedPayments.length === 0 ? (
+                        {filteredPayments.length === 0 ? (
                             <tr>
                                 <td colSpan="7" className="p-3 text-center text-gray-500 dark:text-gray-400">
                                     No se encontraron pagos.
@@ -332,8 +325,8 @@ const PaymentTable = () => {
                                     <td className="p-3 text-center">
                                         {payment.monto ? formatAmount(payment.monto) : "0"}
                                     </td>
-                                    <td className="p-3 text-center">{payment.deuda.tipoDeuda || "N/A"}</td>
-                                    <td className="p-3 text-center">{payment.deuda.observaciones || "N/A"}</td>
+                                    <td className="p-3 text-center">{payment.deuda?.tipoDeuda || "N/A"}</td>
+                                    <td className="p-3 text-center">{payment.deuda?.observaciones || "N/A"}</td>
                                     <td className="p-3 text-center">{payment.metodoPago || "N/A"}</td>
                                     <td className="p-3 text-center">{payment.observaciones || "Sin observaciones"}</td>
                                     <td className="p-3 text-center flex justify-center gap-4">
@@ -363,7 +356,7 @@ const PaymentTable = () => {
             {/* Paginación */}
             <div className="flex justify-between items-center mt-4">
                 <button
-                    disabled={currentPage === 1 || loading}
+                    disabled={currentPage === 1}
                     onClick={() => handlePageChange(currentPage - 1)}
                     className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full disabled:opacity-50"
                     aria-label="Página anterior"
@@ -374,7 +367,7 @@ const PaymentTable = () => {
                     Página {currentPage} de {totalPages}
                 </span>
                 <button
-                    disabled={currentPage === totalPages || loading}
+                    disabled={currentPage === totalPages}
                     onClick={() => handlePageChange(currentPage + 1)}
                     className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full disabled:opacity-50"
                     aria-label="Página siguiente"
@@ -396,5 +389,7 @@ const PaymentTable = () => {
             )}
         </div>
     );
+
 }
-    export default PaymentTable;
+
+export default PaymentTable;

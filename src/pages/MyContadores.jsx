@@ -19,7 +19,7 @@ function MyContadores() {
         const fetchClients = async () => {
             setLoading(true);
             try {
-                const response = await axios.get("https://backend.cobros.myccontadores.cl/api/clientes");
+                const response = await axios.get("http://localhost:8080/api/clientes");
                 const sortedClients = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 setClients(sortedClients);
             } catch (error) {
@@ -74,7 +74,7 @@ function MyContadores() {
     // Función para descargar el archivo Excel
     const descargarExcel = async () => {
         try {
-            const response = await fetch('https://backend.cobros.myccontadores.cl/api/honorarios/exportar/deudas-pagos/clienteId');  // Cambia "clienteId" por el id correspondiente
+            const response = await fetch('http://localhost:8080/api/honorarios/exportar/deudas-pagos/clienteId');  // Cambia "clienteId" por el id correspondiente
             if (!response.ok) {
                 throw new Error("No se pudo descargar el archivo Excel.");
             }

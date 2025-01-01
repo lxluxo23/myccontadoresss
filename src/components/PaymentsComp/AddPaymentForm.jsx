@@ -14,7 +14,7 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
     useEffect(() => {
         if (userId) {
             axios
-                .get(`https://backend.cobros.myccontadores.cl/api/deudas/usuario/${userId}/pendientes`)
+                .get(`http://localhost:8080/api/deudas/usuario/${userId}/pendientes`)
                 .then((response) => {
                     const deudasPendientes = Array.isArray(response.data) ? response.data : [];
                     setDeudas(deudasPendientes);
@@ -59,7 +59,7 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
 
         try {
             const response = await axios.post(
-                `https://backend.cobros.myccontadores.cl/api/pagos/registrar/${deudaSeleccionada}`,
+                `http://localhost:8080/api/pagos/registrar/${deudaSeleccionada}`,
                 {
                     fechaTransaccion: fechaPago, // Agregar fechaTransaccion
                     monto: parseFloat(monto.replace(/\./g, "")), // Enviar el valor sin formato
