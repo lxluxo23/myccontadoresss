@@ -22,7 +22,7 @@ function MyContadores() {
         const fetchClients = async () => {
             setLoading(true);
             try {
-                const response = await axios.get("http://localhost:8080/api/clientes");
+                const response = await axios.get("https://backend.cobros.myccontadores.cl/api/clientes");
                 const sortedClients = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 setClients(sortedClients);
             } catch (error) {
@@ -78,7 +78,7 @@ function MyContadores() {
     const descargarExcel = async () => {
         setIsDownloading(true);
         try {
-            const response = await fetch('http://localhost:8080/api/clientes/exportar/excel', {  // Endpoint corregido
+            const response = await fetch('https://backend.cobros.myccontadores.cl/api/clientes/exportar/excel', {  // Endpoint corregido
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

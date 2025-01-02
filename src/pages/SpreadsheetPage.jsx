@@ -28,9 +28,9 @@ const SpreadsheetPage = () => {
                 console.log("Cargando datos para cliente ID:", clienteId);
 
                 const [clientResponse, indicatorsResponse, movementsResponse] = await Promise.all([
-                    fetch(`http://localhost:8080/api/clientes/${clienteId}`),
-                    fetch(`http://localhost:8080/api/clientes/${clienteId}/indicadores`),
-                    fetch(`http://localhost:8080/api/clientes/${clienteId}/movimientos`),
+                    fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}`),
+                    fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/indicadores`),
+                    fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/movimientos`),
                 ]);
 
                 if (!clientResponse.ok || !indicatorsResponse.ok || !movementsResponse.ok) {
