@@ -1,3 +1,5 @@
+// src/components/MyCcontadoresComp/MyContadores.jsx
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "../components/MyCcontadoresComp/SidebarMyC";
@@ -14,6 +16,7 @@ function MyContadores() {
     const [sortOrder, setSortOrder] = useState("asc");
     const [loading, setLoading] = useState(false);
     const [editingClient, setEditingClient] = useState(null);
+    const [isDownloading, setIsDownloading] = useState(false); // Estado para indicar la descarga
 
     useEffect(() => {
         const fetchClients = async () => {
@@ -73,20 +76,35 @@ function MyContadores() {
 
     // Función para descargar el archivo Excel
     const descargarExcel = async () => {
+        setIsDownloading(true);
         try {
-            const response = await fetch('http://localhost:8080/api/honorarios/exportar/deudas-pagos/clienteId');  // Cambia "clienteId" por el id correspondiente
+            const response = await fetch('http://localhost:8080/api/clientes/exportar/excel', {  // Endpoint corregido
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                },
+            });
+
             if (!response.ok) {
                 throw new Error("No se pudo descargar el archivo Excel.");
             }
+
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "deudas_y_pagos_clientes.xlsx"; // Nombre del archivo
+            a.download = "clientes_saldo_pendiente.xlsx"; // Nombre del archivo
+            document.body.appendChild(a); // Añadir el elemento al DOM
             a.click();
+            a.remove(); // Remover el elemento del DOM
             window.URL.revokeObjectURL(url);
+
+            alert("Descarga de Excel completada exitosamente.");
         } catch (err) {
             console.error("Error al descargar el archivo Excel:", err);
+            alert("Hubo un error al descargar el archivo Excel. Por favor, intenta nuevamente.");
+        } finally {
+            setIsDownloading(false);
         }
     };
 
@@ -146,7 +164,7 @@ function MyContadores() {
             </main>
 
             {/* Botón Flotante para Descargar el Excel */}
-            <FloatingExcelButton onClick={descargarExcel} /> {/* El botón flotante que descarga el Excel */}
+            <FloatingExcelButton onClick={descargarExcel} disabled={isDownloading} /> {/* El botón flotante que descarga el Excel */}
         </div>
     );
 }
