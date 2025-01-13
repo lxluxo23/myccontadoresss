@@ -18,7 +18,7 @@ const PaymentDetailsModal = ({ payment, onClose }) => {
         setError(null);
         try {
             const response = await axios.get(
-                `http://backend.cobros.myccontadores.cl/api/pagos/comprobante/${pagoId}`,
+                `https://backend.cobros.myccontadores.cl/api/pagos/comprobante/${pagoId}`,
                 { responseType: "blob" }
             );
 

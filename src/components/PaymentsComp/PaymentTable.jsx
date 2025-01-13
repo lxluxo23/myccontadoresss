@@ -45,7 +45,7 @@ const PaymentTable = ({ payments }) => { // Recibe payments como prop
     const confirmDelete = async () => {
         if (!paymentToDelete) return;
         try {
-            const response = await fetch(`http://backend.cobros.myccontadores.cl/api/pagos/cancelar/${paymentToDelete.pagoId}`, {
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/pagos/cancelar/${paymentToDelete.pagoId}`, {
                 method: "DELETE",
             });
             if (!response.ok) {

@@ -56,7 +56,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
     const fetchHonorarios = async () => {
         setLoadingHonorarios(true);
         try {
-            const response = await fetch(`http://backend.cobros.myccontadores.cl/api/honorarios/cliente/${clienteId}`);
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/cliente/${clienteId}`);
             if (!response.ok) {
                 throw new Error("Error al obtener los honorarios contables.");
             }
@@ -95,7 +95,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
         setSelectedDebtId(debt.deudaId);
         setLoadingDetails(true);
         try {
-            const response = await fetch(`http://backend.cobros.myccontadores.cl/api/deudas/${debt.deudaId}/detalle`);
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/deudas/${debt.deudaId}/detalle`);
             if (!response.ok) {
                 throw new Error("Error al obtener detalles de la deuda");
             }
@@ -127,7 +127,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
     const confirmDeleteHonorario = async () => {
         try {
-            const response = await fetch(`hhttp://backend.cobros.myccontadores.cl/api/honorarios/${honorarioToDelete.honorarioId}`, {
+            const response = await fetch(`hhttps://backend.cobros.myccontadores.cl/api/honorarios/${honorarioToDelete.honorarioId}`, {
                 method: "DELETE",
             });
             if (!response.ok) {
@@ -146,7 +146,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
     const handleSubmitHonorario = async (clienteId, payload) => {
         try {
-            const response = await fetch(`http://backend.cobros.myccontadores.cl/api/honorarios/${clienteId}`, {
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${clienteId}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -175,7 +175,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
     const confirmDeleteDebt = async () => {
         try {
-            const response = await fetch(`http://backend.cobros.myccontadores.cl/api/deudas/${debtToDelete.deudaId}`, {
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/deudas/${debtToDelete.deudaId}`, {
                 method: "DELETE",
             });
             if (!response.ok) {
@@ -210,7 +210,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
         try {
             const response = await fetch(
-                `http://backend.cobros.myccontadores.cl/api/honorarios/${selectedHonorario.honorarioId}/pagos`,
+                `https://backend.cobros.myccontadores.cl/api/honorarios/${selectedHonorario.honorarioId}/pagos`,
                 { method: "POST", body: formData }
             );
 
@@ -229,7 +229,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
     const handleViewHonorarioInfo = async (honorarioId) => {
         try {
-            const response = await fetch(`http://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/detalle`);
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/detalle`);
             if (!response.ok) {
                 throw new Error("Error al cargar los detalles del honorario.");
             }
@@ -243,7 +243,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
     const descargarComprobante = async (pagoId) => {
         try {
-            const response = await fetch(`http://backend.cobros.myccontadores.cl/api/honorarios/pagos/comprobante/${pagoId}`);
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/pagos/comprobante/${pagoId}`);
             if (!response.ok) {
                 throw new Error("No se pudo descargar el comprobante.");
             }
@@ -263,7 +263,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
     const visualizarComprobante = async (pagoId) => {
         try {
-            const response = await fetch(`http://backend.cobros.myccontadores.cl/api/honorarios/pagos/comprobante/${pagoId}`);
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/pagos/comprobante/${pagoId}`);
             if (!response.ok) {
                 throw new Error("No se pudo cargar el comprobante.");
             }
@@ -285,7 +285,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
     const handleViewMonthDetails = async (honorarioId, mes) => {
         try {
-            const response = await fetch(`http://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/mes/${mes}`);
+            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/mes/${mes}`);
             if (!response.ok) {
                 throw new Error("No se pudo cargar la información del mes.");
             }

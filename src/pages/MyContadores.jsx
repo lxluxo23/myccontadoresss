@@ -26,7 +26,7 @@ function MyContadores() {
         const fetchClients = async () => {
             setLoading(true);
             try {
-                const response = await axios.get("http://backend.cobros.myccontadores.cl/api/clientes");
+                const response = await axios.get("https://backend.cobros.myccontadores.cl/api/clientes");
                 const sortedClients = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 setClients(sortedClients);
             } catch (error) {
@@ -114,7 +114,7 @@ function MyContadores() {
         setIsDownloading(true);
         try {
             const response = await fetch(
-                `http://backend.cobros.myccontadores.cl/api/clientes/exportar/excel?mes=${month}&anio=${year}`,
+                `https://backend.cobros.myccontadores.cl/api/clientes/exportar/excel?mes=${month}&anio=${year}`,
                 {
                     method: "GET",
                     headers: {
