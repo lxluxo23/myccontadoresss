@@ -1,8 +1,38 @@
-// PaymentDetailsModal.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const PaymentDetailsModal = ({ payment, onClose }) => {
-    if (!payment) return null;
+    const [comprobanteUrl, setComprobanteUrl] = useState(null);
+    const [comprobanteFormato, setComprobanteFormato] = useState("");
+    const [loadingComprobante, setLoadingComprobante] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (payment?.pagoId) {
+            cargarComprobante(payment.pagoId);
+        }
+    }, [payment]);
+
+    const cargarComprobante = async (pagoId) => {
+        setLoadingComprobante(true);
+        setError(null);
+        try {
+            const response = await axios.get(
+                `http://localhost:8080/api/pagos/comprobante/${pagoId}`,
+                { responseType: "blob" }
+            );
+
+            const formato = response.headers["content-type"];
+            const url = URL.createObjectURL(response.data);
+            setComprobanteUrl(url);
+            setComprobanteFormato(formato);
+        } catch (err) {
+            console.error("Error al cargar el comprobante:", err);
+            setError("No se pudo cargar el comprobante.");
+        } finally {
+            setLoadingComprobante(false);
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -25,6 +55,36 @@ const PaymentDetailsModal = ({ payment, onClose }) => {
                     </p>
                     <p><strong>Método:</strong> {payment.metodoPago || "N/A"}</p>
                     <p><strong>Observaciones:</strong> {payment.observaciones || "N/A"}</p>
+                </div>
+
+                <div className="mt-4">
+                    <h3 className="text-lg font-bold mb-2">Comprobante</h3>
+                    {loadingComprobante && <p>Cargando comprobante...</p>}
+                    {error && <p className="text-red-500">{error}</p>}
+                    {comprobanteUrl && (
+                        <div>
+                            {comprobanteFormato === "application/pdf" ? (
+                                <iframe
+                                    src={comprobanteUrl}
+                                    className="w-full h-64 border rounded-md"
+                                    title="Vista previa del comprobante"
+                                />
+                            ) : (
+                                <img
+                                    src={comprobanteUrl}
+                                    alt="Comprobante"
+                                    className="w-full max-h-64 object-contain"
+                                />
+                            )}
+                            <a
+                                href={comprobanteUrl}
+                                download={`comprobante-${payment.pagoId}`}
+                                className="block text-indigo-500 mt-2 text-center"
+                            >
+                                Descargar Comprobante
+                            </a>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

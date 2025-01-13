@@ -1,5 +1,3 @@
-// AddPaymentForm.jsx
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -10,6 +8,7 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
     const [observaciones, setObservaciones] = useState("");
     const [deudaSeleccionada, setDeudaSeleccionada] = useState("");
     const [deudas, setDeudas] = useState([]);
+    const [comprobante, setComprobante] = useState(null);
 
     useEffect(() => {
         if (userId) {
@@ -37,6 +36,10 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
         }
     };
 
+    const handleFileChange = (e) => {
+        setComprobante(e.target.files[0]); // Guardar el archivo en el estado
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -56,15 +59,28 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
             alert("Debe seleccionar una deuda pendiente para registrar el pago.");
             return;
         }
+        if (!comprobante) {
+            alert("Debe subir un comprobante de pago.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("montoPago", parseFloat(monto.replace(/\./g, "")));
+        formData.append("comprobante", comprobante); // Agregar el archivo al FormData
+        formData.append("fechaPagoReal", fechaPago);
+        formData.append("metodoPago", metodoPago);
+        if (observaciones) {
+            formData.append("observaciones", observaciones);
+        }
 
         try {
             const response = await axios.post(
-                `http://localhost:8080/api/pagos/registrar/${deudaSeleccionada}`,
+                `http://localhost:8080/api/pagos/${deudaSeleccionada}/registrar`,
+                formData,
                 {
-                    fechaTransaccion: fechaPago, // Agregar fechaTransaccion
-                    monto: parseFloat(monto.replace(/\./g, "")), // Enviar el valor sin formato
-                    metodoPago,
-                    observaciones,
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
                 }
             );
 
@@ -137,6 +153,15 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
                             <option value="EFECTIVO">Efectivo</option>
                             <option value="CHEQUE">Cheque</option>
                         </select>
+                    </div>
+                    <div>
+                        <label className="block text-gray-700 dark:text-gray-300">Comprobante</label>
+                        <input
+                            type="file"
+                            accept="image/*,application/pdf" // Puedes personalizar los formatos permitidos
+                            onChange={handleFileChange}
+                            className="w-full p-2 border rounded-md"
+                        />
                     </div>
                     <div>
                         <label className="block text-gray-700 dark:text-gray-300">Observaciones</label>
