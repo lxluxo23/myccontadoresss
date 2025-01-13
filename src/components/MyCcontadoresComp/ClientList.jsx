@@ -13,7 +13,7 @@ function ClientList() {
     // Carga los clientes al montar el componente
     const fetchClients = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/clientes");
+        const response = await axios.get("http://backend.cobros.myccontadores.cl/api/clientes");
         setClients(response.data);
       } catch (error) {
         console.error("Error al obtener los clientes:", error);
