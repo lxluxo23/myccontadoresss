@@ -33,7 +33,7 @@ function AddClientForm({ onClose, onAddClient }) {
 
         try {
             // Enviar los datos al backend
-            const response = await axios.post("https://backend.cobros.myccontadores.cl/api/clientes", clientData);
+            const response = await axios.post("http://localhost:8080/api/clientes", clientData);
 
             // Llamar a la función del componente padre para actualizar la lista de clientes
             onAddClient(response.data);

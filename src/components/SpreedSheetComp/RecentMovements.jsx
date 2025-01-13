@@ -31,7 +31,7 @@ const RecentMovements = () => {
                 setIsLoading(true);
                 setError(null);
 
-                const url = `https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/movimientos`;
+                const url = `http://localhost:8080/api/clientes/${clienteId}/movimientos`;
                 console.log("Realizando solicitud a:", url);
 
                 const response = await fetch(url);

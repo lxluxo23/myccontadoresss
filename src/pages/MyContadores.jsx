@@ -1,5 +1,3 @@
-// src/components/MyCcontadoresComp/MyContadores.jsx
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "../components/MyCcontadoresComp/SidebarMyC";
@@ -8,7 +6,8 @@ import TableHeader from "../components/MyCcontadoresComp/TableHeader";
 import ClientRow from "../components/MyCcontadoresComp/ClientRow";
 import Pagination from "../components/MyCcontadoresComp/Pagination";
 import EditClientForm from "../components/MyCcontadoresComp/EditClientForm";
-import FloatingExcelButton from "../components/MyCcontadoresComp/FloatingExcelButton";  // Importar el nuevo botón flotante
+import FloatingExcelButton from "../components/MyCcontadoresComp/FloatingExcelButton";
+import MonthYearModal from "../components/MyCcontadoresComp/MonthYearModal";
 
 function MyContadores() {
     const [clients, setClients] = useState([]);
@@ -16,13 +15,18 @@ function MyContadores() {
     const [sortOrder, setSortOrder] = useState("asc");
     const [loading, setLoading] = useState(false);
     const [editingClient, setEditingClient] = useState(null);
-    const [isDownloading, setIsDownloading] = useState(false); // Estado para indicar la descarga
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    // Estados para la paginación
+    const [currentPage, setCurrentPage] = useState(1);
+    const clientsPerPage = 10;
 
     useEffect(() => {
         const fetchClients = async () => {
             setLoading(true);
             try {
-                const response = await axios.get("https://backend.cobros.myccontadores.cl/api/clientes");
+                const response = await axios.get("http://localhost:8080/api/clientes");
                 const sortedClients = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 setClients(sortedClients);
             } catch (error) {
@@ -74,16 +78,50 @@ function MyContadores() {
         setClients(sortedClients);
     };
 
-    // Función para descargar el archivo Excel
-    const descargarExcel = async () => {
+    // Lógica de paginación
+    const lastIndex = currentPage * clientsPerPage;
+    const firstIndex = lastIndex - clientsPerPage;
+    const currentClients = filteredClients.slice(firstIndex, lastIndex);
+    const totalPages = Math.ceil(filteredClients.length / clientsPerPage);
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage((prevPage) => prevPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage((prevPage) => prevPage + 1);
+        }
+    };
+
+    const handlePageClick = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    // Abrir y cerrar el modal
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
+    // Descargar el archivo Excel con los parámetros de mes y año
+    const handleDownloadExcel = async (month, year) => {
         setIsDownloading(true);
         try {
-            const response = await fetch('https://backend.cobros.myccontadores.cl/api/clientes/exportar/excel', {  // Endpoint corregido
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                },
-            });
+            const response = await fetch(
+                `http://localhost:8080/api/clientes/exportar/excel?mes=${month}&anio=${year}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    },
+                }
+            );
 
             if (!response.ok) {
                 throw new Error("No se pudo descargar el archivo Excel.");
@@ -93,10 +131,10 @@ function MyContadores() {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "clientes_saldo_pendiente.xlsx"; // Nombre del archivo
-            document.body.appendChild(a); // Añadir el elemento al DOM
+            a.download = `clientes_saldo_pendiente_${month}_${year}.xlsx`;
+            document.body.appendChild(a);
             a.click();
-            a.remove(); // Remover el elemento del DOM
+            a.remove();
             window.URL.revokeObjectURL(url);
 
             alert("Descarga de Excel completada exitosamente.");
@@ -105,6 +143,7 @@ function MyContadores() {
             alert("Hubo un error al descargar el archivo Excel. Por favor, intenta nuevamente.");
         } finally {
             setIsDownloading(false);
+            handleCloseModal();
         }
     };
 
@@ -120,7 +159,6 @@ function MyContadores() {
             {/* Contenido Principal */}
             <main className="flex-1 p-6">
                 <div className="max-w-7xl mx-auto">
-
                     {/* Filtros y búsqueda */}
                     <FilterSection
                         onAddClient={(clientData) => setClients((prev) => [...prev, clientData])}
@@ -131,9 +169,9 @@ function MyContadores() {
                     <div className="bg-white rounded-lg shadow mt-6">
                         <TableHeader sortOrder={sortOrder} onSortChange={handleSortChange} />
 
-                        {filteredClients.length > 0 ? (
+                        {currentClients.length > 0 ? (
                             <div>
-                                {filteredClients.map((client) => (
+                                {currentClients.map((client) => (
                                     <ClientRow
                                         key={client.clienteId}
                                         client={client}
@@ -147,8 +185,14 @@ function MyContadores() {
                         )}
                     </div>
 
-                    {/* Paginación */}
-                    <Pagination />
+                    {/* Controles de paginación */}
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPrevious={handlePreviousPage}
+                        onNext={handleNextPage}
+                        onPageClick={handlePageClick}
+                    />
 
                     {/* Modal para edición */}
                     {editingClient && (
@@ -163,8 +207,15 @@ function MyContadores() {
                 </div>
             </main>
 
-            {/* Botón Flotante para Descargar el Excel */}
-            <FloatingExcelButton onClick={descargarExcel} disabled={isDownloading} /> {/* El botón flotante que descarga el Excel */}
+            {/* Modal para selección de mes y año */}
+            <MonthYearModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onConfirm={(month, year) => handleDownloadExcel(month, year)}
+            />
+
+            {/* Botón Flotante para Abrir el Modal */}
+            <FloatingExcelButton onClick={handleOpenModal} disabled={isDownloading} />
         </div>
     );
 }
