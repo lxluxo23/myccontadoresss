@@ -168,7 +168,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
     const handleRegisterPayment = async (e, honorarioId, mes) => {
         if (e && e.preventDefault) e.preventDefault(); // Solo llamar preventDefault si es un evento
 
-        if (!honorarioId || !mes || !montoPago || !comprobante || !fechaPagoReal || !metodoPago) {
+        if (!honorarioId || !mes || !montoPago || !fechaPagoReal || !metodoPago) {
             alert("Por favor, completa todos los campos.");
             return;
         }
@@ -221,7 +221,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
     };
 
     const submitPayment = async () => {
-        if (!selectedHonorario || !montoPago || !fechaPagoReal || !metodoPago || !comprobante) {
+        if (!selectedHonorario || !montoPago || !fechaPagoReal || !metodoPago) {
             alert("Por favor, completa todos los campos.");
             return;
         }
