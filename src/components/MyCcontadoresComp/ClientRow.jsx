@@ -1,19 +1,14 @@
-﻿import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import ExpandedClientRow from './ExpandedClientRow';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCliente } from "../context/ClienteContext";
+import ExpandedClientRow from "./ExpandedClientRow";
+import axios from "axios";
+import { FaEdit, FaTrashAlt, FaEllipsisH, FaUser } from "react-icons/fa";
 
-function ClientRow({ client = {}, showAddClientForm }) {
+function ClientRow({ client = {}, showAddClientForm, onDelete, onEdit }) {
     const [expanded, setExpanded] = useState(false);
+    const { setClienteId } = useCliente();
     const navigate = useNavigate();
-
-    const {
-        name = "Nombre no disponible",
-        status = "Estado no disponible",
-        date = "Fecha no disponible",
-        contact = "Contacto no disponible",
-        rut = "RUT no disponible",
-        paymentDate = "Fecha de pago no disponible",
-    } = client;
 
     const handleRowClick = () => {
         setExpanded(!expanded);
@@ -21,84 +16,81 @@ function ClientRow({ client = {}, showAddClientForm }) {
 
     const handleDetailClick = (event) => {
         event.stopPropagation();
-        navigate('/spreadsheet');
+        setClienteId(client.clienteId);
+        navigate(`/spreadsheet/${client.clienteId}`);
     };
 
     const handleEditClick = (event) => {
         event.stopPropagation();
-        alert("Editar funcionalidad aún no implementada");
+        onEdit(client);
     };
 
-    const handleDeleteClick = (event) => {
+    const handleDeleteClick = async (event) => {
         event.stopPropagation();
-        alert("Eliminar funcionalidad aún no implementada");
-    };
-
-    const handleMoreClick = (event) => {
-        event.stopPropagation();
-        alert("Más funcionalidad aún no implementada");
+        if (window.confirm(`¿Está seguro de que desea eliminar al cliente ${client.nombre}?`)) {
+            try {
+                await axios.delete(`https://backend.cobros.myccontadores.cl/api/clientes/${client.clienteId}`);
+                alert(`Cliente ${client.nombre} eliminado exitosamente.`);
+                onDelete(client.clienteId);
+            } catch (error) {
+                console.error("Error al eliminar el cliente:", error.response?.data || error.message);
+                alert("Hubo un problema al intentar eliminar el cliente.");
+            }
+        }
     };
 
     return (
         <div>
             <div
-                className={`flex items-center gap-10 px-5 py-3 w-full min-h-[50px] border border-gray-200 rounded-lg cursor-pointer 
-                ${expanded ? 'bg-[#5D5FEF]' : 'bg-white'}
-                ${showAddClientForm ? 'pointer-events-none opacity-50' : ''} 
-                ${!expanded ? 'duration-500 hover:scale-105 hover:bg-indigo-100 transition-all' : ''}`} // Solo animación si no está expandido
+                className={`grid grid-cols-4 items-center px-6 py-4 w-full border border-gray-200 rounded-lg cursor-pointer 
+                ${expanded ? "bg-indigo-50 shadow-md" : "bg-white"} 
+                ${showAddClientForm ? "pointer-events-none opacity-50" : ""} 
+                transition-transform duration-200 hover:scale-105 hover:bg-gray-100`}
                 onClick={handleRowClick}
             >
-                <div className={`w-[200px] ${expanded ? 'text-white' : 'text-green-600'} font-sans text-[14px]`}>
-                    {name}
+                {/* Información del cliente */}
+                <div className="text-gray-800 font-medium text-sm truncate">
+                    {client.nombre || "Nombre no disponible"}
                 </div>
-                <div className={`w-[120px] ${expanded ? 'text-white' : 'text-zinc-700'} font-sans text-[14px]`}>
-                    {status}
+                <div className="text-gray-600 font-normal text-sm truncate text-center">
+                    {client.email || "Correo no disponible"}
                 </div>
-                <div className={`w-[150px] ${expanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}>
-                    {date}
+                <div className="text-gray-600 font-normal text-sm truncate text-center">
+                    {client.rut || "RUT no disponible"}
                 </div>
-                <div className={`w-[100px] ${expanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}>
-                    {contact}
-                </div>
-                <div className={`w-[150px] ${expanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}>
-                    {rut}
-                </div>
-                <div className={`w-[180px] ${expanded ? 'text-white' : 'text-gray-600'} font-sans text-[14px]`}>
-                    {paymentDate}
-                </div>
-                <div className="w-[120px] flex justify-center gap-4">
-                    <div
-                        className={`p-2 rounded-lg shadow-sm ${expanded ? 'bg-gray-50 text-indigo-500' : 'bg-indigo-500 text-white'}`}
+
+                {/* Botones de acción */}
+                <div className="flex justify-end items-center gap-3">
+                    <button
+                        className="flex items-center gap-2 px-3 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-all"
                         onClick={handleDetailClick}
                     >
-                        Detalle
-                    </div>
-                    <img
-                        loading="lazy"
-                        src={expanded ? "https://cdn.builder.io/api/v1/image/assets/TEMP/993067af5ea4a4c041538a25e19bc2604be7f44aabca253d5465dad75ca74f00?apiKey=c8e063ba4e294c0496fff8126c800e5e&" : "https://cdn.builder.io/api/v1/image/assets/TEMP/dea794fe98df3586a8c24bc9cbe3fd5ab8cb41fff78c6837054ba10849216de2?apiKey=c8e063ba4e294c0496fff8126c800e5e&"}
-                        alt="Editar"
-                        className="object-contain shrink-0 w-[30px]"
+                        <FaUser className="w-4 h-4" />
+                        Ver Cliente
+                    </button>
+                    <FaEdit
+                        className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                        title="Editar"
                         onClick={handleEditClick}
                     />
-                    <img
-                        loading="lazy"
-                        src={expanded ? "https://cdn.builder.io/api/v1/image/assets/TEMP/e6be53545a674c23db96adba534d034f98a4c3529f9e0a828beb534394283415?apiKey=c8e063ba4e294c0496fff8126c800e5e&" : "https://cdn.builder.io/api/v1/image/assets/TEMP/b2c0af724e64f2a72d83a9fe68fc767f2b746dc3168115915a1d143553c190eb?apiKey=c8e063ba4e294c0496fff8126c800e5e&"}
-                        alt="Eliminar"
-                        className="object-contain shrink-0 w-[30px]"
+                    <FaTrashAlt
+                        className="text-red-500 hover:text-red-700 cursor-pointer"
+                        title="Eliminar"
                         onClick={handleDeleteClick}
                     />
-                    <img
-                        loading="lazy"
-                        src={expanded ? "https://cdn.builder.io/api/v1/image/assets/TEMP/e596324028b2a73c869ab3a30a2afd29348e42b614d1eaac9c2ef9fce603dfac?apiKey=c8e063ba4e294c0496fff8126c800e5e&" : "https://cdn.builder.io/api/v1/image/assets/TEMP/1bd453a1918970a54ffc2b34f36dd8210408728eb76742b3bef7083b42a1a351?apiKey=c8e063ba4e294c0496fff8126c800e5e&"}
-                        alt="Más"
-                        className="object-contain shrink-0 w-[5px]"
-                        onClick={handleMoreClick}
+                    <FaEllipsisH
+                        className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                        title="Más"
+                        onClick={() => alert("Más funcionalidades aún no implementadas.")}
                     />
                 </div>
             </div>
 
+            {/* Fila expandida */}
             <div
-                className={`overflow-hidden transition-all duration-500 ease-in-out ${expanded ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    expanded ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+                }`}
             >
                 <ExpandedClientRow />
             </div>

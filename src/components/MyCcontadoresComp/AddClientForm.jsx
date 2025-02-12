@@ -1,12 +1,16 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 
 function AddClientForm({ onClose, onAddClient }) {
     const [clientData, setClientData] = useState({
-        name: '',
+        nombre: '',
         rut: '',
         email: '',
-        phone: '',
+        telefono: '',
+        direccion: '',
     });
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -16,10 +20,32 @@ function AddClientForm({ onClose, onAddClient }) {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        onAddClient(clientData);
-        onClose();
+
+        // Validar campos obligatorios
+        if (!clientData.nombre.trim() || !clientData.rut.trim()) {
+            alert('Los campos Nombre y RUT son obligatorios.');
+            return;
+        }
+
+        setIsSubmitting(true); // Mostrar indicador de carga durante el envío
+
+        try {
+            // Enviar los datos al backend
+            const response = await axios.post("https://backend.cobros.myccontadores.cl/api/clientes", clientData);
+
+            // Llamar a la función del componente padre para actualizar la lista de clientes
+            onAddClient(response.data);
+
+            // Cerrar el formulario después de enviar los datos
+            onClose();
+        } catch (error) {
+            console.error("Error al agregar cliente:", error.response?.data || error.message);
+            alert("Hubo un problema al agregar el cliente. Por favor, inténtalo nuevamente.");
+        } finally {
+            setIsSubmitting(false); // Ocultar indicador de carga
+        }
     };
 
     return (
@@ -31,8 +57,8 @@ function AddClientForm({ onClose, onAddClient }) {
                         <label className="block text-sm font-medium">Nombre</label>
                         <input
                             type="text"
-                            name="name"
-                            value={clientData.name}
+                            name="nombre"
+                            value={clientData.nombre}
                             onChange={handleChange}
                             className="w-full p-2 border rounded-lg"
                             required
@@ -57,18 +83,26 @@ function AddClientForm({ onClose, onAddClient }) {
                             value={clientData.email}
                             onChange={handleChange}
                             className="w-full p-2 border rounded-lg"
-                            required
                         />
                     </div>
                     <div className="mb-4">
                         <label className="block text-sm font-medium">Teléfono</label>
                         <input
                             type="tel"
-                            name="phone"
-                            value={clientData.phone}
+                            name="telefono"
+                            value={clientData.telefono}
                             onChange={handleChange}
                             className="w-full p-2 border rounded-lg"
-                            required
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium">Dirección</label>
+                        <input
+                            type="text"
+                            name="direccion"
+                            value={clientData.direccion}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded-lg"
                         />
                     </div>
                     <div className="flex justify-end space-x-2">
@@ -81,9 +115,14 @@ function AddClientForm({ onClose, onAddClient }) {
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-indigo-500 text-white rounded-lg"
+                            className={`px-4 py-2 rounded-lg ${
+                                isSubmitting
+                                    ? "bg-gray-400 text-gray-800 cursor-not-allowed"
+                                    : "bg-indigo-500 text-white hover:bg-indigo-600"
+                            }`}
+                            disabled={isSubmitting}
                         >
-                            Añadir
+                            {isSubmitting ? "Añadiendo..." : "Añadir"}
                         </button>
                     </div>
                 </form>

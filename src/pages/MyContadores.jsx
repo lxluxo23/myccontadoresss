@@ -1,123 +1,222 @@
-﻿import React, { useState } from 'react';
-import Header from '../components/MyCcontadoresComp/Header';
-import FilterSection from '../components/MyCcontadoresComp/FilterSection';
-import TableHeader from '../components/MyCcontadoresComp/TableHeader';
-import ClientRow from '../components/MyCcontadoresComp/ClientRow';
-import Pagination from '../components/MyCcontadoresComp/Pagination';
-import ExpandedClientRow from '../components/MyCcontadoresComp/ExpandedClientRow';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Sidebar from "../components/MyCcontadoresComp/SidebarMyC";
+import FilterSection from "../components/MyCcontadoresComp/FilterSection";
+import TableHeader from "../components/MyCcontadoresComp/TableHeader";
+import ClientRow from "../components/MyCcontadoresComp/ClientRow";
+import Pagination from "../components/MyCcontadoresComp/Pagination";
+import EditClientForm from "../components/MyCcontadoresComp/EditClientForm";
+import FloatingExcelButton from "../components/MyCcontadoresComp/FloatingExcelButton";
+import MonthYearModal from "../components/MyCcontadoresComp/MonthYearModal";
 
 function MyContadores() {
-    const clients = [
-        {
-            name: 'Camilo Osorio',
-            status: 'Por pagar',
-            date: '23-10-2024',
-            contact: 'No disp',
-            rut: '20.792-999-9',
-            paymentDate: '21-03-2022'
-        },
-        {
-            name: 'Luis Céspedes',
-            status: 'Por pagar',
-            date: '02-11-2024',
-            contact: 'No disp',
-            rut: '20.792-999-9',
-            paymentDate: '21-03-2022',
-        },
-        {
-            name: 'Andrea Céspedes',
-            status: 'Por pagar',
-            date: '22-03-2024',
-            contact: 'No disp',
-            rut: '20.792-999-9',
-            paymentDate: '21-03-2022'
-        },
-        {
-            name: 'Constanza Sanhueza',
-            status: 'Al dia',
-            date: '22/02/2024',
-            contact: 'No disp',
-            rut: '20.792-999-9',
-            paymentDate: '21-03-2022'
-        },
-        {
-            name: 'Enzo Camerati',
-            status: 'Al dia',
-            date: '10-03-2022',
-            contact: 'No disp',
-            rut: '20.792-999-9',
-            paymentDate: '21-03-2022'
-        },
-        {
-            name: 'Camilo Osorio',
-            status: 'Por pagar',
-            date: '23-10-2024',
-            contact: 'No disp',
-            rut: '20.792-999-9',
-            paymentDate: '21-03-2022'
-        },
-        {
-            name: 'Luis Céspedes',
-            status: 'Por pagar',
-            date: '02-11-2024',
-            contact: 'No disp',
-            rut: '20.792-999-9',
-            paymentDate: '21-03-2022',
-        },
-        {
-            name: 'Andrea Céspedes',
-            status: 'Por pagar',
-            date: '22-03-2024',
-            contact: 'No disp',
-            rut: '20.792-999-9',
-            paymentDate: '21-03-2022'
-        },
-        {
-            name: 'Constanza Sanhueza',
-            status: 'Al dia',
-            date: '22/02/2024',
-            contact: 'No disp',
-            rut: '20.792-999-9',
-            paymentDate: '21-03-2022'
-        },
-        {
-            name: 'Enzo Camerati',
-            status: 'Al dia',
-            date: '10-03-2022',
-            contact: 'No disp',
-            rut: '20.792-999-9',
-            paymentDate: '21-03-2022'
-        }
-    ];
+    const [clients, setClients] = useState([]);
+    const [searchName, setSearchName] = useState("");
+    const [sortOrder, setSortOrder] = useState("asc");
+    const [loading, setLoading] = useState(false);
+    const [editingClient, setEditingClient] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
 
-    const [expandedClients, setExpandedClients] = useState({});
+    // Estados para la paginación
+    const [currentPage, setCurrentPage] = useState(1);
+    const clientsPerPage = 10;
 
-    const toggleExpansion = (name) => {
-        setExpandedClients(prevState => ({
-            ...prevState,
-            [name]: !prevState[name]
-        }));
+    useEffect(() => {
+        const fetchClients = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get("https://backend.cobros.myccontadores.cl/api/clientes");
+                const sortedClients = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                setClients(sortedClients);
+            } catch (error) {
+                console.error("Error al cargar los clientes:", error.response?.data || error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchClients();
+    }, []);
+
+    const handleEditClick = (client) => {
+        setEditingClient(client);
     };
 
+    const handleSaveClient = (updatedClient) => {
+        setClients((prevClients) =>
+            prevClients.map((client) =>
+                client.clienteId === updatedClient.clienteId ? updatedClient : client
+            )
+        );
+        setEditingClient(null);
+    };
+
+    const handleCancelEdit = () => {
+        setEditingClient(null);
+    };
+
+    const handleDeleteClient = (deletedClientId) => {
+        setClients((prevClients) =>
+            prevClients.filter((client) => client.clienteId !== deletedClientId)
+        );
+    };
+
+    const filteredClients = clients.filter((client) =>
+        client.nombre.toLowerCase().includes(searchName.toLowerCase())
+    );
+
+    const handleSortChange = (newSortOrder) => {
+        setSortOrder(newSortOrder);
+        const sortedClients = [...clients].sort((a, b) => {
+            if (newSortOrder === "asc") {
+                return a.nombre.localeCompare(b.nombre);
+            } else {
+                return b.nombre.localeCompare(a.nombre);
+            }
+        });
+        setClients(sortedClients);
+    };
+
+    // Lógica de paginación
+    const lastIndex = currentPage * clientsPerPage;
+    const firstIndex = lastIndex - clientsPerPage;
+    const currentClients = filteredClients.slice(firstIndex, lastIndex);
+    const totalPages = Math.ceil(filteredClients.length / clientsPerPage);
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage((prevPage) => prevPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage((prevPage) => prevPage + 1);
+        }
+    };
+
+    const handlePageClick = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    // Abrir y cerrar el modal
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
+    // Descargar el archivo Excel con los parámetros de mes y año
+    const handleDownloadExcel = async (month, year) => {
+        setIsDownloading(true);
+        try {
+            const response = await fetch(
+                `https://backend.cobros.myccontadores.cl/api/clientes/exportar/excel?mes=${month}&anio=${year}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("No se pudo descargar el archivo Excel.");
+            }
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `clientes_saldo_pendiente_${month}_${year}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            alert("Descarga de Excel completada exitosamente.");
+        } catch (err) {
+            console.error("Error al descargar el archivo Excel:", err);
+            alert("Hubo un error al descargar el archivo Excel. Por favor, intenta nuevamente.");
+        } finally {
+            setIsDownloading(false);
+            handleCloseModal();
+        }
+    };
+
+    if (loading) {
+        return <p className="text-center mt-6 text-lg">Cargando clientes...</p>;
+    }
+
     return (
-        <main className="flex flex-col items-center p-6 min-h-screen" style={{backgroundColor: '#F2F5FF'}}>
-            <div
-                className="flex flex-col px-9 py-6 w-full max-w-[1400px] min-h-[892px] bg-white rounded-3xl shadow-[1px_2px_3px_rgba(93,95,239,0.4)] max-md:px-5 mt-16">
-                <Header/>
-                <FilterSection/>
-                <TableHeader/>
-                <section className="flex flex-col w-full gap-3">
-                    {clients.map((client, index) => (
-                        <React.Fragment key={index}>
-                            <ClientRow client={client} onClick={() => toggleExpansion(client.name)}
-                                       expanded={expandedClients[client.name]}/>
-                            {expandedClients[client.name] && <ExpandedClientRow client={client}/>}
-                        </React.Fragment>
-                    ))}
-                </section>
-                <Pagination/>
-            </div>
-        </main>
+        <div className="flex min-h-screen bg-gray-50">
+            {/* Sidebar */}
+            <Sidebar />
+
+            {/* Contenido Principal */}
+            <main className="flex-1 p-6">
+                <div className="max-w-7xl mx-auto">
+                    {/* Filtros y búsqueda */}
+                    <FilterSection
+                        onAddClient={(clientData) => setClients((prev) => [...prev, clientData])}
+                        onSearchNameChange={setSearchName}
+                    />
+
+                    {/* Tabla de clientes */}
+                    <div className="bg-white rounded-lg shadow mt-6">
+                        <TableHeader sortOrder={sortOrder} onSortChange={handleSortChange} />
+
+                        {currentClients.length > 0 ? (
+                            <div>
+                                {currentClients.map((client) => (
+                                    <ClientRow
+                                        key={client.clienteId}
+                                        client={client}
+                                        onDelete={handleDeleteClient}
+                                        onEdit={handleEditClick}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-center text-gray-500 py-6">No se encontraron clientes.</p>
+                        )}
+                    </div>
+
+                    {/* Controles de paginación */}
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPrevious={handlePreviousPage}
+                        onNext={handleNextPage}
+                        onPageClick={handlePageClick}
+                    />
+
+                    {/* Modal para edición */}
+                    {editingClient && (
+                        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                            <EditClientForm
+                                client={editingClient}
+                                onSave={handleSaveClient}
+                                onCancel={handleCancelEdit}
+                            />
+                        </div>
+                    )}
+                </div>
+            </main>
+
+            {/* Modal para selección de mes y año */}
+            <MonthYearModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onConfirm={(month, year) => handleDownloadExcel(month, year)}
+            />
+
+            {/* Botón Flotante para Abrir el Modal */}
+            <FloatingExcelButton onClick={handleOpenModal} disabled={isDownloading} />
+        </div>
     );
 }
 

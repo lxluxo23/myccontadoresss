@@ -1,0 +1,9 @@
+services:
+  react-app:
+    build: .
+    networks:
+      - nextcloud_backend
+
+networks:
+  nextcloud_backend:
+    external: true
