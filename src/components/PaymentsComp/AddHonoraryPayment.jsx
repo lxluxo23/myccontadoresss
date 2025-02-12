@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import { config } from '../../config/config'; 
 const AddHonoraryPayment = ({ honorarioId, onSubmit, onClose }) => {
     const [paymentData, setPaymentData] = useState({
         mes: "",
@@ -32,7 +32,7 @@ const AddHonoraryPayment = ({ honorarioId, onSubmit, onClose }) => {
     // Función para obtener pagos existentes
     const fetchExistingPayments = async () => {
         try {
-            const response = await axios.get(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/pagos`);
+            const response = await axios.get(`${config.apiUrl}/api/honorarios/${honorarioId}/pagos`);
             return response.data; // Asumiendo que la respuesta es un array de pagos
         } catch (err) {
             console.error("Error al obtener los pagos existentes:", err);

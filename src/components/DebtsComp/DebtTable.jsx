@@ -14,7 +14,7 @@ import Spinner from "./Spinner";
 import Modal from "./Modal";
 import HonoraryList from "./HonoraryList";
 import DebtList from "./DebtList";
-
+import { config } from '../../config/config'; 
 const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
     const [currentPageDebts, setCurrentPageDebts] = useState(1);
     const [currentPageHonorarios, setCurrentPageHonorarios] = useState(1);
@@ -50,7 +50,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
     const fetchHonorarios = async () => {
         setLoadingHonorarios(true);
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/cliente/${clienteId}`);
+            const response = await fetch(`${config.apiUrl}/api/honorarios/cliente/${clienteId}`);
             if (!response.ok) {
                 throw new Error("Error al obtener los honorarios contables.");
             }
@@ -67,7 +67,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
     const fetchDebts = async () => {
         setLoadingDebts(true);  // Inicia la carga de las deudas
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/deudas/cliente/${clienteId}`);
+            const response = await fetch(`${config.apiUrl}/api/deudas/cliente/${clienteId}`);
             if (!response.ok) {
                 throw new Error("Error al obtener las deudas.");
             }
@@ -91,7 +91,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
         setSelectedDebtId(debt.deudaId);
         setLoadingDetails(true);
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/deudas/${debt.deudaId}/detalle`);
+            const response = await fetch(`${config.apiUrl}/api/deudas/${debt.deudaId}/detalle`);
             if (!response.ok) {
                 throw new Error("Error al obtener detalles de la deuda");
             }
@@ -116,7 +116,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
     const confirmDeleteDebt = async () => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/deudas/${debtToDelete.deudaId}`, { method: "DELETE" });
+            const response = await fetch(`${config.apiUrl}/api/deudas/${debtToDelete.deudaId}`, { method: "DELETE" });
             if (!response.ok) {
                 throw new Error("Error al eliminar la deuda.");
             }
@@ -135,7 +135,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
     const confirmDeleteHonorario = async () => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioToDelete.honorarioId}`, { method: "DELETE" });
+            const response = await fetch(`${config.apiUrl}/api/honorarios/${honorarioToDelete.honorarioId}`, { method: "DELETE" });
             if (!response.ok) {
                 throw new Error("Error al eliminar el honorario.");
             }
@@ -154,7 +154,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
     const handleViewHonorarioDetails = async (honorarioId) => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/detalle`);
+            const response = await fetch(`${config.apiUrl}/api/honorarios/${honorarioId}/detalle`);
             if (!response.ok) {
                 throw new Error("Error al cargar los detalles del honorario.");
             }
@@ -182,7 +182,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
         try {
             const response = await fetch(
-                `https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/pagos`,
+                `${config.apiUrl}/api/honorarios/${honorarioId}/pagos`,
                 { method: "POST", body: formData }
             );
 
@@ -199,7 +199,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
     const handleEditHonorario = async (honorarioId, mes, nuevoMonto) => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/mes/${mes}?nuevoMontoMensual=${nuevoMonto}`, {
+            const response = await fetch(`${config.apiUrl}/api/honorarios/${honorarioId}/mes/${mes}?nuevoMontoMensual=${nuevoMonto}`, {
                 method: "PUT",
             });
             if (!response.ok) {
@@ -240,7 +240,7 @@ const DebtTable = ({ debts = [], honorariosContables = [], clienteId }) => {
 
         try {
             const response = await fetch(
-                `https://backend.cobros.myccontadores.cl/api/honorarios/${selectedHonorario.honorarioId}/pagos`,
+                `${config.apiUrl}/api/honorarios/${selectedHonorario.honorarioId}/pagos`,
                 { method: "POST", body: formData }
             );
 

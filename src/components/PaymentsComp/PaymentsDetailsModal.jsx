@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import { config } from '../../config/config'; 
 const PaymentDetailsModal = ({ payment, onClose }) => {
     const [comprobanteUrl, setComprobanteUrl] = useState(null);
     const [comprobanteFormato, setComprobanteFormato] = useState("");
@@ -18,7 +18,7 @@ const PaymentDetailsModal = ({ payment, onClose }) => {
         setError(null);
         try {
             const response = await axios.get(
-                `https://backend.cobros.myccontadores.cl/api/pagos/comprobante/${pagoId}`,
+                `${config.apiUrl}/api/pagos/comprobante/${pagoId}`,
                 { responseType: "blob" }
             );
 
