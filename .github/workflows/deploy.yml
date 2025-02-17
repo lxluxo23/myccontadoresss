@@ -26,7 +26,7 @@ jobs:
       - name: Desplegar vía FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ftp://myccontadores.cl
+          server: myccontadores.cl
           username: github@myccontadores.cl
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: build/
