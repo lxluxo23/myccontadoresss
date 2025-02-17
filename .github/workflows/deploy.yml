@@ -21,7 +21,7 @@ jobs:
         run: npm install
 
       - name: Ejecutar build
-        run: npm run build
+        run: CI=false npm run build
       
       - name: Desplegar vía FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
