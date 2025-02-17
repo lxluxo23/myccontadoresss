@@ -24,7 +24,7 @@ jobs:
         run: npm run build
       
       - name: Desplegar vía FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           ftp-server: ftp://myccontadores.cl
           ftp-username: github@myccontadores.cl
