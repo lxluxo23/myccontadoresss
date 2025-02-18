@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import { config } from '../../config/config'; 
 const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
     const [fechaPago, setFechaPago] = useState("");
     const [monto, setMonto] = useState("0");
@@ -13,7 +13,7 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
     useEffect(() => {
         if (userId) {
             axios
-                .get(`https://backend.cobros.myccontadores.cl/api/deudas/usuario/${userId}/pendientes`)
+                .get(`${config.apiUrl}/api/deudas/usuario/${userId}/pendientes`)
                 .then((response) => {
                     const deudasPendientes = Array.isArray(response.data) ? response.data : [];
                     setDeudas(deudasPendientes);
@@ -75,7 +75,7 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
 
         try {
             const response = await axios.post(
-                `https://backend.cobros.myccontadores.cl/api/pagos/${deudaSeleccionada}/registrar`,
+                `${config.apiUrl}/api/pagos/${deudaSeleccionada}/registrar`,
                 formData,
                 {
                     headers: {

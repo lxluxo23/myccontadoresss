@@ -7,7 +7,7 @@ import {
     FaChevronLeft,
     FaChevronRight,
 } from "react-icons/fa";
-
+import { config } from '../../config/config'; 
 const RecentMovements = () => {
     const { clienteId } = useCliente(); // Obteniendo el clienteId desde el contexto
     const [movements, setMovements] = useState([]); // Lista de movimientos
@@ -31,7 +31,7 @@ const RecentMovements = () => {
                 setIsLoading(true);
                 setError(null);
 
-                const url = `https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/movimientos`;
+                const url = `${config.apiUrl}/api/clientes/${clienteId}/movimientos`;
                 console.log("Realizando solicitud a:", url);
 
                 const response = await fetch(url);

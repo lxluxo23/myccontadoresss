@@ -4,7 +4,7 @@ import { useCliente } from "../context/ClienteContext";
 import ExpandedClientRow from "./ExpandedClientRow";
 import axios from "axios";
 import { FaEdit, FaTrashAlt, FaEllipsisH, FaUser } from "react-icons/fa";
-
+import { config } from '../../config/config'; 
 function ClientRow({ client = {}, showAddClientForm, onDelete, onEdit }) {
     const [expanded, setExpanded] = useState(false);
     const { setClienteId } = useCliente();
@@ -29,7 +29,7 @@ function ClientRow({ client = {}, showAddClientForm, onDelete, onEdit }) {
         event.stopPropagation();
         if (window.confirm(`¿Está seguro de que desea eliminar al cliente ${client.nombre}?`)) {
             try {
-                await axios.delete(`https://backend.cobros.myccontadores.cl/api/clientes/${client.clienteId}`);
+                await axios.delete(`${config.apiUrl}/api/clientes/${client.clienteId}`);
                 alert(`Cliente ${client.nombre} eliminado exitosamente.`);
                 onDelete(client.clienteId);
             } catch (error) {

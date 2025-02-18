@@ -9,6 +9,7 @@ import { useCliente } from "../components/context/ClienteContext";
 import { FaPlus } from "react-icons/fa";
 import ThemeToggle from "../components/ThemeToggle";
 import { AddDebtForm } from "../components/DebtsComp/AddDebtForm";
+import { config } from '../config/config'; 
 
 const DebtsPage = () => {
     const { clienteId } = useCliente();
@@ -25,7 +26,7 @@ const DebtsPage = () => {
     const fetchTotalDeudas = async () => {
         if (!clienteId) return;
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/deudas/usuario/${clienteId}/total`);
+            const response = await fetch(`${config.apiUrl}/api/deudas/usuario/${clienteId}/total`);
             if (!response.ok) {
                 throw new Error("Error al obtener el total de deudas");
             }
@@ -39,7 +40,7 @@ const DebtsPage = () => {
     const fetchDebts = async () => {
         if (!clienteId) return;
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/deudas/usuario/${clienteId}`);
+            const response = await fetch(`${config.apiUrl}/api/deudas/usuario/${clienteId}`);
             if (!response.ok) {
                 throw new Error("Error al cargar deudas");
             }
@@ -53,7 +54,7 @@ const DebtsPage = () => {
     const fetchHonorarios = async () => {
         if (!clienteId) return;
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/cliente/${clienteId}`);
+            const response = await fetch(`${config.apiUrl}/api/honorarios/cliente/${clienteId}`);
             if (!response.ok) {
                 throw new Error("Error al cargar honorarios contables");
             }
@@ -81,7 +82,7 @@ const DebtsPage = () => {
         }
 
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/deudas/filtro-fechas?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`);
+            const response = await fetch(`${config.apiUrl}/api/deudas/filtro-fechas?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`);
             if (!response.ok) {
                 throw new Error("Error al filtrar deudas por fecha");
             }
@@ -95,7 +96,7 @@ const DebtsPage = () => {
 
     const mostrarPendientes = async () => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/deudas/usuario/${clienteId}/pendientes`);
+            const response = await fetch(`${config.apiUrl}/api/deudas/usuario/${clienteId}/pendientes`);
             if (!response.ok) {
                 throw new Error("Error al cargar deudas pendientes");
             }
@@ -109,7 +110,7 @@ const DebtsPage = () => {
 
     const handleAddHonorary = async (clienteId, payload) => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${clienteId}`, {
+            const response = await fetch(`${config.apiUrl}/api/honorarios/${clienteId}`, {
                 method: "POST",
                 body: JSON.stringify(payload),
                 headers: { "Content-Type": "application/json" },
@@ -127,7 +128,7 @@ const DebtsPage = () => {
 
     const handleAddDebt = async (debtData) => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/deudas`, {
+            const response = await fetch(`${config.apiUrl}/api/deudas`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

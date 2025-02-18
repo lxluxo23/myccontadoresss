@@ -7,7 +7,7 @@ import RecentMovements from "../components/SpreedSheetComp/RecentMovements";
 import AlertsNotifications from "../components/SpreedSheetComp/AlertsNotifications";
 import ThemeToggle from "../components/ThemeToggle";
 import { useCliente } from "../components/context/ClienteContext";
-
+import { config } from '../config/config'; 
 const SpreadsheetPage = () => {
     const navigate = useNavigate();
     const { clienteId, setClienteData, clearCliente } = useCliente();
@@ -28,9 +28,9 @@ const SpreadsheetPage = () => {
                 console.log("Cargando datos para cliente ID:", clienteId);
 
                 const [clientResponse, indicatorsResponse, movementsResponse] = await Promise.all([
-                    fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}`),
-                    fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/indicadores`),
-                    fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/movimientos`),
+                    fetch(`${config.apiUrl}/api/clientes/${clienteId}`),
+                    fetch(`${config.apiUrl}/api/clientes/${clienteId}/indicadores`),
+                    fetch(`${config.apiUrl}/api/clientes/${clienteId}/movimientos`),
                 ]);
 
                 if (!clientResponse.ok || !indicatorsResponse.ok || !movementsResponse.ok) {

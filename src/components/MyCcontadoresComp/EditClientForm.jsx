@@ -1,6 +1,6 @@
 ﻿import React, { useState } from "react";
 import axios from "axios";
-
+import { config } from '../../config/config'; 
 function EditClientForm({ client, onSave, onCancel }) {
     const [formData, setFormData] = useState(client);
 
@@ -12,7 +12,7 @@ function EditClientForm({ client, onSave, onCancel }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(`https://backend.cobros.myccontadores.cl/api/clientes/${client.clienteId}`, formData);
+            await axios.put(`${config.apiUrl}/api/clientes/${client.clienteId}`, formData);
             alert("Cliente actualizado exitosamente.");
             onSave(formData); // Llama a la función onSave para actualizar la lista de clientes
         } catch (error) {

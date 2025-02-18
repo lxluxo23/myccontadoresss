@@ -8,6 +8,7 @@ import Pagination from "../components/MyCcontadoresComp/Pagination";
 import EditClientForm from "../components/MyCcontadoresComp/EditClientForm";
 import FloatingExcelButton from "../components/MyCcontadoresComp/FloatingExcelButton";
 import MonthYearModal from "../components/MyCcontadoresComp/MonthYearModal";
+import { config } from '../config/config'; 
 
 function MyContadores() {
     const [clients, setClients] = useState([]);
@@ -26,7 +27,7 @@ function MyContadores() {
         const fetchClients = async () => {
             setLoading(true);
             try {
-                const response = await axios.get("https://backend.cobros.myccontadores.cl/api/clientes");
+                const response = await axios.get(`${config.apiUrl}/api/clientes`);
                 const sortedClients = response.data.sort((a, b) => a.nombre.localeCompare(b.nombre));
                 setClients(sortedClients);
             } catch (error) {
@@ -114,7 +115,7 @@ function MyContadores() {
         setIsDownloading(true);
         try {
             const response = await fetch(
-                `https://backend.cobros.myccontadores.cl/api/clientes/exportar/excel?mes=${month}&anio=${year}`,
+                `${config.apiUrl}/api/clientes/exportar/excel?mes=${month}&anio=${year}`,
                 {
                     method: "GET",
                     headers: {

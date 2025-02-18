@@ -1,7 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ClientRow from "./ClientRow";
-
+import { config } from '../../config/config';
 function ClientList() {
   const [clients, setClients] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -13,7 +13,7 @@ function ClientList() {
     // Carga los clientes al montar el componente
     const fetchClients = async () => {
       try {
-        const response = await axios.get("https://backend.cobros.myccontadores.cl/api/clientes");
+        const response = await axios.get(`${config.apiUrl}/api/clientes`);
         setClients(response.data);
       } catch (error) {
         console.error("Error al obtener los clientes:", error);

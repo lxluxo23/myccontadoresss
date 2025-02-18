@@ -10,6 +10,7 @@ import Modal from "../components/DebtsComp/Modal";
 import { useCliente } from "../components/context/ClienteContext";
 import { FaPlus } from "react-icons/fa";
 import ThemeToggle from "../components/ThemeToggle";
+import { config } from '../config/config'; 
 
 const PaymentsPage = () => {
     const { clienteId } = useCliente();
@@ -29,7 +30,7 @@ const PaymentsPage = () => {
 
         const fetchPayments = async () => {
             try {
-                const response = await fetch(`https://backend.cobros.myccontadores.cl/api/clientes/${clienteId}/pagos`);
+                const response = await fetch(`${config.apiUrl}/api/clientes/${clienteId}/pagos`);
                 if (!response.ok) {
                     throw new Error("Error al cargar los datos");
                 }
@@ -55,7 +56,7 @@ const PaymentsPage = () => {
     // Función para manejar el agregado de pagos de honorarios
     const handleAddHonoraryPayment = async (honorarioId, payload) => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioId}/pagos`, {
+            const response = await fetch(`${config.apiUrl}/api/honorarios/${honorarioId}/pagos`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),

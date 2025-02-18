@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween"; // Importar el plugin
 import PaymentDetailsModal from "./PaymentsDetailsModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
-
+import { config } from '../../config/config'; 
 // Extender Day.js con el plugin isBetween
 dayjs.extend(isBetween);
 
@@ -45,7 +45,7 @@ const PaymentTable = ({ payments }) => { // Recibe payments como prop
     const confirmDelete = async () => {
         if (!paymentToDelete) return;
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/pagos/cancelar/${paymentToDelete.pagoId}`, {
+            const response = await fetch(`${config.apiUrl}/api/pagos/cancelar/${paymentToDelete.pagoId}`, {
                 method: "DELETE",
             });
             if (!response.ok) {

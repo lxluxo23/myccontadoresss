@@ -3,7 +3,7 @@ import { FaEye, FaTrash, FaPlus, FaChevronLeft, FaChevronRight, FaPencilAlt } fr
 import dayjs from "dayjs";
 import Spinner from "./Spinner";
 import Modal from "./Modal";
-
+import { config } from '../../config/config'; 
 const HonoraryList = ({
                           honorariosContables,
                           currentPage,
@@ -33,7 +33,7 @@ const HonoraryList = ({
 
     const confirmDeleteHonorario = async () => {
         try {
-            const response = await fetch(`https://backend.cobros.myccontadores.cl/api/honorarios/${honorarioToDelete.honorarioId}`, {
+            const response = await fetch(`${config.apiUrl}/api/honorarios/${honorarioToDelete.honorarioId}`, {
                 method: "DELETE",
             });
             if (!response.ok) {
@@ -64,7 +64,7 @@ const HonoraryList = ({
 
         try {
             const response = await fetch(
-                `https://backend.cobros.myccontadores.cl/api/honorarios/${selectedHonorarioId}/mes/${selectedMes}?nuevoMontoMensual=${nuevoMontoMensual}`,
+                `${config.apiUrl}/api/honorarios/${selectedHonorarioId}/mes/${selectedMes}?nuevoMontoMensual=${nuevoMontoMensual}`,
                 { method: "PUT" }
             );
 
