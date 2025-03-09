@@ -1,17 +1,26 @@
 ﻿import React, { useState, useEffect } from "react";
 
-export const AddDebtForm = ({ onSubmit, onClose }) => {
+export const EditDebtForm = ({ debt, onSubmit, onClose }) => {
     const [formData, setFormData] = useState({
-        tipoDeuda: "",
-        montoTotal: "",
-        fechaInicio: "",
-        fechaVencimiento: "",
-        observaciones: "",
+        tipoDeuda: debt.tipoDeuda || "",
+        montoTotal: debt.montoTotal ? debt.montoTotal.toString() : "",
+        fechaInicio: debt.fechaInicio || "",
+        fechaVencimiento: debt.fechaVencimiento || "",
+        observaciones: debt.observaciones || "",
     });
     const [displayMontoTotal, setDisplayMontoTotal] = useState("");
     const [errors, setErrors] = useState({});
 
-    // Actualizar formData.montoTotal en función del display formateado
+    // Inicializar display con el monto formateado
+    useEffect(() => {
+        if (formData.montoTotal) {
+            const numericValue = formData.montoTotal.toString();
+            const formattedValue = numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            setDisplayMontoTotal(formattedValue);
+        }
+    }, [formData.montoTotal]);
+
+    // Sincronizar formData.montoTotal cuando cambia el display
     useEffect(() => {
         const numericValue = displayMontoTotal.replace(/\./g, "");
         if (!isNaN(numericValue) && numericValue !== "") {
@@ -45,10 +54,12 @@ export const AddDebtForm = ({ onSubmit, onClose }) => {
         if (!formData.tipoDeuda) {
             newErrors.tipoDeuda = "Debe seleccionar un tipo de deuda.";
         }
+
         const montoNumber = parseFloat(formData.montoTotal);
         if (isNaN(montoNumber) || montoNumber <= 0) {
             newErrors.montoTotal = "El monto debe ser mayor que 0.";
         }
+
         if (formData.fechaInicio && formData.fechaVencimiento) {
             const inicio = new Date(formData.fechaInicio);
             const venc = new Date(formData.fechaVencimiento);
@@ -67,6 +78,7 @@ export const AddDebtForm = ({ onSubmit, onClose }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
         const isValid = validate();
         let proceed = true;
         if (formData.fechaInicio && formData.fechaVencimiento) {
@@ -81,6 +93,7 @@ export const AddDebtForm = ({ onSubmit, onClose }) => {
                 }
             }
         }
+
         if (!isValid || !proceed) return;
 
         const montoNumber = parseFloat(formData.montoTotal);
@@ -91,15 +104,17 @@ export const AddDebtForm = ({ onSubmit, onClose }) => {
             fechaVencimiento: formData.fechaVencimiento,
             observaciones: formData.observaciones || null,
         };
-        onSubmit(debtData);
+
+        onSubmit(debt.deudaId, debtData);
     };
 
+    // Se deshabilita el botón si hay errores (exceptuando el de fecha, que se puede confirmar)
     const isDisabled = Object.keys(errors).length > 0 && !errors.fechaVencimiento;
 
     return (
         <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-6 bg-white dark:bg-gray-800 dark:text-gray-100 p-6">
             <h2 className="text-2xl font-bold text-indigo-600 dark:text-indigo-400 text-center">
-                Agregar Nueva Deuda
+                Editar Deuda
             </h2>
 
             {/* Campo Tipo de Deuda */}
@@ -194,7 +209,7 @@ export const AddDebtForm = ({ onSubmit, onClose }) => {
                 />
             </div>
 
-            {/* Botones de acción */}
+            {/* Botones */}
             <div className="flex justify-end space-x-4">
                 <button
                     type="button"
@@ -210,7 +225,7 @@ export const AddDebtForm = ({ onSubmit, onClose }) => {
                     }`}
                     disabled={isDisabled}
                 >
-                    Agregar
+                    Guardar Cambios
                 </button>
             </div>
         </form>

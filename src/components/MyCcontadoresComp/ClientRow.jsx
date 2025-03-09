@@ -1,52 +1,77 @@
-import React, { useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCliente } from "../context/ClienteContext";
-import ExpandedClientRow from "./ExpandedClientRow";
+// import ExpandedClientRow from "./ExpandedClientRow"; // Componente expandido desactivado
 import axios from "axios";
 import { FaEdit, FaTrashAlt, FaEllipsisH, FaUser } from "react-icons/fa";
-import { config } from '../../config/config'; 
+import { config } from "../../config/config";
+
 function ClientRow({ client = {}, showAddClientForm, onDelete, onEdit }) {
-    const [expanded, setExpanded] = useState(false);
+    // Para activar la funcionalidad expandida, descomenta la siguiente línea:
+    // const [expanded, setExpanded] = useState(false);
     const { setClienteId } = useCliente();
     const navigate = useNavigate();
 
-    const handleRowClick = () => {
-        setExpanded(!expanded);
-    };
+    const handleDetailClick = useCallback(
+        (event) => {
+            event.stopPropagation();
+            setClienteId(client.clienteId);
+            navigate(`/spreadsheet/${client.clienteId}`);
+        },
+        [client.clienteId, navigate, setClienteId]
+    );
 
-    const handleDetailClick = (event) => {
-        event.stopPropagation();
-        setClienteId(client.clienteId);
-        navigate(`/spreadsheet/${client.clienteId}`);
-    };
+    const handleEditClick = useCallback(
+        (event) => {
+            event.stopPropagation();
+            onEdit(client);
+        },
+        [client, onEdit]
+    );
 
-    const handleEditClick = (event) => {
-        event.stopPropagation();
-        onEdit(client);
-    };
-
-    const handleDeleteClick = async (event) => {
-        event.stopPropagation();
-        if (window.confirm(`¿Está seguro de que desea eliminar al cliente ${client.nombre}?`)) {
-            try {
-                await axios.delete(`${config.apiUrl}/api/clientes/${client.clienteId}`);
-                alert(`Cliente ${client.nombre} eliminado exitosamente.`);
-                onDelete(client.clienteId);
-            } catch (error) {
-                console.error("Error al eliminar el cliente:", error.response?.data || error.message);
-                alert("Hubo un problema al intentar eliminar el cliente.");
+    const handleDeleteClick = useCallback(
+        async (event) => {
+            event.stopPropagation();
+            if (
+                window.confirm(
+                    `¿Está seguro de que desea eliminar al cliente ${client.nombre}?`
+                )
+            ) {
+                try {
+                    await axios.delete(`${config.apiUrl}/api/clientes/${client.clienteId}`);
+                    alert(`Cliente ${client.nombre} eliminado exitosamente.`);
+                    onDelete(client.clienteId);
+                } catch (error) {
+                    console.error(
+                        "Error al eliminar el cliente:",
+                        error.response?.data || error.message
+                    );
+                    alert("Hubo un problema al intentar eliminar el cliente.");
+                }
             }
-        }
-    };
+        },
+        [client, onDelete]
+    );
+
+    // Handler para el botón "Más"
+    const handleMoreClick = useCallback((e) => {
+        e.stopPropagation();
+        alert("Más funcionalidades aún no implementadas.");
+    }, []);
+
+    // Se memorizan las clases de la fila para evitar recomputación en cada render.
+    const rowClasses = useMemo(
+        () =>
+            "grid grid-cols-4 items-center px-6 py-4 w-full border border-gray-200 rounded-lg cursor-pointer transition-transform duration-200 hover:scale-105 hover:bg-gray-100" +
+            (showAddClientForm ? " pointer-events-none opacity-50" : ""),
+        [showAddClientForm]
+    );
 
     return (
         <div>
             <div
-                className={`grid grid-cols-4 items-center px-6 py-4 w-full border border-gray-200 rounded-lg cursor-pointer 
-                ${expanded ? "bg-indigo-50 shadow-md" : "bg-white"} 
-                ${showAddClientForm ? "pointer-events-none opacity-50" : ""} 
-                transition-transform duration-200 hover:scale-105 hover:bg-gray-100`}
-                onClick={handleRowClick}
+                className={rowClasses}
+                // onClick={handleRowClick} // Descomentar para activar la funcionalidad expandida
             >
                 {/* Información del cliente */}
                 <div className="text-gray-800 font-medium text-sm truncate">
@@ -81,21 +106,28 @@ function ClientRow({ client = {}, showAddClientForm, onDelete, onEdit }) {
                     <FaEllipsisH
                         className="text-gray-400 hover:text-gray-600 cursor-pointer"
                         title="Más"
-                        onClick={() => alert("Más funcionalidades aún no implementadas.")}
+                        onClick={handleMoreClick}
                     />
                 </div>
             </div>
 
-            {/* Fila expandida */}
-            <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                    expanded ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-                }`}
-            >
-                <ExpandedClientRow />
-            </div>
+            {/*
+        Componente expandido desactivado:
+        Para activar la funcionalidad expandida, descomenta el siguiente bloque y
+        la lógica relacionada en la fila principal (incluyendo el estado "expanded" y
+        el handler "handleRowClick").
+
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          expanded ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <ExpandedClientRow />
+      </div>
+      */}
         </div>
     );
 }
 
-export default ClientRow;
+// Se utiliza React.memo para evitar renderizados innecesarios si los props no cambian.
+export default React.memo(ClientRow);

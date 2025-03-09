@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { config } from '../../config/config'; 
+import { config } from "../../config/config";
+
 const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
     const [fechaPago, setFechaPago] = useState("");
     const [monto, setMonto] = useState("0");
@@ -15,7 +16,9 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
             axios
                 .get(`${config.apiUrl}/api/deudas/usuario/${userId}/pendientes`)
                 .then((response) => {
-                    const deudasPendientes = Array.isArray(response.data) ? response.data : [];
+                    const deudasPendientes = Array.isArray(response.data)
+                        ? response.data
+                        : [];
                     setDeudas(deudasPendientes);
                 })
                 .catch((error) => {
@@ -25,19 +28,19 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
         }
     }, [userId]);
 
-    const formatMonto = (value) => {
-        return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    };
+    // Función para formatear el monto con separadores de miles
+    const formatMonto = (value) =>
+        value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 
     const handleMontoChange = (e) => {
-        const rawValue = e.target.value.replace(/\./g, ""); // Elimina los puntos antes de formatear
+        const rawValue = e.target.value.replace(/\./g, "");
         if (!isNaN(rawValue)) {
             setMonto(formatMonto(rawValue));
         }
     };
 
     const handleFileChange = (e) => {
-        setComprobante(e.target.files[0]); // Guardar el archivo en el estado
+        setComprobante(e.target.files[0]);
     };
 
     const handleSubmit = async (e) => {
@@ -59,14 +62,12 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
             alert("Debe seleccionar una deuda pendiente para registrar el pago.");
             return;
         }
-        if (!comprobante) {
-            alert("Debe subir un comprobante de pago.");
-            return;
-        }
 
         const formData = new FormData();
         formData.append("montoPago", parseFloat(monto.replace(/\./g, "")));
-        formData.append("comprobante", comprobante); // Agregar el archivo al FormData
+        if (comprobante) {
+            formData.append("comprobante", comprobante);
+        }
         formData.append("fechaPagoReal", fechaPago);
         formData.append("metodoPago", metodoPago);
         if (observaciones) {
@@ -78,30 +79,42 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
                 `${config.apiUrl}/api/pagos/${deudaSeleccionada}/registrar`,
                 formData,
                 {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
+                    headers: { "Content-Type": "multipart/form-data" },
                 }
             );
-
             onPaymentAdded(response.data);
-
             alert("Pago registrado con éxito.");
             onClose();
         } catch (error) {
-            console.error("Error al registrar el pago:", error.response?.data || error.message);
+            console.error(
+                "Error al registrar el pago:",
+                error.response?.data || error.message
+            );
             alert("Hubo un error al registrar el pago. Intente nuevamente.");
         }
     };
 
+    // Condición para desactivar el botón de envío si faltan los datos mínimos
+    const isDisabled =
+        !fechaPago ||
+        !monto ||
+        parseFloat(monto.replace(/\./g, "")) <= 0 ||
+        !metodoPago ||
+        !deudaSeleccionada;
+
     return (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-6">
+            <h2 className="text-2xl font-bold text-indigo-600 text-center">
+                Registrar Pago
+            </h2>
             <div>
-                <label className="block text-gray-700 dark:text-gray-300">Seleccionar Deuda</label>
+                <label className="block mb-1 text-gray-700 dark:text-gray-300">
+                    Seleccionar Deuda
+                </label>
                 <select
                     value={deudaSeleccionada}
                     onChange={(e) => setDeudaSeleccionada(e.target.value)}
-                    className="w-full p-2 border rounded-md"
+                    className="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center appearance-none"
                 >
                     <option value="">Seleccione una deuda pendiente</option>
                     {deudas.length > 0 ? (
@@ -122,30 +135,36 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
             {deudaSeleccionada && (
                 <>
                     <div>
-                        <label className="block text-gray-700 dark:text-gray-300">Fecha de Pago</label>
+                        <label className="block mb-1 text-gray-700 dark:text-gray-300">
+                            Fecha de Pago
+                        </label>
                         <input
                             type="date"
                             value={fechaPago}
                             onChange={(e) => setFechaPago(e.target.value)}
-                            className="w-full p-2 border rounded-md"
+                            className="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                     </div>
                     <div>
-                        <label className="block text-gray-700 dark:text-gray-300">Monto</label>
+                        <label className="block mb-1 text-gray-700 dark:text-gray-300">
+                            Monto
+                        </label>
                         <input
                             type="text"
                             value={monto}
                             onChange={handleMontoChange}
-                            className="w-full p-2 border rounded-md"
+                            className="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             inputMode="numeric"
                         />
                     </div>
                     <div>
-                        <label className="block text-gray-700 dark:text-gray-300">Método de Pago</label>
+                        <label className="block mb-1 text-gray-700 dark:text-gray-300">
+                            Método de Pago
+                        </label>
                         <select
                             value={metodoPago}
                             onChange={(e) => setMetodoPago(e.target.value)}
-                            className="w-full p-2 border rounded-md"
+                            className="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center appearance-none"
                         >
                             <option value="">Seleccione</option>
                             <option value="TRANSFERENCIA">Transferencia</option>
@@ -155,23 +174,34 @@ const AddPaymentForm = ({ onClose, userId, onPaymentAdded }) => {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-gray-700 dark:text-gray-300">Comprobante</label>
+                        <label className="block mb-1 text-gray-700 dark:text-gray-300">
+                            Comprobante (opcional)
+                        </label>
                         <input
                             type="file"
-                            accept="image/*,application/pdf" // Puedes personalizar los formatos permitidos
+                            accept="image/*,application/pdf"
                             onChange={handleFileChange}
-                            className="w-full p-2 border rounded-md"
+                            className="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                     </div>
                     <div>
-                        <label className="block text-gray-700 dark:text-gray-300">Observaciones</label>
+                        <label className="block mb-1 text-gray-700 dark:text-gray-300">
+                            Observaciones
+                        </label>
                         <textarea
                             value={observaciones}
                             onChange={(e) => setObservaciones(e.target.value)}
-                            className="w-full p-2 border rounded-md"
+                            className="w-full p-3 border rounded-md bg-gray-50 dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            rows="3"
                         />
                     </div>
-                    <button type="submit" className="w-full bg-indigo-500 text-white py-2 rounded-md">
+                    <button
+                        type="submit"
+                        className={`w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 rounded-md transition-colors ${
+                            isDisabled ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        disabled={isDisabled}
+                    >
                         Agregar Pago
                     </button>
                 </>

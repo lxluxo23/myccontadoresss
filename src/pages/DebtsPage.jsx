@@ -1,4 +1,3 @@
-// DebtsPage.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
@@ -9,7 +8,8 @@ import { useCliente } from "../components/context/ClienteContext";
 import { FaPlus } from "react-icons/fa";
 import ThemeToggle from "../components/ThemeToggle";
 import { AddDebtForm } from "../components/DebtsComp/AddDebtForm";
-import { config } from '../config/config'; 
+import { EditDebtForm } from "../components/DebtsComp/EditDebtForm";
+import { config } from "../config/config";
 
 const DebtsPage = () => {
     const { clienteId } = useCliente();
@@ -23,13 +23,15 @@ const DebtsPage = () => {
     const [fechaFin, setFechaFin] = useState("");
     const [totalDeudas, setTotalDeudas] = useState(null);
 
+    // Estados para editar deuda
+    const [debtToEdit, setDebtToEdit] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
     const fetchTotalDeudas = async () => {
         if (!clienteId) return;
         try {
             const response = await fetch(`${config.apiUrl}/api/deudas/usuario/${clienteId}/total`);
-            if (!response.ok) {
-                throw new Error("Error al obtener el total de deudas");
-            }
+            if (!response.ok) throw new Error("Error al obtener el total de deudas");
             const total = await response.json();
             setTotalDeudas(total);
         } catch (error) {
@@ -41,9 +43,7 @@ const DebtsPage = () => {
         if (!clienteId) return;
         try {
             const response = await fetch(`${config.apiUrl}/api/deudas/usuario/${clienteId}`);
-            if (!response.ok) {
-                throw new Error("Error al cargar deudas");
-            }
+            if (!response.ok) throw new Error("Error al cargar deudas");
             const data = await response.json();
             setDebts(data);
         } catch (error) {
@@ -55,9 +55,7 @@ const DebtsPage = () => {
         if (!clienteId) return;
         try {
             const response = await fetch(`${config.apiUrl}/api/honorarios/cliente/${clienteId}`);
-            if (!response.ok) {
-                throw new Error("Error al cargar honorarios contables");
-            }
+            if (!response.ok) throw new Error("Error al cargar honorarios contables");
             const data = await response.json();
             setHonorariosContables(data);
         } catch (error) {
@@ -80,12 +78,9 @@ const DebtsPage = () => {
             setError("Debes seleccionar ambas fechas para filtrar.");
             return;
         }
-
         try {
             const response = await fetch(`${config.apiUrl}/api/deudas/filtro-fechas?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`);
-            if (!response.ok) {
-                throw new Error("Error al filtrar deudas por fecha");
-            }
+            if (!response.ok) throw new Error("Error al filtrar deudas por fecha");
             const data = await response.json();
             setDebts(data);
             setError(null);
@@ -97,9 +92,7 @@ const DebtsPage = () => {
     const mostrarPendientes = async () => {
         try {
             const response = await fetch(`${config.apiUrl}/api/deudas/usuario/${clienteId}/pendientes`);
-            if (!response.ok) {
-                throw new Error("Error al cargar deudas pendientes");
-            }
+            if (!response.ok) throw new Error("Error al cargar deudas pendientes");
             const data = await response.json();
             setDebts(data);
             setError(null);
@@ -115,9 +108,7 @@ const DebtsPage = () => {
                 body: JSON.stringify(payload),
                 headers: { "Content-Type": "application/json" },
             });
-            if (!response.ok) {
-                throw new Error("Error al agregar honorario contable");
-            }
+            if (!response.ok) throw new Error("Error al agregar honorario contable");
             await fetchHonorarios();
             setIsHonoraryModalOpen(false);
             setError(null);
@@ -136,13 +127,11 @@ const DebtsPage = () => {
                     cliente: { clienteId: clienteId },
                 }),
             });
-
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error("Error del servidor:", errorData);
                 throw new Error(errorData.error || "Error al agregar la deuda");
             }
-
             const newDebt = await response.json();
             setDebts((prev) => [...prev, newDebt]);
             setIsDebtModalOpen(false);
@@ -153,22 +142,55 @@ const DebtsPage = () => {
         }
     };
 
+    // Función para iniciar el proceso de edición
+    const handleEditDebt = (debt) => {
+        console.log("Editar deuda:", debt);
+        setDebtToEdit(debt);
+        setIsEditModalOpen(true);
+    };
+
+    // Función para actualizar la deuda en el servidor
+    const handleUpdateDebt = async (deudaId, updatedData) => {
+        try {
+            const response = await fetch(`${config.apiUrl}/api/deudas/${deudaId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedData),
+            });
+            if (!response.ok) throw new Error("Error al actualizar la deuda");
+            const updatedDebt = await response.json();
+            setDebts((prev) =>
+                prev.map((debt) => (debt.deudaId === deudaId ? updatedDebt : debt))
+            );
+            setIsEditModalOpen(false);
+            setDebtToEdit(null);
+            fetchTotalDeudas();
+        } catch (error) {
+            setError(error.message || "No se pudo actualizar la deuda.");
+        }
+    };
+
     return (
         <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
             <Sidebar />
-            <div className="flex-1 p-6 space-y-6">
-
+            {/* Agregamos un margen inferior extra (mb-24) para que los botones flotantes no tapen la paginación */}
+            <div className="flex-1 p-6 space-y-6 mb-24">
                 {/* Tarjeta Superior: Total y Filtros */}
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-md shadow space-y-4">
                     <div>
                         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-1">
-                            {totalDeudas !== null ? `Total de Deudas: $${Number(totalDeudas).toLocaleString("es-CL")}` : "Cargando Total..."}
+                            {totalDeudas !== null
+                                ? `Total de Deudas: $${Number(totalDeudas).toLocaleString("es-CL")}`
+                                : "Cargando Total..."}
                         </h2>
-                        <p className="text-sm text-gray-600 dark:text-gray-300">Aquí puedes filtrar tus deudas por rango de fecha o ver solamente las pendientes.</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                            Aquí puedes filtrar tus deudas por rango de fecha o ver solamente las pendientes.
+                        </p>
                     </div>
-
                     <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <label className="block text-gray-700 dark:text-gray-200 font-semibold mb-2">Filtrar por Rango de Fechas:</label>
+                        <label className="block text-gray-700 dark:text-gray-200 font-semibold mb-2">
+                            Filtrar por Rango de Fechas:
+                        </label>
                         <div className="flex flex-col sm:flex-row sm:items-end sm:space-x-4">
                             <div className="flex flex-col">
                                 <span className="text-gray-600 dark:text-gray-300 text-sm mb-1">Fecha Inicio</span>
@@ -214,20 +236,23 @@ const DebtsPage = () => {
                                 </button>
                             </div>
                         </div>
-
                         {error && <p className="text-red-500 mt-4">{error}</p>}
                     </div>
                 </div>
 
                 {/* Tabla de Deudas y Honorarios */}
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-md shadow space-y-6">
-                    <DebtTable debts={debts} honorariosContables={honorariosContables} clienteId={clienteId} />
+                    <DebtTable
+                        debts={debts}
+                        honorariosContables={honorariosContables}
+                        clienteId={clienteId}
+                        handleEditDebt={handleEditDebt}
+                    />
                 </div>
-
             </div>
 
-            {/* Botones flotantes a la derecha */}
-            <div className="fixed bottom-4 right-4 flex flex-col space-y-4">
+            {/* Botones flotantes a la derecha; se han reposicionado a bottom-24 para que no tapen la paginación */}
+            <div className="fixed bottom-24 right-4 flex flex-col space-y-4 z-50">
                 <button
                     onClick={() => setIsDebtModalOpen(true)}
                     className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700 transition"
@@ -263,7 +288,19 @@ const DebtsPage = () => {
                     onClose={() => setIsDebtModalOpen(false)}
                 />
             </Modal>
+
+            {/* Modal para editar deuda */}
+            <Modal isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setDebtToEdit(null); }}>
+                {debtToEdit && (
+                    <EditDebtForm
+                        debt={debtToEdit}
+                        onSubmit={handleUpdateDebt}
+                        onClose={() => { setIsEditModalOpen(false); setDebtToEdit(null); }}
+                    />
+                )}
+            </Modal>
         </div>
     );
-}
+};
+
 export default DebtsPage;

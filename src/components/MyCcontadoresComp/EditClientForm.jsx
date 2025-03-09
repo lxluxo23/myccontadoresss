@@ -1,20 +1,30 @@
-﻿import React, { useState } from "react";
+﻿import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { config } from '../../config/config'; 
+import { config } from "../../config/config";
+
+const inputClasses = "w-full border border-gray-300 p-2 rounded";
+
 function EditClientForm({ client, onSave, onCancel }) {
     const [formData, setFormData] = useState(client);
 
+    // Si el cliente puede cambiar, es recomendable sincronizar el estado
+    useEffect(() => {
+        setFormData(client);
+    }, [client]);
+
+    // Handler para actualizar el estado del formulario
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({ ...prevData, [name]: value }));
     };
 
+    // Handler para enviar el formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             await axios.put(`${config.apiUrl}/api/clientes/${client.clienteId}`, formData);
             alert("Cliente actualizado exitosamente.");
-            onSave(formData); // Llama a la función onSave para actualizar la lista de clientes
+            onSave(formData); // Actualiza la lista de clientes en el componente padre
         } catch (error) {
             console.error("Error al actualizar el cliente:", error.message);
             alert("Hubo un problema al actualizar el cliente.");
@@ -32,7 +42,7 @@ function EditClientForm({ client, onSave, onCancel }) {
                         name="nombre"
                         value={formData.nombre}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 p-2 rounded"
+                        className={inputClasses}
                         required
                     />
                 </div>
@@ -43,7 +53,7 @@ function EditClientForm({ client, onSave, onCancel }) {
                         name="rut"
                         value={formData.rut}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 p-2 rounded"
+                        className={inputClasses}
                         required
                     />
                 </div>
@@ -54,7 +64,7 @@ function EditClientForm({ client, onSave, onCancel }) {
                         name="direccion"
                         value={formData.direccion}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 p-2 rounded"
+                        className={inputClasses}
                     />
                 </div>
                 <div className="mb-4">
@@ -64,7 +74,7 @@ function EditClientForm({ client, onSave, onCancel }) {
                         name="telefono"
                         value={formData.telefono}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 p-2 rounded"
+                        className={inputClasses}
                     />
                 </div>
                 <div className="mb-4">
@@ -74,7 +84,7 @@ function EditClientForm({ client, onSave, onCancel }) {
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 p-2 rounded"
+                        className={inputClasses}
                     />
                 </div>
                 <div className="flex justify-between">

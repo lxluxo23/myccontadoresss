@@ -1,16 +1,33 @@
-﻿import React, { useState } from "react";
+﻿import React, { useState, useCallback, useMemo, useEffect } from "react";
 
-const MonthYearModal = ({ isOpen, onClose, onConfirm }) => {
+const MonthYearModal = React.memo(({ isOpen, onClose, onConfirm }) => {
     const [month, setMonth] = useState("");
     const [year, setYear] = useState("");
 
-    const handleConfirm = () => {
+    // Reinicia los campos cuando se abre el modal
+    useEffect(() => {
+        if (isOpen) {
+            setMonth("");
+            setYear("");
+        }
+    }, [isOpen]);
+
+    // Handler memorizado para confirmar la selección
+    const handleConfirm = useCallback(() => {
         if (month && year) {
             onConfirm(month, year);
         } else {
             alert("Por favor, selecciona un mes y un año.");
         }
-    };
+    }, [month, year, onConfirm]);
+
+    // Calcula las opciones de mes una sola vez
+    const monthOptions = useMemo(() => {
+        return [...Array(12)].map((_, i) => ({
+            value: i + 1,
+            label: new Date(0, i).toLocaleString("es", { month: "long" })
+        }));
+    }, []);
 
     if (!isOpen) return null;
 
@@ -26,9 +43,9 @@ const MonthYearModal = ({ isOpen, onClose, onConfirm }) => {
                         className="w-full p-2 border rounded"
                     >
                         <option value="">Seleccionar mes</option>
-                        {[...Array(12)].map((_, i) => (
-                            <option key={i + 1} value={i + 1}>
-                                {new Date(0, i).toLocaleString("es", { month: "long" })}
+                        {monthOptions.map(({ value, label }) => (
+                            <option key={value} value={value}>
+                                {label}
                             </option>
                         ))}
                     </select>
@@ -62,6 +79,6 @@ const MonthYearModal = ({ isOpen, onClose, onConfirm }) => {
             </div>
         </div>
     );
-};
+});
 
 export default MonthYearModal;

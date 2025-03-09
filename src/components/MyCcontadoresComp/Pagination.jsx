@@ -1,9 +1,7 @@
-﻿// src/components/MyCcontadoresComp/Pagination.jsx
-
-import React from 'react';
+﻿import React, { useMemo } from 'react';
 
 // Componente para el botón de navegación (Anterior/Siguiente)
-function PageButton({ ariaLabel, src, altText, onClick, disabled }) {
+const PageButton = React.memo(function PageButton({ ariaLabel, src, altText, onClick, disabled }) {
     return (
         <button
             aria-label={ariaLabel}
@@ -19,10 +17,10 @@ function PageButton({ ariaLabel, src, altText, onClick, disabled }) {
             />
         </button>
     );
-}
+});
 
 // Componente para los números de página
-function PageNumber({ number, isActive, onClick }) {
+const PageNumber = React.memo(function PageNumber({ number, isActive, onClick }) {
     return (
         <button
             onClick={() => onClick(number)}
@@ -34,18 +32,16 @@ function PageNumber({ number, isActive, onClick }) {
             {number}
         </button>
     );
-}
+});
 
 function Pagination({ currentPage, totalPages, onPrevious, onNext, onPageClick }) {
-    // Generar una lista de números de página
-    const renderPageNumbers = () => {
-        const pageNumbers = [];
+    // Usamos useMemo para calcular la lista de números de página solo cuando sea necesario
+    const pageNumbers = useMemo(() => {
+        const pageNumbersList = [];
 
-        // Lógica para manejar demasiadas páginas (por ejemplo, mostrar solo algunas)
-        // Aquí mostramos todas las páginas si son menos de 7, de lo contrario, usamos puntos suspensivos
         if (totalPages <= 7) {
             for (let i = 1; i <= totalPages; i++) {
-                pageNumbers.push(
+                pageNumbersList.push(
                     <PageNumber
                         key={i}
                         number={i}
@@ -55,61 +51,32 @@ function Pagination({ currentPage, totalPages, onPrevious, onNext, onPageClick }
                 );
             }
         } else {
-            // Mostrar las primeras 2 páginas, puntos suspensivos, la página actual y las últimas 2
-            pageNumbers.push(
-                <PageNumber
-                    key={1}
-                    number={1}
-                    isActive={1 === currentPage}
-                    onClick={onPageClick}
-                />
-            );
-            pageNumbers.push(
-                <PageNumber
-                    key={2}
-                    number={2}
-                    isActive={2 === currentPage}
-                    onClick={onPageClick}
-                />
+            // Mostrar las primeras 2 páginas
+            pageNumbersList.push(
+                <PageNumber key={1} number={1} isActive={1 === currentPage} onClick={onPageClick} />,
+                <PageNumber key={2} number={2} isActive={2 === currentPage} onClick={onPageClick} />
             );
             if (currentPage > 4) {
-                pageNumbers.push(<span key="start-ellipsis">...</span>);
+                pageNumbersList.push(<span key="start-ellipsis">...</span>);
             }
             const startPage = Math.max(3, currentPage - 1);
             const endPage = Math.min(totalPages - 2, currentPage + 1);
             for (let i = startPage; i <= endPage; i++) {
-                pageNumbers.push(
-                    <PageNumber
-                        key={i}
-                        number={i}
-                        isActive={i === currentPage}
-                        onClick={onPageClick}
-                    />
+                pageNumbersList.push(
+                    <PageNumber key={i} number={i} isActive={i === currentPage} onClick={onPageClick} />
                 );
             }
             if (currentPage < totalPages - 3) {
-                pageNumbers.push(<span key="end-ellipsis">...</span>);
+                pageNumbersList.push(<span key="end-ellipsis">...</span>);
             }
-            pageNumbers.push(
-                <PageNumber
-                    key={totalPages - 1}
-                    number={totalPages - 1}
-                    isActive={(totalPages - 1) === currentPage}
-                    onClick={onPageClick}
-                />
-            );
-            pageNumbers.push(
-                <PageNumber
-                    key={totalPages}
-                    number={totalPages}
-                    isActive={totalPages === currentPage}
-                    onClick={onPageClick}
-                />
+            pageNumbersList.push(
+                <PageNumber key={totalPages - 1} number={totalPages - 1} isActive={(totalPages - 1) === currentPage} onClick={onPageClick} />,
+                <PageNumber key={totalPages} number={totalPages} isActive={totalPages === currentPage} onClick={onPageClick} />
             );
         }
 
-        return pageNumbers;
-    };
+        return pageNumbersList;
+    }, [currentPage, totalPages, onPageClick]);
 
     return (
         <nav
@@ -122,7 +89,7 @@ function Pagination({ currentPage, totalPages, onPrevious, onNext, onPageClick }
                 Página {currentPage} de {totalPages}
             </div>
 
-            {/* Botones de navegación */}
+            {/* Botones de navegación y números de página */}
             <div className="flex gap-4 items-center">
                 <PageButton
                     ariaLabel="Previous page"
@@ -132,8 +99,7 @@ function Pagination({ currentPage, totalPages, onPrevious, onNext, onPageClick }
                     disabled={currentPage === 1}
                 />
 
-                {/* Números de página */}
-                {renderPageNumbers()}
+                {pageNumbers}
 
                 <PageButton
                     ariaLabel="Next page"
@@ -147,4 +113,4 @@ function Pagination({ currentPage, totalPages, onPrevious, onNext, onPageClick }
     );
 }
 
-export default Pagination;
+export default React.memo(Pagination);

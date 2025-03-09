@@ -1,188 +1,136 @@
-// PaymentTable.jsx
-
 import React, { useState, useMemo } from "react";
 import { FaChevronLeft, FaChevronRight, FaEye, FaTrashAlt } from "react-icons/fa";
 import dayjs from "dayjs";
-import isBetween from "dayjs/plugin/isBetween"; // Importar el plugin
+import isBetween from "dayjs/plugin/isBetween";
 import PaymentDetailsModal from "./PaymentsDetailsModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
-import { config } from '../../config/config'; 
-// Extender Day.js con el plugin isBetween
+import { config } from "../../config/config";
+
 dayjs.extend(isBetween);
 
-const PaymentTable = ({ payments }) => { // Recibe payments como prop
+const PaymentTable = ({ payments }) => {
+    // Estados locales
     const [selectedPayment, setSelectedPayment] = useState(null);
     const [paymentToDelete, setPaymentToDelete] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10; // Ítems por página fijo en 10
+    const itemsPerPage = 10;
     const [searchTerm, setSearchTerm] = useState("");
-    const [sortConfig, setSortConfig] = useState({ key: "fechaTransaccion", direction: "ascending" });
+    const [sortConfig, setSortConfig] = useState({
+        key: "fechaTransaccion",
+        direction: "ascending",
+    });
     const [error, setError] = useState(null);
-    const [debtTypes, setDebtTypes] = useState([]); // Para filtros por tipo de deuda
-    const [selectedDebtType, setSelectedDebtType] = useState(""); // Estado para filtro de tipo de deuda
-    const [dateRange, setDateRange] = useState({ start: "", end: "" }); // Estado para filtro de rango de fechas
+    const [debtTypes, setDebtTypes] = useState([]);
+    const [selectedDebtType, setSelectedDebtType] = useState("");
+    const [dateRange, setDateRange] = useState({ start: "", end: "" });
 
-    // Establecer tipos únicos de deuda al recibir nuevos pagos
+    // Extraer tipos únicos de deuda
     useMemo(() => {
-        const tiposUnicos = [...new Set(payments.map((pago) => pago.deuda?.tipoDeuda))].filter(Boolean);
+        const tiposUnicos = [...new Set(payments.map((pago) => pago.deuda?.tipoDeuda))]
+            .filter(Boolean);
         setDebtTypes(tiposUnicos);
     }, [payments]);
 
-    // Función para manejar la vista de detalles
-    const handleViewDetails = (payment) => {
-        setSelectedPayment(payment);
-    };
+    // Funciones para manejo de modales
+    const handleViewDetails = (payment) => setSelectedPayment(payment);
+    const closeDetails = () => setSelectedPayment(null);
+    const handleDelete = (payment) => setPaymentToDelete(payment);
+    const closeDeleteModal = () => setPaymentToDelete(null);
 
-    const closeDetails = () => {
-        setSelectedPayment(null);
-    };
+    // Función para formatear montos
+    const formatAmount = (amount) =>
+        amount.toLocaleString("es-CL", { style: "currency", currency: "CLP" });
 
-    // Función para abrir el modal de confirmación de eliminación
-    const handleDelete = (payment) => {
-        setPaymentToDelete(payment);
-    };
-
-    const confirmDelete = async () => {
-        if (!paymentToDelete) return;
-        try {
-            const response = await fetch(`${config.apiUrl}/api/pagos/cancelar/${paymentToDelete.pagoId}`, {
-                method: "DELETE",
-            });
-            if (!response.ok) {
-                throw new Error("Error al eliminar el pago.");
-            }
-            // Actualizar los pagos eliminando el pago eliminado
-            // Esto requiere que PaymentsPage maneje la actualización de los pagos
-            // Puedes pasar una función desde PaymentsPage para actualizar los pagos
-            // Por simplicidad, aquí asumimos que PaymentsPage está gestionando esto
-            setPaymentToDelete(null);
-            // Opcional: notificar a PaymentsPage para que actualice el estado de payments
-            // Esto se puede hacer mediante props adicionales o context
-        } catch (err) {
-            console.error("Error al eliminar el pago:", err);
-            setError("Error al eliminar el pago.");
-        }
-    };
-
-    const closeDeleteModal = () => {
-        setPaymentToDelete(null);
-    };
-
-    // Función para formatear el monto como pesos chilenos (CLP) con separadores de miles
-    const formatAmount = (amount) => {
-        return amount.toLocaleString("es-CL", { style: "currency", currency: "CLP" });
-    };
-
-    // Filtros aplicados a los pagos
+    // Filtrar pagos
     const filteredPayments = useMemo(() => {
-        const filtered = payments.filter((payment) => {
-            // Manejar posibles datos faltantes con encadenamiento opcional
-            const fechaTransaccion = payment.fechaTransaccion ? dayjs(payment.fechaTransaccion).format("DD/MM/YYYY") : "";
-            const monto = payment.monto ? formatAmount(payment.monto) : "0";
+        return payments.filter((payment) => {
+            const fechaTransaccion = payment.fechaTransaccion
+                ? dayjs(payment.fechaTransaccion).format("DD/MM/YYYY")
+                : "";
+            const montoFormatted = payment.monto ? formatAmount(payment.monto) : "0";
             const tipoDeuda = payment.deuda?.tipoDeuda || "";
-            const observacionesDeuda = payment.deuda?.observaciones || "";
-            const observacionesPago = payment.observaciones || "";
+            const obsDeuda = payment.deuda?.observaciones || "";
+            const obsPago = payment.observaciones || "";
 
-            // Filtrado por término de búsqueda
             const matchesSearchTerm =
-                searchTerm === "" ||
+                !searchTerm ||
                 fechaTransaccion.includes(searchTerm) ||
-                monto.includes(searchTerm) ||
+                montoFormatted.includes(searchTerm) ||
                 tipoDeuda.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                observacionesDeuda.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                observacionesPago.toLowerCase().includes(searchTerm.toLowerCase());
+                obsDeuda.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                obsPago.toLowerCase().includes(searchTerm.toLowerCase());
 
-            // Filtrado por tipo de deuda
-            const matchesDebtType = selectedDebtType === "" || tipoDeuda === selectedDebtType;
+            const matchesDebtType = !selectedDebtType || tipoDeuda === selectedDebtType;
 
-            // Filtrado por rango de fechas
             const matchesDateRange = (() => {
-                if (dateRange.start && dateRange.end) {
-                    const fecha = payment.fechaTransaccion ? dayjs(payment.fechaTransaccion) : null;
+                if (dateRange.start && dateRange.end && payment.fechaTransaccion) {
+                    const fecha = dayjs(payment.fechaTransaccion);
                     const inicio = dayjs(dateRange.start);
                     const fin = dayjs(dateRange.end);
-                    if (!fecha?.isValid()) return false;
-                    return fecha.isBetween(inicio, fin, null, '[]'); // Inclusivo
+                    return fecha.isBetween(inicio, fin, null, "[]");
                 }
                 return true;
             })();
 
             return matchesSearchTerm && matchesDebtType && matchesDateRange;
         });
-
-        console.log("Pagos después de aplicar filtros:", filtered);
-        return filtered;
     }, [payments, searchTerm, selectedDebtType, dateRange]);
 
-    // Ordenar los pagos según la columna seleccionada
+    // Ordenamiento
     const sortedPayments = useMemo(() => {
         const sorted = [...filteredPayments];
-        if (sortConfig !== null) {
+        if (sortConfig) {
             sorted.sort((a, b) => {
-                let aKey = a[sortConfig.key];
-                let bKey = b[sortConfig.key];
-
-                // Si la clave es 'tipoDeuda' o 'observacionesDeuda' o 'observaciones', acceder a los campos anidados
-                if (sortConfig.key === "tipoDeuda") {
-                    aKey = a.deuda?.tipoDeuda || "";
-                    bKey = b.deuda?.tipoDeuda || "";
+                let aKey, bKey;
+                switch (sortConfig.key) {
+                    case "fechaTransaccion":
+                        aKey = a.fechaTransaccion ? dayjs(a.fechaTransaccion).valueOf() : 0;
+                        bKey = b.fechaTransaccion ? dayjs(b.fechaTransaccion).valueOf() : 0;
+                        break;
+                    case "monto":
+                        aKey = a.monto || 0;
+                        bKey = b.monto || 0;
+                        break;
+                    case "tipoDeuda":
+                        aKey = a.deuda?.tipoDeuda || "";
+                        bKey = b.deuda?.tipoDeuda || "";
+                        break;
+                    case "observacionesDeuda":
+                        aKey = a.deuda?.observaciones || "";
+                        bKey = b.deuda?.observaciones || "";
+                        break;
+                    case "observaciones":
+                        aKey = a.observaciones || "";
+                        bKey = b.observaciones || "";
+                        break;
+                    default:
+                        aKey = a[sortConfig.key];
+                        bKey = b[sortConfig.key];
                 }
-                if (sortConfig.key === "observacionesDeuda") {
-                    aKey = a.deuda?.observaciones || "";
-                    bKey = b.deuda?.observaciones || "";
-                }
-                if (sortConfig.key === "observaciones") {
-                    aKey = a.observaciones || "";
-                    bKey = b.observaciones || "";
-                }
-
-                // Para fechas, convertir a timestamps para una comparación adecuada
-                if (sortConfig.key === "fechaTransaccion") {
-                    aKey = a.fechaTransaccion ? dayjs(a.fechaTransaccion).valueOf() : 0;
-                    bKey = b.fechaTransaccion ? dayjs(b.fechaTransaccion).valueOf() : 0;
-                }
-
-                if (aKey < bKey) {
-                    return sortConfig.direction === "ascending" ? -1 : 1;
-                }
-                if (aKey > bKey) {
-                    return sortConfig.direction === "ascending" ? 1 : -1;
-                }
+                if (aKey < bKey) return sortConfig.direction === "ascending" ? -1 : 1;
+                if (aKey > bKey) return sortConfig.direction === "ascending" ? 1 : -1;
                 return 0;
             });
         }
         return sorted;
     }, [filteredPayments, sortConfig]);
 
-    // Paginación de los pagos
+    // Paginación
     const paginatedPayments = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        const paginated = sortedPayments.slice(start, end);
-        console.log(`Pagos en la página ${currentPage}:`, paginated);
-        return paginated;
-    }, [sortedPayments, currentPage, itemsPerPage]);
+        return sortedPayments.slice(start, start + itemsPerPage);
+    }, [sortedPayments, currentPage]);
 
-    // Función para manejar el ordenamiento de las columnas
-    const requestSort = (key) => {
-        let direction = "ascending";
-        if (sortConfig.key === key && sortConfig.direction === "ascending") {
-            direction = "descending";
-        }
-        setSortConfig({ key, direction });
-    };
-
-    // Calcular el total de páginas
     const totalPages = Math.ceil(filteredPayments.length / itemsPerPage) || 1;
 
-    // Función para manejar el cambio de página asegurando que esté dentro del rango válido
+    // Manejo de cambio de página
     const handlePageChange = (newPage) => {
         if (newPage < 1) newPage = 1;
         else if (newPage > totalPages) newPage = totalPages;
         setCurrentPage(newPage);
     };
 
-    // Funciones para manejar el cambio de rango de fechas
+    // Manejo de filtros de fechas
     const handleStartDateChange = (e) => {
         setDateRange((prev) => ({ ...prev, start: e.target.value }));
     };
@@ -191,27 +139,34 @@ const PaymentTable = ({ payments }) => { // Recibe payments como prop
         setDateRange((prev) => ({ ...prev, end: e.target.value }));
     };
 
+    // Cambio de ordenamiento
+    const requestSort = (key) => {
+        let direction = "ascending";
+        if (sortConfig.key === key && sortConfig.direction === "ascending") {
+            direction = "descending";
+        }
+        setSortConfig({ key, direction });
+    };
+
     return (
-        <div className="recent-movements bg-white dark:bg-darkCard text-gray-800 dark:text-darkText shadow-md dark:shadow-dark rounded-xl p-6">
-            <h2 className="text-lg font-bold mb-4 text-gray-800 dark:text-gray-200 text-center">
+        <div className="bg-white dark:bg-darkCard text-gray-800 dark:text-darkText shadow-md dark:shadow-dark rounded-xl p-6">
+            <h2 className="text-xl font-bold mb-4 text-center text-gray-800 dark:text-gray-200">
                 Gestión de Pagos
             </h2>
 
-            {/* Barra de búsqueda y Filtros */}
-            <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                {/* Filtro de Búsqueda */}
+            {/* Barra de búsqueda y filtros */}
+            <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <input
                     type="text"
-                    placeholder="Buscar por fecha, monto, tipo o observaciones de deuda"
+                    placeholder="Buscar por fecha, monto, tipo u observaciones"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="p-2 bg-gray-200 dark:bg-gray-700 rounded w-full md:w-1/2"
-                    aria-label="Buscar pagos por fecha, monto, tipo o observaciones de deuda"
+                    className="p-3 bg-gray-200 dark:bg-gray-700 rounded-md w-full md:w-1/2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    aria-label="Buscar pagos"
                 />
 
-                {/* Filtros de Tipo de Deuda y Rango de Fechas */}
                 <div className="flex flex-col md:flex-row md:items-center gap-4">
-                    {/* Filtro por Tipo de Deuda */}
+                    {/* Filtro por tipo de deuda */}
                     <div className="flex items-center">
                         <label htmlFor="debtType" className="mr-2 text-sm dark:text-gray-400">
                             Tipo de Deuda:
@@ -220,7 +175,7 @@ const PaymentTable = ({ payments }) => { // Recibe payments como prop
                             id="debtType"
                             value={selectedDebtType}
                             onChange={(e) => setSelectedDebtType(e.target.value)}
-                            className="p-2 bg-gray-200 dark:bg-gray-700 rounded"
+                            className="p-2 bg-gray-200 dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
                             <option value="">Todos</option>
                             {debtTypes.map((tipo, index) => (
@@ -231,81 +186,86 @@ const PaymentTable = ({ payments }) => { // Recibe payments como prop
                         </select>
                     </div>
 
-                    {/* Filtro por Rango de Fechas */}
+                    {/* Filtro por rango de fechas */}
                     <div className="flex items-center">
-                        <label className="mr-2 text-sm dark:text-gray-400">Fecha Transacción:</label>
+                        <label className="mr-2 text-sm dark:text-gray-400">
+                            Fecha Transacción:
+                        </label>
                         <input
                             type="date"
                             value={dateRange.start}
                             onChange={handleStartDateChange}
-                            className="p-2 bg-gray-200 dark:bg-gray-700 rounded mr-2"
-                            aria-label="Fecha de inicio"
+                            className="p-2 bg-gray-200 dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 mr-2"
+                            aria-label="Fecha inicio"
                         />
                         <span className="mx-2 text-gray-500 dark:text-gray-400">-</span>
                         <input
                             type="date"
                             value={dateRange.end}
                             onChange={handleEndDateChange}
-                            className="p-2 bg-gray-200 dark:bg-gray-700 rounded"
-                            aria-label="Fecha de fin"
+                            className="p-2 bg-gray-200 dark:bg-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            aria-label="Fecha fin"
                         />
                     </div>
                 </div>
             </div>
 
+            {/* Tabla de pagos */}
             <div className="overflow-x-auto">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Pagos</h3>
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                    Pagos
+                </h3>
                 {error ? (
                     <div className="text-center py-10">
                         <span className="text-red-500">{error}</span>
                     </div>
                 ) : (
-                    <table className="table-auto w-full text-gray-700 dark:text-gray-300 rounded-lg">
+                    <table className="min-w-full table-auto text-gray-700 dark:text-gray-300 rounded-lg">
                         <thead className="bg-indigo-500 dark:bg-gray-800 text-white">
                         <tr>
                             <th
-                                className="p-3 text-center cursor-pointer"
+                                className="p-4 text-center cursor-pointer select-none"
                                 onClick={() => requestSort("fechaTransaccion")}
                                 aria-sort={sortConfig.key === "fechaTransaccion" ? sortConfig.direction : "none"}
                             >
                                 Fecha {sortConfig.key === "fechaTransaccion" ? (sortConfig.direction === "ascending" ? "↑" : "↓") : ""}
                             </th>
                             <th
-                                className="p-3 text-center cursor-pointer"
+                                className="p-4 text-center cursor-pointer select-none"
                                 onClick={() => requestSort("monto")}
                                 aria-sort={sortConfig.key === "monto" ? sortConfig.direction : "none"}
                             >
                                 Monto {sortConfig.key === "monto" ? (sortConfig.direction === "ascending" ? "↑" : "↓") : ""}
                             </th>
                             <th
-                                className="p-3 text-center cursor-pointer"
+                                className="p-4 text-center cursor-pointer select-none"
                                 onClick={() => requestSort("tipoDeuda")}
                                 aria-sort={sortConfig.key === "tipoDeuda" ? sortConfig.direction : "none"}
                             >
                                 Tipo de Deuda {sortConfig.key === "tipoDeuda" ? (sortConfig.direction === "ascending" ? "↑" : "↓") : ""}
                             </th>
                             <th
-                                className="p-3 text-center cursor-pointer"
+                                className="p-4 text-center cursor-pointer select-none"
                                 onClick={() => requestSort("observacionesDeuda")}
                                 aria-sort={sortConfig.key === "observacionesDeuda" ? sortConfig.direction : "none"}
                             >
                                 Observaciones de Deuda {sortConfig.key === "observacionesDeuda" ? (sortConfig.direction === "ascending" ? "↑" : "↓") : ""}
                             </th>
-                            <th className="p-3 text-center">Método</th>
+                            <th className="p-4 text-center">Método</th>
                             <th
-                                className="p-3 text-center cursor-pointer"
+                                className="p-4 text-center cursor-pointer select-none"
                                 onClick={() => requestSort("observaciones")}
                                 aria-sort={sortConfig.key === "observaciones" ? sortConfig.direction : "none"}
                             >
                                 Observaciones del Pago {sortConfig.key === "observaciones" ? (sortConfig.direction === "ascending" ? "↑" : "↓") : ""}
                             </th>
-                            <th className="p-3 text-center">Acciones</th>
+                            <th className="p-4 text-center">Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
                         {filteredPayments.length === 0 ? (
                             <tr>
-                                <td colSpan="7" className="p-3 text-center text-gray-500 dark:text-gray-400">
+                                <td colSpan="7" className="p-4 text-center text-gray-500 dark:text-gray-400">
                                     No se encontraron pagos.
                                 </td>
                             </tr>
@@ -317,19 +277,19 @@ const PaymentTable = ({ payments }) => { // Recibe payments como prop
                                         index % 2 === 0 ? "bg-gray-50 dark:bg-gray-800" : ""
                                     } hover:bg-indigo-100 dark:hover:bg-gray-700 transition-all duration-200 ease-in-out`}
                                 >
-                                    <td className="p-3 text-center">
+                                    <td className="p-4 text-center">
                                         {payment.fechaTransaccion
                                             ? dayjs(payment.fechaTransaccion).format("DD/MM/YYYY")
                                             : "Sin fecha"}
                                     </td>
-                                    <td className="p-3 text-center">
+                                    <td className="p-4 text-center">
                                         {payment.monto ? formatAmount(payment.monto) : "0"}
                                     </td>
-                                    <td className="p-3 text-center">{payment.deuda?.tipoDeuda || "N/A"}</td>
-                                    <td className="p-3 text-center">{payment.deuda?.observaciones || "N/A"}</td>
-                                    <td className="p-3 text-center">{payment.metodoPago || "N/A"}</td>
-                                    <td className="p-3 text-center">{payment.observaciones || "Sin observaciones"}</td>
-                                    <td className="p-3 text-center flex justify-center gap-4">
+                                    <td className="p-4 text-center">{payment.deuda?.tipoDeuda || "N/A"}</td>
+                                    <td className="p-4 text-center">{payment.deuda?.observaciones || "N/A"}</td>
+                                    <td className="p-4 text-center">{payment.metodoPago || "N/A"}</td>
+                                    <td className="p-4 text-center">{payment.observaciones || "Sin observaciones"}</td>
+                                    <td className="p-4 text-center flex justify-center gap-4">
                                         <button
                                             onClick={() => handleViewDetails(payment)}
                                             className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
@@ -354,42 +314,59 @@ const PaymentTable = ({ payments }) => { // Recibe payments como prop
             </div>
 
             {/* Paginación */}
-            <div className="flex justify-between items-center mt-4">
+            <div className="flex justify-between items-center mt-6">
                 <button
                     disabled={currentPage === 1}
                     onClick={() => handlePageChange(currentPage - 1)}
-                    className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full disabled:opacity-50"
+                    className="p-3 bg-gray-200 dark:bg-gray-700 rounded-full disabled:opacity-50"
                     aria-label="Página anterior"
                 >
                     <FaChevronLeft className="text-gray-500 dark:text-gray-300" />
                 </button>
                 <span className="text-sm dark:text-gray-400">
-                    Página {currentPage} de {totalPages}
-                </span>
+          Página {currentPage} de {totalPages}
+        </span>
                 <button
                     disabled={currentPage === totalPages}
                     onClick={() => handlePageChange(currentPage + 1)}
-                    className="p-2 bg-gray-200 dark:bg-gray-700 rounded-full disabled:opacity-50"
+                    className="p-3 bg-gray-200 dark:bg-gray-700 rounded-full disabled:opacity-50"
                     aria-label="Página siguiente"
                 >
                     <FaChevronRight className="text-gray-500 dark:text-gray-300" />
                 </button>
             </div>
 
-            {/* Modal para ver detalles de un pago */}
-            {selectedPayment && <PaymentDetailsModal payment={selectedPayment} onClose={closeDetails} />}
+            {/* Modal para ver detalles */}
+            {selectedPayment && (
+                <PaymentDetailsModal payment={selectedPayment} onClose={closeDetails} />
+            )}
 
             {/* Modal de confirmación de eliminación */}
             {paymentToDelete && (
                 <DeleteConfirmationModal
-                    onConfirm={confirmDelete}
+                    onConfirm={async () => {
+                        try {
+                            const response = await fetch(
+                                `${config.apiUrl}/api/pagos/cancelar/${paymentToDelete.pagoId}`,
+                                { method: "DELETE" }
+                            );
+                            if (!response.ok) {
+                                throw new Error("Error al eliminar el pago.");
+                            }
+                            closeDeleteModal();
+                        } catch (err) {
+                            console.error("Error al eliminar el pago:", err);
+                            setError("Error al eliminar el pago.");
+                        }
+                    }}
                     onCancel={closeDeleteModal}
-                    message={`¿Estás seguro de eliminar el pago de ${formatAmount(paymentToDelete.monto)}?`}
+                    message={`¿Estás seguro de eliminar el pago de ${formatAmount(
+                        paymentToDelete.monto
+                    )}?`}
                 />
             )}
         </div>
     );
-
-}
+};
 
 export default PaymentTable;

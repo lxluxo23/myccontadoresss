@@ -1,115 +1,141 @@
-﻿import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
 import ClientRow from "./ClientRow";
-import { config } from '../../config/config';
+import { config } from "../../config/config";
+
+// Componente de paginación reutilizable
+const Pagination = React.memo(({ currentPage, totalPages, onPageChange, onPrevious, onNext }) => {
+  const renderPageNumbers = useMemo(() => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(
+          <button
+              key={i}
+              onClick={() => onPageChange(i)}
+              className={`px-3 py-1 mx-1 rounded ${
+                  i === currentPage ? "bg-blue-500 text-white" : "bg-gray-200"
+              }`}
+          >
+            {i}
+          </button>
+      );
+    }
+    return pages;
+  }, [totalPages, currentPage, onPageChange]);
+
+  return (
+      <div className="flex items-center justify-center mt-4">
+        <button
+            onClick={onPrevious}
+            disabled={currentPage === 1}
+            className="px-4 py-2 mr-2 bg-gray-300 rounded disabled:opacity-50"
+        >
+          Anterior
+        </button>
+        {renderPageNumbers}
+        <button
+            onClick={onNext}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 ml-2 bg-gray-300 rounded disabled:opacity-50"
+        >
+          Siguiente
+        </button>
+      </div>
+  );
+});
+
 function ClientList() {
   const [clients, setClients] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Cantidad de clientes por página
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const clientsPerPage = 10;
 
+  // Carga los clientes al montar el componente
   useEffect(() => {
-    // Carga los clientes al montar el componente
     const fetchClients = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const response = await axios.get(`${config.apiUrl}/api/clientes`);
         setClients(response.data);
-      } catch (error) {
-        console.error("Error al obtener los clientes:", error);
+      } catch (err) {
+        console.error("Error al obtener los clientes:", err);
+        setError("Error al obtener los clientes.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchClients();
   }, []);
 
-  // Cálculo de índices para determinar qué clientes mostrar
-  const lastIndex = currentPage * clientsPerPage;
-  const firstIndex = lastIndex - clientsPerPage;
-  const currentClients = clients.slice(firstIndex, lastIndex);
+  // Calcula el total de páginas
+  const totalPages = useMemo(() => Math.ceil(clients.length / clientsPerPage), [clients.length]);
 
-  // Cálculo del total de páginas
-  const totalPages = Math.ceil(clients.length / clientsPerPage);
+  // Calcula los clientes de la página actual
+  const currentClients = useMemo(() => {
+    const lastIndex = currentPage * clientsPerPage;
+    const firstIndex = lastIndex - clientsPerPage;
+    return clients.slice(firstIndex, lastIndex);
+  }, [clients, currentPage, clientsPerPage]);
 
-  // Funciones para cambiar de página
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prevPage) => prevPage - 1);
-    }
-  };
+  // Handlers memorizados para evitar recreación en cada render
+  const handlePreviousPage = useCallback(() => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  }, []);
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage((prevPage) => prevPage + 1);
-    }
-  };
+  const handleNextPage = useCallback(() => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  }, [totalPages]);
 
-  // Botones numéricos de paginación (opcional, pero útil)
-  const renderPageNumbers = () => {
-    const pages = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(
-        <button
-          key={i}
-          onClick={() => setCurrentPage(i)}
-          className={`px-3 py-1 mx-1 rounded 
-            ${i === currentPage ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-        >
-          {i}
-        </button>
-      );
-    }
-    return pages;
-  };
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+  }, []);
 
-  // Handler para eliminar clientes del estado local (tras eliminarlos vía API)
-  const handleDeleteClient = (clientId) => {
+  // Handler para eliminar un cliente del estado
+  const handleDeleteClient = useCallback((clientId) => {
     setClients((prevClients) => prevClients.filter((c) => c.clienteId !== clientId));
-  };
+  }, []);
 
-  // Handler para editar (simplemente un ejemplo, ajusta a tus necesidades)
-  const handleEditClient = (clientData) => {
+  // Handler para editar un cliente (lógica de ejemplo)
+  const handleEditClient = useCallback((clientData) => {
     console.log("Editar cliente:", clientData);
-    // Aquí podrías abrir un modal o hacer la lógica que necesites.
-  };
+    // Aquí podrías abrir un modal o ejecutar otra lógica necesaria.
+  }, []);
 
   return (
-    <div className="container mx-auto p-4">
-      <h2 className="text-lg font-semibold mb-4">Listado de Clientes</h2>
+      <div className="container mx-auto p-4">
+        <h2 className="text-lg font-semibold mb-4">Listado de Clientes</h2>
 
-      {/* Renderizamos los clientes de la página actual */}
-      {currentClients.map((client) => (
-        <ClientRow
-          key={client.clienteId}
-          client={client}
-          showAddClientForm={false}
-          onDelete={handleDeleteClient}
-          onEdit={handleEditClient}
-        />
-      ))}
+        {loading ? (
+            <p>Cargando clientes...</p>
+        ) : error ? (
+            <p className="text-red-500">{error}</p>
+        ) : (
+            <>
+              {currentClients.map((client) => (
+                  <ClientRow
+                      key={client.clienteId}
+                      client={client}
+                      showAddClientForm={false}
+                      onDelete={handleDeleteClient}
+                      onEdit={handleEditClient}
+                  />
+              ))}
 
-      {/* Controles de paginación */}
-      <div className="flex items-center justify-center mt-4">
-        <button
-          onClick={handlePreviousPage}
-          disabled={currentPage === 1}
-          className="px-4 py-2 mr-2 bg-gray-300 rounded disabled:opacity-50"
-        >
-          Anterior
-        </button>
-
-        {/* Render dinámico de los números de página */}
-        {renderPageNumbers()}
-
-        <button
-          onClick={handleNextPage}
-          disabled={currentPage === totalPages}
-          className="px-4 py-2 ml-2 bg-gray-300 rounded disabled:opacity-50"
-        >
-          Siguiente
-        </button>
+              {clients.length > clientsPerPage && (
+                  <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                      onPrevious={handlePreviousPage}
+                      onNext={handleNextPage}
+                  />
+              )}
+            </>
+        )}
       </div>
-    </div>
   );
 }
 

@@ -4,8 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import PaymentTable from "../components/PaymentsComp/PaymentTable";
-import AddPaymentForm from "../components/PaymentsComp/AddPaymentForm";
-import RegisterPaymentForm from "../components/PaymentsComp/AddHonoraryPayment"; // Nuevo formulario para pagos de honorarios
+import AddPaymentForm from "../components/PaymentsComp/AddPaymentForm"; // Nuevo formulario para pagos de honorarios
 import Modal from "../components/DebtsComp/Modal";
 import { useCliente } from "../components/context/ClienteContext";
 import { FaPlus } from "react-icons/fa";
@@ -116,31 +115,12 @@ const PaymentsPage = () => {
                     </button>
                 </div>
 
-                <div className="flex justify-end mt-4">
-                    <button
-                        onClick={() => setIsAddHonoraryPaymentModalOpen(true)}
-                        className="inline-flex items-center px-4 py-2 bg-green-500 text-white dark:bg-green-600 dark:text-gray-200 rounded hover:bg-green-600 dark:hover:bg-green-700"
-                    >
-                        <FaPlus className="mr-2" />
-                        Registrar Pago de Honorario
-                    </button>
-                </div>
-
                 {/* Modal para agregar pagos normales */}
                 <Modal isOpen={isAddPaymentModalOpen} onClose={() => setIsAddPaymentModalOpen(false)}>
                     <AddPaymentForm
                         onPaymentAdded={handleAddPayment} // Función para manejar el agregado de pagos normales
                         userId={clienteId}
                         onClose={() => setIsAddPaymentModalOpen(false)} // Cierra el modal
-                    />
-                </Modal>
-
-                {/* Modal para pagos de honorarios */}
-                <Modal isOpen={isAddHonoraryPaymentModalOpen} onClose={() => setIsAddHonoraryPaymentModalOpen(false)}>
-                    <RegisterPaymentForm
-                        honorarioId={clienteId}
-                        onSubmit={handleAddHonoraryPayment} // Función para manejar pagos de honorarios
-                        onClose={() => setIsAddHonoraryPaymentModalOpen(false)} // Cierra el modal
                     />
                 </Modal>
             </div>
