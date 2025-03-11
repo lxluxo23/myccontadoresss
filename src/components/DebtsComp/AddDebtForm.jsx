@@ -116,6 +116,8 @@ export const AddDebtForm = ({ onSubmit, onClose }) => {
                 >
                     <option value="">Seleccione</option>
                     <option value="Imposiciones">Imposiciones</option>
+                    <option value="Imposiciones Nana">Imposiciones Nana</option>
+                    <option value="Imposiciones Independiente">Imposiciones Independiente</option>
                     <option value="Impuesto IVA">Impuesto IVA</option>
                     <option value="Talonarios">Talonarios</option>
                     <option value="Multas">Multas</option>
